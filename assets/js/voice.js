@@ -22,12 +22,71 @@ class VoiceRoom {
     this.bindChannelEvents()
   }
 
+enablePTT(key = ' ') {
+  this.pttKey = key
+  this.pttActive = false
+
+  // Start muted
+  this.localStream.getTracks().forEach(t => t.enabled = false)
+
+  const activate = () => {
+    if (this.pttActive) return
+    this.pttActive = true
+    this.localStream.getTracks().forEach(t => t.enabled = true)
+    this.channel.push("ptt_state", { active: true })
+    btn?.setAttribute("data-active", "true")
+    btn?.classList.replace("bg-gray-600", "bg-green-500")
+    btn.textContent = "🎙️ Talking..."
+    console.log("🎙️ PTT on")
+  }
+
+  const deactivate = () => {
+    if (!this.pttActive) return
+    this.pttActive = false
+    this.localStream.getTracks().forEach(t => t.enabled = false)
+    this.channel.push("ptt_state", { active: false })
+    btn?.setAttribute("data-active", "false")
+    btn?.classList.replace("bg-green-500", "bg-gray-600")
+    btn.textContent = "🎙️ Hold to Talk"
+    console.log("🎙️ PTT off")
+  }
+
+  // Button — pointer events so it works on mobile and desktop
+  const btn = document.getElementById("ptt-button")
+  if (btn) {
+    btn.addEventListener("pointerdown", (e) => { e.preventDefault(); activate() })
+    btn.addEventListener("pointerup", deactivate)
+    btn.addEventListener("pointerleave", deactivate)  // finger slides off button
+    btn.addEventListener("pointercancel", deactivate)
+  }
+
+  // Keyboard
+  this._onKeyDown = (e) => {
+    if (e.key === this.pttKey && !e.repeat) activate()
+  }
+  this._onKeyUp = (e) => {
+    if (e.key === this.pttKey) deactivate()
+  }
+
+  window.addEventListener("keydown", this._onKeyDown)
+  window.addEventListener("keyup", this._onKeyUp)
+}
   async join() {
-    this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    console.log("🎤 Got local stream", this.localStream.getTracks())
+   this.localStream = await navigator.mediaDevices.getUserMedia({
+    audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        sampleRate: 48000
+    }
+    })
+        console.log("🎤 Got local stream", this.localStream.getTracks())
 
     this.channel.join()
-      .receive("ok", () => console.log("✅ Joined voice channel"))
+       .receive("ok", () => {
+      console.log("✅ Joined voice channel")
+      this.enablePTT(' ')  // spacebar
+    })
       .receive("error", (err) => console.error("❌ Failed to join:", err))
   }
 
@@ -86,6 +145,15 @@ class VoiceRoom {
       console.log("🎵 Adding track to peer", id)
       peer.addTrack(track, this.localStream)
     })
+    peer.getTransceivers().forEach(transceiver => {
+    if (transceiver.kind === 'audio') {
+      const { codecs } = RTCRtpSender.getCapabilities('audio')
+      const opusCodecs = codecs.filter(c => c.mimeType === 'audio/opus')
+      const otherCodecs = codecs.filter(c => c.mimeType !== 'audio/opus')
+      transceiver.setCodecPreferences([...opusCodecs, ...otherCodecs])
+    }
+  })
+
 
     peer.ontrack = (event) => {
       console.log("🔊 Got remote track from", id)
@@ -111,6 +179,10 @@ class VoiceRoom {
       peer.createOffer()
         .then(offer => {
           console.log("📤 Sending SDP offer to", id)
+          offer.sdp = offer.sdp.replace(
+        'useinbandfec=1',
+        'useinbandfec=1;maxaveragebitrate=128000'
+      )
           return peer.setLocalDescription(offer)
         })
         .then(() => {
@@ -168,6 +240,8 @@ class VoiceRoom {
   }
 
   leave() {
+      window.removeEventListener("keydown", this._onKeyDown)
+  window.removeEventListener("keyup", this._onKeyUp)
     Object.keys(this.peers).forEach(id => this.removePeer(id))
     this.localStream?.getTracks().forEach(t => t.stop())
     this.channel.leave()

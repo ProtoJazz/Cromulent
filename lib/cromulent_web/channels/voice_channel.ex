@@ -39,6 +39,13 @@ end
     })
     {:noreply, socket}
   end
+  def handle_in("ptt_state", %{"active" => active}, socket) do
+  broadcast_from!(socket, "ptt_state", %{
+    user_id: socket.assigns.current_user.id,
+    active: active
+  })
+  {:noreply, socket}
+end
 
   # Relay ICE candidates
   def handle_in("ice_candidate", %{"to" => to, "candidate" => candidate}, socket) do
