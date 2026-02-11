@@ -22,8 +22,41 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import "flowbite/dist/flowbite.phoenix.js";
+import VoiceRoom from "./voice"
+
+let voiceRoom = null
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+
+const Hooks = {
+  VoiceRoom: {
+     mounted() {
+    const token = this.el.dataset.userToken
+    const userId = this.el.dataset.userId
+    const channelId = this.el.dataset.channelId
+
+    console.log("token:", token)
+    console.log("userId:", userId)
+    console.log("channelId:", channelId)
+
+    const socket = new Socket("/socket", { params: { token } })
+    socket.connect()
+
+    socket.onOpen(() => console.log("✅ Socket connected"))
+    socket.onError((err) => console.error("❌ Socket error:", err))
+    socket.onClose(() => console.log("🔌 Socket closed"))
+
+    voiceRoom = new VoiceRoom(channelId, userId, socket)
+    voiceRoom.join()
+  },
+    destroyed() {
+      voiceRoom?.leave()
+      voiceRoom = null
+    }
+  }
+}
+
 let liveSocket = new LiveSocket("/live", Socket, {
+  hooks: Hooks,
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken}
 })

@@ -66,6 +66,8 @@ defmodule CromulentWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{CromulentWeb.UserAuth, :ensure_authenticated}] do
+      live "/lobby", LobbyLive, :index
+      live "/channels/:id", ChannelLive, :show
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
     end
