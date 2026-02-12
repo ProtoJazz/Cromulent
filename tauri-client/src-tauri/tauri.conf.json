@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schema.tauri.app/config/2",
+    "productName": "tauri-client",
+    "version": "0.1.0",
+    "identifier": "com.protojazz.tauri-client",
+    "build": 
+    {
+        "frontendDist": "../src"
+    },
+    "app": 
+    {
+        "withGlobalTauri": true,
+        "windows": 
+        [
+            {
+                "title": "Cromulent Voice Chat - Select Server",
+                "url": "index.html",
+                "width": 1200,
+                "height": 800,
+                "minWidth": 800,
+                "minHeight": 600
+            }
+        ],
+        "security": 
+        {
+            "csp": "default-src 'self'; connect-src 'self' ws: wss: https:; media-src 'self' https: blob: mediastream:; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:;"
+        }
+    },
+    "bundle": 
+    {
+        "active": true,
+        "targets": "all",
+        "icon": 
+        [
+            "icons/32x32.png",
+            "icons/128x128.png",
+            "icons/128x128@2x.png",
+            "icons/icon.icns",
+            "icons/icon.ico"
+        ]
+    }
+}

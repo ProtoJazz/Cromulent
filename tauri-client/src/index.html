@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Server</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .server-list {
+            margin-bottom: 20px;
+        }
+
+        .server-item {
+            background: #f7f7f7;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .server-item:hover {
+            background: #f0f0f0;
+            border-color: #667eea;
+        }
+
+        .server-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .server-url {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .remove-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .remove-btn:hover {
+            background: #ee5a52;
+        }
+
+        .add-server {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .add-server h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .error {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎙️ Voice Chat</h1>
+        <p>Choose a server to connect to, or add a new one.</p>
+
+        <div id="error-message" class="error" style="display: none;"></div>
+        <button onclick="testMic()" style="margin-bottom: 20px;">Test Microphone Access</button>
+        <div class="server-list" id="server-list">
+            <div class="empty-state">
+                <p>No servers added yet.</p>
+                <p>Add your first server below to get started. You dirty goblin</p>
+            </div>
+        </div>
+
+        <div class="add-server">
+            <h2>Add New Server</h2>
+            <input 
+                type="text" 
+                id="server-name" 
+                placeholder="Server Name (e.g., My Server)"
+            />
+            <input 
+                type="url" 
+                id="server-url" 
+                placeholder="Server URL (e.g., https://chat.example.com)"
+            />
+            <button id="add-btn">Add Server</button>
+        </div>
+    </div>
+
+<script>
+        // Use Tauri APIs from the global window object
+        const { Store } = window.__TAURI__.store;
+        
+        let store;
+        let servers = [];
+
+        // Initialize the store when page loads
+        async function initStore() {
+            store = await Store.load('servers.json');
+            await loadServers();
+        }
+
+        // Load servers from storage
+        async function loadServers() {
+            servers = (await store.get('servers')) || [];
+            renderServers();
+        }
+
+        // Display the server list
+        function renderServers() {
+            const listEl = document.getElementById('server-list');
+            
+            if (servers.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <p>No servers added yet.</p>
+                        <p>Add your first server below to get started.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = servers.map((server, index) => `
+                <div class="server-item" onclick="connectToServer(${index})">
+                    <div>
+                        <div class="server-name">${escapeHtml(server.name)}</div>
+                        <div class="server-url">${escapeHtml(server.url)}</div>
+                    </div>
+                    <button class="remove-btn" onclick="event.stopPropagation(); removeServer(${index})">
+                        Remove
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Add a new server
+        async function addServer() {
+            const name = document.getElementById('server-name').value.trim();
+            const url = document.getElementById('server-url').value.trim();
+            
+            if (!name || !url) {
+                showError('Please enter both server name and URL');
+                return;
+            }
+
+            // Basic URL validation
+            try {
+                new URL(url);
+            } catch (e) {
+                showError('Please enter a valid URL (e.g., https://chat.example.com)');
+                return;
+            }
+
+            // Check if server already exists
+            if (servers.some(s => s.url === url)) {
+                showError('This server is already in your list');
+                return;
+            }
+
+            servers.push({ name, url });
+            await store.set('servers', servers);
+            await store.save();
+            
+            document.getElementById('server-name').value = '';
+            document.getElementById('server-url').value = '';
+            hideError();
+            
+            await loadServers();
+        }
+
+        // Remove a server
+        async function removeServer(index) {
+            if (confirm('Remove this server from your list?')) {
+                servers.splice(index, 1);
+                await store.set('servers', servers);
+                await store.save();
+                await loadServers();
+            }
+        }
+        async function testMic() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        alert('✅ Microphone access granted!');
+        stream.getTracks().forEach(track => track.stop());
+    } catch (err) {
+        alert('❌ Microphone denied: ' + err.message);
+        console.error(err);
+    }
+}
+
+        // Connect to a server
+        async function connectToServer(index) {
+            const server = servers[index];
+            
+            // Store the current server selection
+            await store.set('current_server', server.url);
+            await store.save();
+            
+            // Navigate the webview to the Phoenix server
+            window.location.href = server.url;
+        }
+
+        // Helper functions
+        function showError(message) {
+            const errorEl = document.getElementById('error-message');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        function hideError() {
+            const errorEl = document.getElementById('error-message');
+            errorEl.style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listeners
+        document.getElementById('add-btn').addEventListener('click', addServer);
+        
+        document.getElementById('server-url').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addServer();
+        });
+
+        // Initialize when page loads
+        initStore();
+    </script>
+</body>
+</html>
