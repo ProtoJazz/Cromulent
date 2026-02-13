@@ -6,7 +6,6 @@
   "scripts": {
     "start": "electron .",
     "build": "electron-packager . cromulent-voice-chat --platform=linux --arch=x64 --out=dist --overwrite"
-
   },
   "keywords": [],
   "author": "",
@@ -17,6 +16,7 @@
   },
   "dependencies": {
     "electron-localshortcut": "^3.2.1",
+    "electron-store": "^11.0.2",
     "uiohook-napi": "^1.5.4"
   }
 }

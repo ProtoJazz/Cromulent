@@ -1,24 +1,20 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-// Expose safe APIs to the renderer process
-contextBridge.exposeInMainWorld('electronAPI', {
-    // Store operations
-    getServers: () => ipcRenderer.invoke('store:get-servers'),
-    saveServers: (servers) => ipcRenderer.invoke('store:save-servers', servers),
-    getCurrentServer: () => ipcRenderer.invoke('store:get-current-server'),
-    setCurrentServer: (url) => ipcRenderer.invoke('store:set-current-server', url),
-    
-    // Navigation
-    loadURL: (url) => ipcRenderer.send('navigate', url),
-    
-    // PTT
-    getPTTState: () => ipcRenderer.invoke('ptt:get-state'),
-    onPTTToggle: (callback) => {
-        ipcRenderer.on('ptt-toggle', (event, pressed) => {
-            callback(pressed);
-        });
-    },
-    
-    // Platform info
-    platform: process.platform
-});
+console.log('🔧 Preload script running!');
+
+const api = {
+  getServers: () => ipcRenderer.invoke('get-servers'),
+  saveServers: (servers) => ipcRenderer.invoke('save-servers', servers),
+  connectServer: (url) => ipcRenderer.invoke('connect-server', url),
+  
+  // PTT APIs
+  getPTTKey: () => ipcRenderer.invoke('get-ptt-key'),
+  setPTTKey: (keyCode) => ipcRenderer.invoke('set-ptt-key', keyCode),
+  onPTTState: (callback) => ipcRenderer.on('ptt-state', (event, isPressed) => callback(isPressed)),
+  onPTTError: (callback) => ipcRenderer.on('ptt-error', (event, message) => callback(message))
+};
+
+// Expose as electronAPI
+contextBridge.exposeInMainWorld('electronAPI', api);
+
+console.log('✅ electronAPI exposed to window');

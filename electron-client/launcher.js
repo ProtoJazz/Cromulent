@@ -5,6 +5,17 @@ async function init() {
     servers = await window.electronAPI.getServers();
     renderServers();
     initPTT();
+
+    if (window.electron) {
+  window.electron.onPTTState((isPressed) => {
+    const status = document.getElementById('ptt-status');
+    if (status) {
+      status.textContent = isPressed ? '🎤 PTT ACTIVE' : '🔇 PTT OFF';
+      status.style.color = isPressed ? 'green' : 'gray';
+    }
+  });
+}
+
 }
 
 // Display the server list
@@ -79,13 +90,9 @@ async function removeServer(index) {
 
 // Connect to a server
 async function connectToServer(index) {
-    const server = servers[index];
-    
-    // Save current server selection
-    await window.electronAPI.setCurrentServer(server.url);
-    
-    // Navigate to the Phoenix server
-    window.electronAPI.loadURL(server.url);
+  const server = servers[index];
+  // Connect using the existing API
+  await window.electronAPI.connectServer(server.url);
 }
 
 // Helper functions
@@ -106,17 +113,25 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+
 async function initPTT() {
-    // Just show that PTT is active
-    document.getElementById('ptt-key').textContent = 'Left Ctrl (hold)';
-    console.log("INIT PTT")
-    // Listen for PTT toggles
-    window.electronAPI.onPTTToggle((pressed) => {
-        console.log("PEEP")
-        const statusEl = document.getElementById('ptt-status');
-        statusEl.textContent = pressed ? '🔴 PRESSED' : 'Released';
-        statusEl.style.color = pressed ? '#ff6b6b' : '#333';
-    });
+  // Just show that PTT is active
+  document.getElementById('ptt-key').textContent = 'Left Ctrl (hold)';
+  console.log("INIT PTT");
+  
+  // Listen for PTT state changes
+  window.electronAPI.onPTTState((pressed) => {
+    console.log("PTT State:", pressed);
+    const statusEl = document.getElementById('ptt-status');
+    statusEl.textContent = pressed ? '🔴 PRESSED' : 'Released';
+    statusEl.style.color = pressed ? '#ff6b6b' : '#333';
+  });
+  
+  // Listen for PTT errors
+  window.electronAPI.onPTTError((message) => {
+    console.error("PTT Error:", message);
+    showError(message);
+  });
 }
 // Event listeners
 document.getElementById('add-btn').addEventListener('click', addServer);
@@ -124,6 +139,7 @@ document.getElementById('add-btn').addEventListener('click', addServer);
 document.getElementById('server-url').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') addServer();
 });
+
 
 // Initialize
 init();
