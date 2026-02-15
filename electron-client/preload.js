@@ -11,7 +11,16 @@ const api = {
   getPTTKey: () => ipcRenderer.invoke('get-ptt-key'),
   setPTTKey: (keyCode) => ipcRenderer.invoke('set-ptt-key', keyCode),
   onPTTState: (callback) => ipcRenderer.on('ptt-state', (event, isPressed) => callback(isPressed)),
-  onPTTError: (callback) => ipcRenderer.on('ptt-error', (event, message) => callback(message))
+  onPTTError: (callback) => ipcRenderer.on('ptt-error', (event, message) => callback(message)),
+
+  storeRefreshToken: (serverUrl, token, email) => 
+    ipcRenderer.invoke('store-refresh-token', serverUrl, token, email),
+  getRefreshToken: (serverUrl) => 
+    ipcRenderer.invoke('get-refresh-token', serverUrl),
+  clearRefreshToken: (serverUrl) => 
+    ipcRenderer.invoke('clear-refresh-token', serverUrl),
+  getDeviceInfo: () => 
+    ipcRenderer.invoke('get-device-info'),
 };
 
 // Expose as electronAPI

@@ -350,4 +350,90 @@ defmodule Cromulent.Accounts do
       {:error, :user, changeset, _} -> {:error, changeset}
     end
   end
+
+
+   ## Refresh tokens (for Electron/API clients)
+
+  @doc """
+  Generates a refresh token with device tracking.
+  """
+  def generate_user_refresh_token(user, device_info \\ %{}) do
+    {encoded_token, user_token} = UserToken.build_refresh_token(user, device_info)
+    Repo.insert!(user_token)
+    encoded_token
+  end
+
+  @doc """
+  Gets the user by refresh token and updates last_used_at.
+  """
+  def get_user_by_refresh_token(token) do
+    with {:ok, query} <- UserToken.verify_refresh_token_query(token),
+         %User{} = user <- Repo.one(query),
+         {:ok, _} <- update_refresh_token_usage(token) do
+      {:ok, user}
+    else
+      _ -> {:error, :invalid_token}
+    end
+  end
+
+  @doc """
+  Updates the last_used_at timestamp for a refresh token.
+  """
+  defp update_refresh_token_usage(token) do
+    with {:ok, query} <- UserToken.get_refresh_token_record(token) do
+      Repo.update_all(query, set: [last_used_at: DateTime.utc_now()])
+      {:ok, :updated}
+    end
+  end
+
+  @doc """
+  Deletes a specific refresh token (logout from one device).
+  """
+  def delete_user_refresh_token(token) do
+    case Base.url_decode64(token, padding: false) do
+      {:ok, decoded_token} ->
+        hashed_token = :crypto.hash(:sha256, decoded_token)
+        Repo.delete_all(UserToken.by_token_and_context_query(hashed_token, "refresh"))
+        :ok
+
+      :error ->
+        {:error, :invalid_token}
+    end
+  end
+
+  @doc """
+  Deletes all refresh tokens for a user (logout from all devices).
+  """
+  def delete_all_user_refresh_tokens(%User{} = user) do
+    Repo.delete_all(UserToken.by_user_and_contexts_query(user, ["refresh"]))
+    :ok
+  end
+
+  @doc """
+  Lists all active refresh token sessions for a user.
+  """
+  def list_user_refresh_sessions(%User{} = user) do
+    import Ecto.Query
+
+    from(t in UserToken,
+      where: t.user_id == ^user.id and t.context == "refresh",
+      order_by: [desc: t.last_used_at],
+      select: t
+    )
+    |> Repo.all()
+  end
+
+  @doc """
+  Deletes a specific session by ID (only if it belongs to the user).
+  """
+  def delete_user_session(%User{} = user, session_id) do
+    case Repo.get(UserToken, session_id) do
+      %UserToken{user_id: user_id, context: "refresh"} = token when user_id == user.id ->
+        Repo.delete(token)
+
+      _ ->
+        {:error, :not_found}
+    end
+  end
+
 end

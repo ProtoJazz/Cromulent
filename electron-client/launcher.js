@@ -18,6 +18,111 @@ async function init() {
 
 }
 
+function populateLoginServerList() {
+  const select = document.getElementById('login-server');
+  
+  if (servers.length === 0) {
+    select.innerHTML = '<option>No servers added</option>';
+    select.disabled = true;
+    document.getElementById('login-btn').disabled = true;
+    return;
+  }
+  
+  select.innerHTML = servers.map((server, index) => 
+    `<option value="${index}">${escapeHtml(server.name)} - ${escapeHtml(server.url)}</option>`
+  ).join('');
+  select.disabled = false;
+  document.getElementById('login-btn').disabled = false;
+}
+
+// Quick login from launcher
+async function quickLogin() {
+  const serverIndex = document.getElementById('login-server').value;
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  
+  const errorEl = document.getElementById('login-error');
+  const statusEl = document.getElementById('login-status');
+  const loginBtn = document.getElementById('login-btn');
+  
+  errorEl.style.display = 'none';
+  statusEl.style.display = 'none';
+  
+  if (!email || !password) {
+    errorEl.textContent = 'Please enter email and password';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  const server = servers[serverIndex];
+  if (!server) {
+    errorEl.textContent = 'Please select a server';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'Logging in...';
+  statusEl.textContent = 'Connecting...';
+  statusEl.style.display = 'block';
+  
+  try {
+    const authManager = new AuthManager(server.url);
+    
+    statusEl.textContent = 'Authenticating...';
+    const success = await authManager.login(email, password);
+    
+    if (success) {
+      statusEl.textContent = 'Success! Connecting to server...';
+      
+      // Wait a moment so user sees the success message
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Connect to the server
+      await window.electronAPI.connectServer(server.url);
+    } else {
+      errorEl.textContent = 'Login failed';
+      errorEl.style.display = 'block';
+      statusEl.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    errorEl.textContent = error.message || 'Login failed';
+    errorEl.style.display = 'block';
+    statusEl.style.display = 'none';
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Login & Connect';
+  }
+}
+
+// Update renderServers to also update the login dropdown
+function renderServers() {
+  const listEl = document.getElementById('server-list');
+  if (servers.length === 0) {
+    listEl.innerHTML = `
+      <div class="empty-state">
+        <p>No servers added yet.</p>
+        <p>Add your first server below to get started.</p>
+      </div>
+    `;
+  } else {
+    listEl.innerHTML = servers.map((server, index) => `
+      <div class="server-item" onclick="connectToServer(${index})">
+        <div>
+          <div class="server-name">${escapeHtml(server.name)}</div>
+          <div class="server-url">${escapeHtml(server.url)}</div>
+        </div>
+        <button class="remove-btn" onclick="event.stopPropagation(); removeServer(${index})">
+          Remove
+        </button>
+      </div>
+    `).join('');
+  }
+  
+  populateLoginServerList();
+}
+
 // Display the server list
 function renderServers() {
     const listEl = document.getElementById('server-list');
@@ -43,6 +148,9 @@ function renderServers() {
             </button>
         </div>
     `).join('');
+
+
+     populateLoginServerList();
 }
 
 // Add a new server

@@ -3,7 +3,7 @@ const path = require('path');
 const Store = require('electron-store');
 const { spawn } = require('child_process');
 const fs = require('fs');
-
+const os = require('os');
 const store = new (Store.default || Store)();
 
 let mainWindow;
@@ -385,10 +385,46 @@ ipcMain.handle('set-ptt-key', (event, keyCode) => {
   return true;
 });
 
+
+ipcMain.handle('store-refresh-token', async (event, serverUrl, refreshToken, email) => {
+  const tokens = store.get('auth_tokens', {});
+  tokens[serverUrl] = {
+    refreshToken,
+    email,
+    lastUsed: Date.now()
+  };
+  store.set('auth_tokens', tokens);
+  console.log('✅ Stored refresh token for:', serverUrl, '- User:', email);
+  return true;
+});
+
+ipcMain.handle('get-refresh-token', async (event, serverUrl) => {
+  const tokens = store.get('auth_tokens', {});
+  const auth = tokens[serverUrl] || null;
+  console.log('🔑 Retrieved token for:', serverUrl, ':', auth ? `✅ ${auth.email}` : '❌ not found');
+  return auth;
+});
+
+ipcMain.handle('clear-refresh-token', async (event, serverUrl) => {
+  const tokens = store.get('auth_tokens', {});
+  delete tokens[serverUrl];
+  store.set('auth_tokens', tokens);
+  console.log('🗑️  Cleared token for:', serverUrl);
+  return true;
+});
+
+ipcMain.handle('get-device-info', async () => {
+  return {
+    device_name: os.hostname(),
+    device_type: `electron-${process.platform}`
+  };
+});
+
 // ============================================================================
 // App Lifecycle
 // ============================================================================
 app.whenReady().then(() => {
+  console.log('📁 Electron store path:', store.path);
   createLauncher();
 });
 
