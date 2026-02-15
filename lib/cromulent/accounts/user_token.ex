@@ -12,14 +12,79 @@ defmodule Cromulent.Accounts.UserToken do
   @confirm_validity_in_days 7
   @change_email_validity_in_days 7
   @session_validity_in_days 60
+  @refresh_validity_in_days 30
 
   schema "users_tokens" do
     field :token, :binary
     field :context, :string
     field :sent_to, :string
+    field :device_name, :string
+    field :device_type, :string
+    field :ip_address, :string
+    field :last_used_at, :utc_datetime
     belongs_to :user, Cromulent.Accounts.User
 
     timestamps(type: :utc_datetime, updated_at: false)
+  end
+
+
+  @doc """
+  Builds a refresh token for Electron/API clients with device tracking.
+  """
+  def build_refresh_token(user, device_info \\ %{}) do
+    token = :crypto.strong_rand_bytes(@rand_size)
+    hashed_token = :crypto.hash(@hash_algorithm, token)
+
+    {Base.url_encode64(token, padding: false),
+     %UserToken{
+       token: hashed_token,
+       context: "refresh",
+       user_id: user.id,
+       device_name: device_info[:device_name],
+       device_type: device_info[:device_type],
+       ip_address: device_info[:ip_address],
+       last_used_at: DateTime.utc_now() |> DateTime.truncate(:second)
+     }}
+  end
+
+  @doc """
+  Verifies a refresh token and returns the user query.
+  """
+  def verify_refresh_token_query(token) do
+    case Base.url_decode64(token, padding: false) do
+      {:ok, decoded_token} ->
+        hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
+
+        query =
+          from token in by_token_and_context_query(hashed_token, "refresh"),
+            join: user in assoc(token, :user),
+            where: token.inserted_at > ago(@refresh_validity_in_days, "day"),
+            select: user
+
+        {:ok, query}
+
+      :error ->
+        :error
+    end
+  end
+
+  @doc """
+  Gets the token record itself (for updating last_used_at).
+  """
+  def get_refresh_token_record(token) do
+    case Base.url_decode64(token, padding: false) do
+      {:ok, decoded_token} ->
+        hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
+
+        query =
+          from t in by_token_and_context_query(hashed_token, "refresh"),
+            where: t.inserted_at > ago(@refresh_validity_in_days, "day")
+
+        {:ok, query}
+
+      :error ->
+        :error
+    end
   end
 
   @doc """

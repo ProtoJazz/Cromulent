@@ -13,6 +13,15 @@ defmodule CromulentWeb.Router do
     plug :fetch_current_user
   end
 
+  pipeline :browser_no_csrf do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {CromulentWeb.Layouts, :root}
+    plug :put_secure_browser_headers
+    plug :fetch_current_user
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -20,13 +29,22 @@ defmodule CromulentWeb.Router do
   scope "/", CromulentWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    #get "/", PageController, :home
   end
 
   # Other scopes may use custom stacks.
   # scope "/api", CromulentWeb do
   #   pipe_through :api
   # end
+
+   # API routes
+  scope "/api", CromulentWeb.Api do
+    pipe_through :api
+
+    post "/auth/login", AuthController, :login
+    post "/auth/verify", AuthController, :verify
+    post "/auth/logout", AuthController, :logout
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:cromulent, :dev_routes) do
@@ -66,7 +84,7 @@ defmodule CromulentWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{CromulentWeb.UserAuth, :ensure_authenticated}] do
-      live "/lobby", LobbyLive, :index
+      live "/", LobbyLive, :index
       live "/channels/:id", ChannelLive, :show
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
@@ -74,8 +92,13 @@ defmodule CromulentWeb.Router do
   end
 
   scope "/", CromulentWeb do
-    pipe_through [:browser]
+    pipe_through [:browser_no_csrf]
 
+    post "/auto_login", AutoLoginController, :create
+  end
+
+  scope "/", CromulentWeb do
+    pipe_through [:browser]
     delete "/users/log_out", UserSessionController, :delete
 
     live_session :current_user,

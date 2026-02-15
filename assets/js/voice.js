@@ -23,11 +23,15 @@ class VoiceRoom {
   }
 
 enablePTT(key = ' ') {
+  console.log("DEBUG: window.electronAPI =", window.electronAPI)
+
   this.pttKey = key
   this.pttActive = false
 
   // Start muted
   this.localStream.getTracks().forEach(t => t.enabled = false)
+
+  const btn = document.getElementById("ptt-button")
 
   const activate = () => {
     if (this.pttActive) return
@@ -52,24 +56,45 @@ enablePTT(key = ' ') {
   }
 
   // Button — pointer events so it works on mobile and desktop
-  const btn = document.getElementById("ptt-button")
   if (btn) {
     btn.addEventListener("pointerdown", (e) => { e.preventDefault(); activate() })
     btn.addEventListener("pointerup", deactivate)
-    btn.addEventListener("pointerleave", deactivate)  // finger slides off button
+    btn.addEventListener("pointerleave", deactivate)
     btn.addEventListener("pointercancel", deactivate)
   }
 
-  // Keyboard
-  this._onKeyDown = (e) => {
-    if (e.key === this.pttKey && !e.repeat) activate()
-  }
-  this._onKeyUp = (e) => {
-    if (e.key === this.pttKey) deactivate()
-  }
+  // Check if running in Electron
+  if (window.electronAPI && window.electronAPI.onPTTState) {
+    console.log("🎮 Using Electron PTT backend")
+    
+    // Listen to Electron PTT events
+    window.electronAPI.onPTTState((isPressed) => {
+      if (isPressed) {
+        activate()
+      } else {
+        deactivate()
+      }
+    })
 
-  window.addEventListener("keydown", this._onKeyDown)
-  window.addEventListener("keyup", this._onKeyUp)
+    // Listen for PTT errors
+    window.electronAPI.onPTTError((message) => {
+      console.error("PTT Error:", message)
+      // Optionally show error to user
+    })
+  } else {
+    // Fallback to keyboard events for web browser
+    console.log("🌐 Using browser keyboard PTT")
+    
+    this._onKeyDown = (e) => {
+      if (e.key === this.pttKey && !e.repeat) activate()
+    }
+    this._onKeyUp = (e) => {
+      if (e.key === this.pttKey) deactivate()
+    }
+
+    window.addEventListener("keydown", this._onKeyDown)
+    window.addEventListener("keyup", this._onKeyUp)
+  }
 }
   async join() {
    this.localStream = await navigator.mediaDevices.getUserMedia({
@@ -240,12 +265,16 @@ enablePTT(key = ' ') {
   }
 
   leave() {
-      window.removeEventListener("keydown", this._onKeyDown)
-  window.removeEventListener("keyup", this._onKeyUp)
-    Object.keys(this.peers).forEach(id => this.removePeer(id))
-    this.localStream?.getTracks().forEach(t => t.stop())
-    this.channel.leave()
+  // Only remove keyboard listeners if we added them (not using Electron)
+  if (this._onKeyDown && this._onKeyUp) {
+    window.removeEventListener("keydown", this._onKeyDown)
+    window.removeEventListener("keyup", this._onKeyUp)
   }
+  
+  Object.keys(this.peers).forEach(id => this.removePeer(id))
+  this.localStream?.getTracks().forEach(t => t.stop())
+  this.channel.leave()
+}
 }
 
 export default VoiceRoom

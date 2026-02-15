@@ -35,3 +35,8 @@ cromulent-*.tar
 npm-debug.log
 /assets/node_modules/
 
+/electron-client/node_modules
+/electron-client/target
+/electron-client/dist
+/electron-client/ptt-daemon/target
+/electron-client/ptt-daemon/dist

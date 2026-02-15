@@ -1,0 +1,22 @@
+{
+  "name": "electron-client",
+  "version": "1.0.0",
+  "description": "Cromulent Voice chat desktop client",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . cromulent-voice-chat --platform=linux --arch=x64 --out=dist --overwrite"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@electron/packager": "^19.0.3",
+    "electron": "^40.4.0"
+  },
+  "dependencies": {
+    "electron-localshortcut": "^3.2.1",
+    "electron-store": "^11.0.2",
+    "uiohook-napi": "^1.5.4"
+  }
+}
