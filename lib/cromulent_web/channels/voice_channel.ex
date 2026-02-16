@@ -1,5 +1,6 @@
 defmodule CromulentWeb.VoiceChannel do
   use Phoenix.Channel
+  alias CromulentWeb.Presence
 
   def join("voice:" <> channel_id, _params, socket) do
     channel = Cromulent.Channels.get_channel(channel_id)
@@ -12,12 +13,37 @@ defmodule CromulentWeb.VoiceChannel do
     end
   end
 
+
+defp get_voice_presences(channel_id) do
+    # Get the current presence list
+    Presence.list("voice:#{channel_id}")
+    |> Enum.map(fn {id, %{metas: [meta | _]}} ->
+      # Just take the first meta if user is connected multiple times
+      meta
+    end)
+  end
   # After join, tell everyone else a new peer arrived
 def handle_info(:after_join, socket) do
   IO.puts("🔊 after_join firing for user #{socket.assigns.current_user.id}")
   broadcast_from!(socket, "peer_joined", %{
     user_id: socket.assigns.current_user.id
   })
+   {:ok, _} = Presence.track(socket, socket.assigns.current_user.id, %{
+    user_id: socket.assigns.current_user.id,
+    email: socket.assigns.current_user.email,
+    online_at: inspect(System.system_time(:second)),
+    muted: false,
+    deafened: false
+  })
+
+  push(socket, "presence_state", Presence.list(socket))
+  {:noreply, socket}
+end
+
+def handle_in("toggle_mute", %{"muted" => muted}, socket) do
+  Presence.update(socket, socket.assigns.current_user.id, fn meta ->
+    Map.put(meta, :muted, muted)
+  end)
   {:noreply, socket}
 end
   # Relay SDP offer to a specific peer

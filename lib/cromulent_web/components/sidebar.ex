@@ -4,6 +4,7 @@ defmodule CromulentWeb.Components.Sidebar do
 
   attr :channels, :list, required: true
   attr :current_user, :any, default: nil
+  attr :voice_presences, :map, default: %{}
 
   def sidebar(assigns) do
     text_channels = Enum.filter(assigns.channels, &(&1.type == :text))
@@ -64,6 +65,16 @@ defmodule CromulentWeb.Components.Sidebar do
                   </svg>
                   {ch.name}
                 </.link>
+                <%= if users = @voice_presences[ch.id] do %>
+                  <ul class="ml-7 mt-0.5 space-y-0.5">
+                    <li :for={user <- users} class="flex items-center px-2 py-1 text-xs text-gray-400">
+                      <div class="w-5 h-5 rounded-full bg-gray-600 flex items-center justify-center text-white text-[10px] font-medium mr-2 flex-shrink-0">
+                        {user.email |> String.first() |> String.upcase()}
+                      </div>
+                      <span class="truncate">{user.email}</span>
+                    </li>
+                  </ul>
+                <% end %>
               </li>
             </ul>
           </div>
