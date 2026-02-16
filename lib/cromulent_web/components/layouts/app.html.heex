@@ -1,1 +1,39 @@
-{@inner_content}
+<%= if assigns[:current_user] do %>
+  <%!-- Mobile top bar --%>
+  <nav class="bg-gray-800 border-b border-gray-700 px-4 py-2.5 fixed lg:hidden left-0 right-0 top-0 z-50">
+    <div class="flex items-center justify-between">
+      <button
+        data-drawer-target="drawer-navigation"
+        data-drawer-show="drawer-navigation"
+        aria-controls="drawer-navigation"
+        class="p-2 text-gray-400 rounded-lg hover:text-white hover:bg-gray-700"
+      >
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+        </svg>
+        <span class="sr-only">Toggle sidebar</span>
+      </button>
+      <span class="text-lg font-semibold text-white">Cromulent</span>
+      <div class="w-8"></div>
+    </div>
+  </nav>
+
+  <%!-- Sidebar --%>
+  <.sidebar channels={assigns[:channels] || []} current_user={@current_user} voice_presences={assigns[:voice_presences] || %{}} />
+
+  <%!-- Main content --%>
+  <main class="lg:ml-64 min-h-screen pt-14 lg:pt-0">
+    <div class="p-4 h-full">
+      <.flash_group flash={@flash} />
+      {@inner_content}
+    </div>
+  </main>
+<% else %>
+  <%!-- Unauthenticated layout --%>
+  <main class="min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md px-4">
+      <.flash_group flash={@flash} />
+      {@inner_content}
+    </div>
+  </main>
+<% end %>

@@ -150,12 +150,43 @@ defmodule CromulentWeb.UserAuth do
   end
 
   def on_mount(:ensure_authenticated, _params, session, socket) do
+    channels = Cromulent.Channels.list_channels()
+
     socket =
       socket
       |> mount_current_user(session)
-      |> Phoenix.Component.assign(:channels, Cromulent.Channels.list_channels())
+      |> Phoenix.Component.assign(:channels, channels)
 
     if socket.assigns.current_user do
+      voice_channels = Enum.filter(channels, &(&1.type == :voice))
+
+      # Build initial voice presences map
+      voice_presences =
+        voice_channels
+        |> Map.new(fn ch ->
+          users =
+            CromulentWeb.Presence.list("voice:#{ch.id}")
+            |> Enum.map(fn {_id, %{metas: [meta | _]}} -> meta end)
+
+          {ch.id, users}
+        end)
+
+      socket = Phoenix.Component.assign(socket, :voice_presences, voice_presences)
+
+      # Subscribe and attach hook only once per LiveView process
+      socket =
+        if Phoenix.LiveView.connected?(socket) && !socket.assigns[:presence_hook_attached] do
+          for ch <- voice_channels do
+            Phoenix.PubSub.subscribe(Cromulent.PubSub, "voice:#{ch.id}")
+          end
+
+          socket
+          |> Phoenix.Component.assign(:presence_hook_attached, true)
+          |> Phoenix.LiveView.attach_hook(:presence_updates, :handle_info, &handle_presence_info/2)
+        else
+          socket
+        end
+
       {:cont, socket}
     else
       socket =
@@ -166,6 +197,17 @@ defmodule CromulentWeb.UserAuth do
       {:halt, socket}
     end
   end
+
+  defp handle_presence_info(%Phoenix.Socket.Broadcast{event: "presence_diff", topic: "voice:" <> channel_id}, socket) do
+    users =
+      CromulentWeb.Presence.list("voice:#{channel_id}")
+      |> Enum.map(fn {_id, %{metas: [meta | _]}} -> meta end)
+
+    voice_presences = Map.put(socket.assigns.voice_presences, channel_id, users)
+    {:cont, Phoenix.Component.assign(socket, :voice_presences, voice_presences)}
+  end
+
+  defp handle_presence_info(_msg, socket), do: {:cont, socket}
 
   def on_mount(:redirect_if_user_is_authenticated, _params, session, socket) do
     socket = mount_current_user(socket, session)

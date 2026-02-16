@@ -17,6 +17,7 @@ defmodule Cromulent.Application do
       # Start a worker by calling: Cromulent.Worker.start_link(arg)
       # {Cromulent.Worker, arg},
       # Start to serve requests, typically the last entry
+      CromulentWeb.Presence,
       CromulentWeb.Endpoint
     ]
 
