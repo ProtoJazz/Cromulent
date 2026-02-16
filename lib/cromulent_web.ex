@@ -89,6 +89,7 @@ defmodule CromulentWeb do
       import Phoenix.HTML
       # Core UI components
       import CromulentWeb.CoreComponents
+      import CromulentWeb.Components.Sidebar
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

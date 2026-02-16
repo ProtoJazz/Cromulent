@@ -3,16 +3,15 @@ defmodule CromulentWeb.LobbyLive do
   on_mount {CromulentWeb.UserAuth, :ensure_authenticated}
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, channels: Cromulent.Channels.list_channels())}
+    {:ok, socket}
   end
 
   def render(assigns) do
     ~H"""
-    <div class="sidebar">
-      <div :for={ch <- @channels} class="channel-item">
-        <.link navigate={~p"/channels/#{ch.id}"}>
-          <%= ch.name %>
-        </.link>
+    <div class="flex items-center justify-center h-full">
+      <div class="text-center">
+        <h1 class="text-3xl font-bold text-white mb-2">Welcome to Cromulent</h1>
+        <p class="text-gray-400">Select a channel from the sidebar to get started.</p>
       </div>
     </div>
     """

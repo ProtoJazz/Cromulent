@@ -150,7 +150,10 @@ defmodule CromulentWeb.UserAuth do
   end
 
   def on_mount(:ensure_authenticated, _params, session, socket) do
-    socket = mount_current_user(socket, session)
+    socket =
+      socket
+      |> mount_current_user(session)
+      |> Phoenix.Component.assign(:channels, Cromulent.Channels.list_channels())
 
     if socket.assigns.current_user do
       {:cont, socket}
