@@ -171,7 +171,12 @@ defmodule CromulentWeb.UserAuth do
           {ch.id, users}
         end)
 
-      socket = Phoenix.Component.assign(socket, :voice_presences, voice_presences)
+      socket =
+        socket
+        |> Phoenix.Component.assign(:voice_presences, voice_presences)
+        |> Phoenix.Component.assign_new(:voice_channel, fn ->
+          Cromulent.VoiceState.get(socket.assigns.current_user.id)
+        end)
 
       # Subscribe and attach hook only once per LiveView process
       socket =

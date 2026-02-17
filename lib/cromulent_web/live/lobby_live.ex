@@ -3,17 +3,10 @@ defmodule CromulentWeb.LobbyLive do
   on_mount {CromulentWeb.UserAuth, :ensure_authenticated}
 
   def mount(_params, _session, socket) do
-    {:ok, socket}
-  end
+    first_text_channel =
+      Cromulent.Channels.list_channels()
+      |> Enum.find(&(&1.type == :text))
 
-  def render(assigns) do
-    ~H"""
-    <div class="flex items-center justify-center h-full">
-      <div class="text-center">
-        <h1 class="text-3xl font-bold text-white mb-2">Welcome to Cromulent</h1>
-        <p class="text-gray-400">Select a channel from the sidebar to get started.</p>
-      </div>
-    </div>
-    """
+    {:ok, push_navigate(socket, to: ~p"/channels/#{first_text_channel.id}")}
   end
 end

@@ -1,10 +1,12 @@
 defmodule CromulentWeb.Components.Sidebar do
   use Phoenix.Component
   use CromulentWeb, :verified_routes
+  import CromulentWeb.Components.VoiceBar
 
   attr :channels, :list, required: true
   attr :current_user, :any, default: nil
   attr :voice_presences, :map, default: %{}
+  attr :voice_channel, :any, default: nil
 
   def sidebar(assigns) do
     text_channels = Enum.filter(assigns.channels, &(&1.type == :text))
@@ -56,15 +58,22 @@ defmodule CromulentWeb.Components.Sidebar do
             </h2>
             <ul class="space-y-1">
               <li :for={ch <- @voice_channels}>
-                <.link
-                  navigate={~p"/channels/#{ch.id}"}
-                  class="flex items-center px-2 py-1.5 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white group"
+                <button
+                  phx-click="join_voice"
+                  phx-value-channel-id={ch.id}
+                  class={[
+                    "flex items-center w-full px-2 py-1.5 text-sm font-medium rounded-md cursor-pointer group",
+                    if(@voice_channel && @voice_channel.id == ch.id,
+                      do: "bg-gray-700 text-white",
+                      else: "text-gray-300 hover:bg-gray-700 hover:text-white"
+                    )
+                  ]}
                 >
                   <svg class="w-5 h-5 mr-2 text-gray-400 group-hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                   </svg>
                   {ch.name}
-                </.link>
+                </button>
                 <%= if users = @voice_presences[ch.id] do %>
                   <ul class="ml-7 mt-0.5 space-y-0.5">
                     <li :for={user <- users} class="flex items-center px-2 py-1 text-xs text-gray-400">
@@ -79,6 +88,11 @@ defmodule CromulentWeb.Components.Sidebar do
             </ul>
           </div>
         </div>
+
+        <%!-- Voice connection bar --%>
+        <%= if @voice_channel do %>
+          <.voice_bar voice_channel={@voice_channel} />
+        <% end %>
 
         <%!-- User panel at bottom --%>
         <%= if @current_user do %>
