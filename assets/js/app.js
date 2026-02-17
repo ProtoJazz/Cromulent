@@ -18,8 +18,8 @@
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import "phoenix_html"
 // Establish Phoenix Socket and LiveView configuration.
-import {Socket} from "phoenix"
-import {LiveSocket} from "phoenix_live_view"
+import { Socket } from "phoenix"
+import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import "flowbite/dist/flowbite.phoenix.js";
 import VoiceRoom from "./voice"
@@ -33,7 +33,7 @@ const Hooks = {
     mounted() {
       // This element is always in the DOM, so mounted() fires once on page load.
       // Voice join/leave is driven entirely by server-pushed events.
-      this.handleEvent("voice:join", ({channel_id, user_token, user_id}) => {
+      this.handleEvent("voice:join", ({ channel_id, user_token, user_id }) => {
         // Leave existing voice session if switching channels
         if (voiceRoom) {
           voiceRoom.leave()
@@ -81,17 +81,69 @@ const Hooks = {
         voiceSocket = null
       }
     }
+  },
+  ChatScroll: {
+    mounted() {
+      this.scrollContainer = this.el
+      this.scrollBtn = document.getElementById("scroll-to-bottom-btn")
+      this.isAtBottom = true
+
+      // Scroll to bottom on initial load
+      this.scrollToBottom(false)
+
+      // Track whether user has scrolled up
+      this.scrollContainer.addEventListener("scroll", () => {
+        const distanceFromBottom =
+          this.scrollContainer.scrollHeight -
+          this.scrollContainer.scrollTop -
+          this.scrollContainer.clientHeight
+
+        this.isAtBottom = distanceFromBottom < 50
+
+        if (this.isAtBottom) {
+          this.scrollBtn.classList.add("hidden")
+        }
+      })
+
+      // Listen for new message events from the server
+      this.handleEvent("chat:new_message", () => {
+        if (this.isAtBottom) {
+          this.scrollToBottom(true)
+        } else {
+          this.scrollBtn.classList.remove("hidden")
+        }
+      })
+
+      // Expose scrollToBottom so the button's onclick can call it
+      window.chatScroll = this
+    },
+
+    updated() {
+      // Called after LiveView patches the DOM — if at bottom, stay there
+      if (this.isAtBottom) {
+        this.scrollToBottom(false)
+      }
+    },
+
+    scrollToBottom(smooth) {
+      this.scrollContainer.scrollTo({
+        top: this.scrollContainer.scrollHeight,
+        behavior: smooth ? "smooth" : "instant"
+      })
+      this.scrollBtn.classList.add("hidden")
+      this.isAtBottom = true
+    }
   }
 }
 
 let liveSocket = new LiveSocket("/live", Socket, {
   hooks: Hooks,
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken}
+  params: { _csrf_token: csrfToken }
 })
 
 // Show progress bar on live navigation and form submits
-topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
+topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 
