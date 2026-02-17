@@ -18,6 +18,7 @@ defmodule Cromulent.Application do
       # {Cromulent.Worker, arg},
       # Start to serve requests, typically the last entry
       CromulentWeb.Presence,
+      Cromulent.VoiceState,
       CromulentWeb.Endpoint
     ]
 

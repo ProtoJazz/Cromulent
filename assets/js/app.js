@@ -26,31 +26,59 @@ import VoiceRoom from "./voice"
 import "./electron-bridge.js"
 
 let voiceRoom = null
+let voiceSocket = null
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const Hooks = {
   VoiceRoom: {
-     mounted() {
-    const token = this.el.dataset.userToken
-    const userId = this.el.dataset.userId
-    const channelId = this.el.dataset.channelId
+    mounted() {
+      // This element is always in the DOM, so mounted() fires once on page load.
+      // Voice join/leave is driven entirely by server-pushed events.
+      this.handleEvent("voice:join", ({channel_id, user_token, user_id}) => {
+        // Leave existing voice session if switching channels
+        if (voiceRoom) {
+          voiceRoom.leave()
+          voiceRoom = null
+        }
+        if (voiceSocket) {
+          voiceSocket.disconnect()
+          voiceSocket = null
+        }
 
-    console.log("token:", token)
-    console.log("userId:", userId)
-    console.log("channelId:", channelId)
+        console.log("Joining voice channel:", channel_id)
 
-    const socket = new Socket("/socket", { params: { token } })
-    socket.connect()
+        voiceSocket = new Socket("/socket", { params: { token: user_token } })
+        voiceSocket.connect()
 
-    socket.onOpen(() => console.log("✅ Socket connected"))
-    socket.onError((err) => console.error("❌ Socket error:", err))
-    socket.onClose(() => console.log("🔌 Socket closed"))
+        voiceSocket.onOpen(() => console.log("Voice socket connected"))
+        voiceSocket.onError((err) => console.error("Voice socket error:", err))
+        voiceSocket.onClose(() => console.log("Voice socket closed"))
 
-    voiceRoom = new VoiceRoom(channelId, userId, socket)
-    voiceRoom.join()
-  },
+        voiceRoom = new VoiceRoom(channel_id, user_id, voiceSocket)
+        voiceRoom.join()
+      })
+
+      this.handleEvent("voice:leave", () => {
+        console.log("Leaving voice channel")
+        if (voiceRoom) {
+          voiceRoom.leave()
+          voiceRoom = null
+        }
+        if (voiceSocket) {
+          voiceSocket.disconnect()
+          voiceSocket = null
+        }
+      })
+    },
     destroyed() {
-      voiceRoom?.leave()
-      voiceRoom = null
+      // Only fires on full page reload / logout
+      if (voiceRoom) {
+        voiceRoom.leave()
+        voiceRoom = null
+      }
+      if (voiceSocket) {
+        voiceSocket.disconnect()
+        voiceSocket = null
+      }
     }
   }
 }
