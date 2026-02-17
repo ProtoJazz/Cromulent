@@ -71,6 +71,7 @@ const Hooks = {
     },
     destroyed() {
       // Only fires on full page reload / logout
+      console.log("Destroy voice")
       if (voiceRoom) {
         voiceRoom.leave()
         voiceRoom = null

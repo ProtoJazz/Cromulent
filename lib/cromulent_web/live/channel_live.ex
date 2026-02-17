@@ -3,10 +3,7 @@ defmodule CromulentWeb.ChannelLive do
   import CromulentWeb.Components.MessageComponent
   on_mount {CromulentWeb.UserAuth, :ensure_authenticated}
 
-  def mount(%{"id" => channel_id}, _session, socket) do
-    channel = Cromulent.Channels.get_channel(channel_id)
-    messages = Cromulent.Messages.list_messages(channel_id, socket.assigns.current_user)
-
+  def mount(_params, _session, socket) do
     token =
       Phoenix.Token.sign(
         CromulentWeb.Endpoint,
@@ -16,11 +13,16 @@ defmodule CromulentWeb.ChannelLive do
 
     {:ok,
      assign(socket,
-       channel: channel,
        user_token: token,
-       user_id: socket.assigns.current_user.id,
-       messages: messages
+       user_id: socket.assigns.current_user.id
      )}
+  end
+
+  def handle_params(%{"id" => channel_id}, _uri, socket) do
+    channel = Cromulent.Channels.get_channel(channel_id)
+    messages = Cromulent.Messages.list_messages(channel_id, socket.assigns.current_user)
+
+    {:noreply, assign(socket, channel: channel, messages: messages)}
   end
 
   def handle_event("join_voice", %{"channel-id" => channel_id}, socket) do
@@ -56,7 +58,7 @@ defmodule CromulentWeb.ChannelLive do
 
       <%!-- Message input --%>
       <div class="flex-shrink-0 border-t border-gray-700 bg-gray-800">
-        <div class="flex items-center gap-2 px-4 py-3">
+        <div class="flex items-center gap-2 px-4 h-12">
           <input
             type="text"
             placeholder={"Message ##{@channel.name |> String.replace("# ", "")}"}
