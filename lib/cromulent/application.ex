@@ -19,6 +19,8 @@ defmodule Cromulent.Application do
       # Start to serve requests, typically the last entry
       CromulentWeb.Presence,
       Cromulent.VoiceState,
+      {Registry, keys: :unique, name: Cromulent.RoomRegistry},
+      {DynamicSupervisor, name: Cromulent.RoomSupervisor, strategy: :one_for_one},
       CromulentWeb.Endpoint
     ]
 
