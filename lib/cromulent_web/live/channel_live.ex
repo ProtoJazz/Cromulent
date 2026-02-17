@@ -15,7 +15,7 @@ defmodule CromulentWeb.ChannelLive do
 
     messages =
       if channel.type == :text do
-        Cromulent.Messages.list_messages(channel_id)
+        Cromulent.Messages.list_messages(channel_id, socket.assigns.current_user)
       else
         []
       end
@@ -52,22 +52,26 @@ defmodule CromulentWeb.ChannelLive do
           </button>
         </div>
       <% else %>
-        <div class="flex flex-col h-[calc(100vh-2rem)]">
+        <div class="flex flex-col h-screen fixed inset-0 lg:left-64">
           <%!-- Message list --%>
-          <div class="flex-1 overflow-y-auto py-4">
-            <div :for={msg <- @messages}>
-              <.message message={msg} />
-            </div>
+          <div class="flex-1 overflow-y-auto py-4 space-y-1">
+            <.message :for={msg <- @messages} message={msg} current_user={@current_user} />
           </div>
 
           <%!-- Message input --%>
-          <div class="px-4 pb-4">
-            <div class="flex items-center bg-gray-700 rounded-lg px-4 py-2">
+          <div class="flex-shrink-0 border-t border-gray-700 bg-gray-800">
+            <div class="flex items-center gap-2 px-4 py-3">
               <input
                 type="text"
                 placeholder={"Message ##{@channel.name |> String.replace("# ", "")}"}
-                class="flex-1 bg-transparent text-gray-200 placeholder-gray-400 border-none focus:ring-0 text-sm"
+                class="block w-full border-0 bg-gray-800 px-0 text-sm text-white placeholder:text-gray-400 focus:ring-0"
               />
+              <button type="submit" class="inline-flex cursor-pointer justify-center rounded-full p-2 text-indigo-500 hover:bg-gray-700">
+                <svg class="h-5 w-5 rotate-90" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
+                  <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
+                </svg>
+                <span class="sr-only">Send message</span>
+              </button>
             </div>
           </div>
         </div>
