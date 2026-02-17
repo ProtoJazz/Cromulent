@@ -7,6 +7,7 @@ defmodule CromulentWeb.Components.Sidebar do
   attr :current_user, :any, default: nil
   attr :voice_presences, :map, default: %{}
   attr :voice_channel, :any, default: nil
+  attr :current_channel, :any, default: nil
 
   def sidebar(assigns) do
     text_channels = Enum.filter(assigns.channels, &(&1.type == :text))
@@ -39,10 +40,22 @@ defmodule CromulentWeb.Components.Sidebar do
             <ul class="space-y-1">
               <li :for={ch <- @text_channels}>
                 <.link
-                  navigate={~p"/channels/#{ch.id}"}
-                  class="flex items-center px-2 py-1.5 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white group"
+                  patch={~p"/channels/#{ch.id}"}
+                  class={[
+                    "flex items-center px-2 py-1.5 text-sm font-medium rounded-md group",
+                    if(@current_channel && @current_channel.id == ch.id,
+                      do: "bg-gray-700 text-white",
+                      else: "text-gray-300 hover:bg-gray-700 hover:text-white"
+                    )
+                  ]}
                 >
-                  <svg class="w-5 h-5 mr-2 text-gray-400 group-hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class={[
+                    "w-5 h-5 mr-2 group-hover:text-gray-300",
+                    if(@current_channel && @current_channel.id == ch.id,
+                      do: "text-gray-300",
+                      else: "text-gray-400"
+                    )
+                  ]} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
                   </svg>
                   {ch.name |> String.replace("# ", "")}
@@ -96,7 +109,7 @@ defmodule CromulentWeb.Components.Sidebar do
 
         <%!-- User panel at bottom --%>
         <%= if @current_user do %>
-          <div class="px-3 py-3 border-t border-gray-700">
+          <div class="px-3 py-2 border-t border-gray-700">
             <div class="flex items-center justify-between">
               <div class="flex items-center min-w-0">
                 <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">

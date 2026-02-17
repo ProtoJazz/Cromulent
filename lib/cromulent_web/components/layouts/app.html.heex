@@ -22,7 +22,7 @@
   <div id="voice-hook" phx-hook="VoiceRoom" class="hidden"></div>
 
   <%!-- Sidebar --%>
-  <.sidebar channels={assigns[:channels] || []} current_user={@current_user} voice_presences={assigns[:voice_presences] || %{}} voice_channel={assigns[:voice_channel]} />
+  <.sidebar channels={assigns[:channels] || []} current_user={@current_user} voice_presences={assigns[:voice_presences] || %{}} voice_channel={assigns[:voice_channel]} current_channel={assigns[:channel]} />
 
   <%!-- Main content --%>
   <main class="lg:ml-64 min-h-screen pt-14 lg:pt-0">
