@@ -1,6 +1,7 @@
 defmodule CromulentWeb.ChannelLive do
   use CromulentWeb, :live_view
   alias Cromulent.Chat.RoomServer
+   alias Cromulent.Repo
   import CromulentWeb.Components.MessageComponent
   on_mount {CromulentWeb.UserAuth, :ensure_authenticated}
 
@@ -27,8 +28,9 @@ defmodule CromulentWeb.ChannelLive do
       Phoenix.PubSub.unsubscribe(Cromulent.PubSub, "text:#{socket.assigns.channel_id}")
     end
 
-    channel = Cromulent.Channels.get_channel(channel_id)
-    messages = Cromulent.Messages.list_messages(channel_id, socket.assigns.current_user)
+    channel = channel_id |> String.to_integer() |> Cromulent.Channels.get_channel()
+    IO.inspect(channel, label: "bean vhannel")
+    messages = Cromulent.Messages.list_messages(channel_id)
 
     RoomServer.ensure_started(channel_id)
     Phoenix.PubSub.subscribe(Cromulent.PubSub, "text:#{channel_id}")
@@ -38,17 +40,26 @@ defmodule CromulentWeb.ChannelLive do
 
   def handle_event("send_message", %{"body" => ""}, socket), do: {:noreply, socket}
 
-  def handle_event("send_message", %{"body" => body}, socket) do
-    message = %{
-      id: System.unique_integer([:positive]),
-      body: body,
-      user: socket.assigns.current_user,
-      inserted_at: DateTime.utc_now()
-    }
+ def handle_event("send_message", %{"body" => body}, socket) do
+    body = String.trim(body)
 
-    RoomServer.broadcast_message(socket.assigns.channel_id, message)
+    if body != "" do
+      case Cromulent.Messages.create_message(%{
+        channel_id: socket.assigns.channel.id,
+        user_id: socket.assigns.current_user.id,
+        body: body
+      }) do
+        {:ok, message} ->
+          message = Repo.preload(message, :user)
+          RoomServer.broadcast_message(socket.assigns.channel_id, message)
+          {:noreply, assign(socket, message_input: "")}
 
-    {:noreply, socket}
+        {:error, _changeset} ->
+          {:noreply, put_flash(socket, :error, "Could not send message.")}
+      end
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_event("typing_start", _params, socket) do
@@ -67,7 +78,7 @@ defmodule CromulentWeb.ChannelLive do
   end
 
   def handle_event("join_voice", %{"channel-id" => channel_id}, socket) do
-    channel = Cromulent.Channels.get_channel(channel_id)
+    channel = channel_id |> String.to_integer() |> Cromulent.Channels.get_channel()
     Cromulent.VoiceState.join(socket.assigns.current_user.id, channel)
 
     {:noreply,

@@ -204,6 +204,7 @@ defmodule CromulentWeb.UserAuth do
   end
 
   defp handle_presence_info(%Phoenix.Socket.Broadcast{event: "presence_diff", topic: "voice:" <> channel_id}, socket) do
+    channel_id_int = String.to_integer(channel_id)
     users =
       CromulentWeb.Presence.list("voice:#{channel_id}")
       |> Enum.map(fn {_id, %{metas: [meta | _]}} -> meta end)

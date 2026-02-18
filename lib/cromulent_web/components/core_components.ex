@@ -16,7 +16,6 @@ defmodule CromulentWeb.CoreComponents do
   """
   use Phoenix.Component
   use Gettext, backend: CromulentWeb.Gettext
-
   alias Phoenix.LiveView.JS
 
   @doc """
