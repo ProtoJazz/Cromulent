@@ -116,6 +116,7 @@ defmodule CromulentWeb.ChannelLive do
   def handle_info({:typing_stopped, user_id}, socket) do
     {:noreply, update(socket, :typing_users, &Map.delete(&1, user_id))}
   end
+  def handle_info(_, socket), do: {:noreply, socket}
 
   def render(assigns) do
     ~H"""
