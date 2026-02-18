@@ -1,9 +1,23 @@
 defmodule Cromulent.Channels do
+  import Ecto.Query
+  alias Cromulent.Repo
+  alias Cromulent.Channels.Channel
+
   def list_channels do
-    Application.get_env(:cromulent, :channels, [])
+    Repo.all(from c in Channel, order_by: [asc: c.inserted_at])
   end
 
   def get_channel(id) do
-    list_channels() |> Enum.find(&(&1.id == id))
+    Repo.get(Channel, id)
+  end
+
+  def get_channel_by_name(name) do
+    Repo.get_by(Channel, name: name)
+  end
+
+  def create_channel(attrs) do
+    %Channel{}
+    |> Channel.changeset(attrs)
+    |> Repo.insert()
   end
 end
