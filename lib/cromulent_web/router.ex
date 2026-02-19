@@ -88,6 +88,7 @@ defmodule CromulentWeb.Router do
       live "/channels/:slug", ChannelLive, :show
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+      live "/admin", AdminLive, :index
     end
   end
 

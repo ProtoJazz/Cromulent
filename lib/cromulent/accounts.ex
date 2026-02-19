@@ -351,8 +351,7 @@ defmodule Cromulent.Accounts do
     end
   end
 
-
-   ## Refresh tokens (for Electron/API clients)
+  ## Refresh tokens (for Electron/API clients)
 
   @doc """
   Generates a refresh token with device tracking.
@@ -436,4 +435,16 @@ defmodule Cromulent.Accounts do
     end
   end
 
+  def set_user_role(user, role) do
+    user
+    |> Ecto.Changeset.change(role: role)
+    |> Repo.update()
+  end
+
+  def list_users do
+    Repo.all(User)
+  end
+
+  def admin?(%User{role: :admin}), do: true
+  def admin?(_), do: false
 end
