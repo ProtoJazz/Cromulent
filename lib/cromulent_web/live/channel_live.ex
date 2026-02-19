@@ -34,7 +34,37 @@ defmodule CromulentWeb.ChannelLive do
     RoomServer.ensure_started(channel.id)
     Phoenix.PubSub.subscribe(Cromulent.PubSub, "text:#{channel.id}")
 
-    {:noreply, assign(socket, channel: channel, messages: messages)}
+    {:noreply,
+     assign(socket,
+       channel: channel,
+       messages: messages,
+       oldest_id: List.first(messages) && List.first(messages).id,
+       all_loaded: length(messages) < 50
+     )}
+  end
+
+  def handle_event("load_more", _params, %{assigns: %{all_loaded: true}} = socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("load_more", _params, socket) do
+    older =
+      Cromulent.Messages.list_messages_before(
+        socket.assigns.channel.id,
+        socket.assigns.oldest_id
+      )
+
+    case older do
+      [] ->
+        {:noreply, assign(socket, all_loaded: true)}
+
+      msgs ->
+        {:noreply,
+         socket
+         |> assign(:messages, msgs ++ socket.assigns.messages)
+         |> assign(:oldest_id, List.first(msgs).id)
+         |> assign(:all_loaded, length(msgs) < 50)}
+    end
   end
 
   def handle_event("send_message", %{"body" => ""}, socket), do: {:noreply, socket}
@@ -44,10 +74,10 @@ defmodule CromulentWeb.ChannelLive do
 
     if body != "" do
       case Cromulent.Messages.create_message(%{
-        channel_id: socket.assigns.channel.id,
-        user_id: socket.assigns.current_user.id,
-        body: body
-      }) do
+             channel_id: socket.assigns.channel.id,
+             user_id: socket.assigns.current_user.id,
+             body: body
+           }) do
         {:ok, message} ->
           message = Repo.preload(message, :user)
           RoomServer.broadcast_message(socket.assigns.channel.id, message)
