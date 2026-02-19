@@ -7,6 +7,6 @@ defmodule CromulentWeb.LobbyLive do
       Cromulent.Channels.list_channels()
       |> Enum.find(&(&1.type == :text))
 
-    {:ok, push_navigate(socket, to: ~p"/channels/#{first_text_channel.id}")}
+    {:ok, push_navigate(socket, to: ~p"/channels/#{first_text_channel.slug}")}
   end
 end

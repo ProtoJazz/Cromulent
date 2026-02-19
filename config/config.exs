@@ -10,6 +10,9 @@ import Config
 config :cromulent,
   ecto_repos: [Cromulent.Repo],
   generators: [timestamp_type: :utc_datetime]
+config :cromulent, Cromulent.Repo,
+  migration_primary_key: [type: :binary_id],
+  migration_foreign_key: [type: :binary_id]
 
 # Configures the endpoint
 config :cromulent, CromulentWeb.Endpoint,

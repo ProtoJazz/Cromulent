@@ -1,7 +1,8 @@
 defmodule Cromulent.Messages.Message do
   use Ecto.Schema
   import Ecto.Changeset
-
+  @primary_key {:id, Cromulent.UUID7, autogenerate: true}
+  @foreign_key_type :binary_id
   schema "messages" do
     field :body, :string
 

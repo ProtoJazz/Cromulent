@@ -1,7 +1,7 @@
 defmodule CromulentWeb.ChannelLive do
   use CromulentWeb, :live_view
   alias Cromulent.Chat.RoomServer
-   alias Cromulent.Repo
+  alias Cromulent.Repo
   import CromulentWeb.Components.MessageComponent
   on_mount {CromulentWeb.UserAuth, :ensure_authenticated}
 
@@ -23,24 +23,23 @@ defmodule CromulentWeb.ChannelLive do
      )}
   end
 
-  def handle_params(%{"id" => channel_id}, _uri, socket) do
+  def handle_params(%{"slug" => slug}, _uri, socket) do
     if socket.assigns.channel do
-      Phoenix.PubSub.unsubscribe(Cromulent.PubSub, "text:#{socket.assigns.channel_id}")
+      Phoenix.PubSub.unsubscribe(Cromulent.PubSub, "text:#{socket.assigns.channel.id}")
     end
 
-    channel = channel_id |> String.to_integer() |> Cromulent.Channels.get_channel()
-    IO.inspect(channel, label: "bean vhannel")
-    messages = Cromulent.Messages.list_messages(channel_id)
+    channel = Cromulent.Channels.get_channel_by_slug(slug)
+    messages = Cromulent.Messages.list_messages(channel.id)
 
-    RoomServer.ensure_started(channel_id)
-    Phoenix.PubSub.subscribe(Cromulent.PubSub, "text:#{channel_id}")
+    RoomServer.ensure_started(channel.id)
+    Phoenix.PubSub.subscribe(Cromulent.PubSub, "text:#{channel.id}")
 
-    {:noreply, assign(socket, channel: channel, channel_id: channel_id, messages: messages)}
+    {:noreply, assign(socket, channel: channel, messages: messages)}
   end
 
   def handle_event("send_message", %{"body" => ""}, socket), do: {:noreply, socket}
 
- def handle_event("send_message", %{"body" => body}, socket) do
+  def handle_event("send_message", %{"body" => body}, socket) do
     body = String.trim(body)
 
     if body != "" do
@@ -51,7 +50,7 @@ defmodule CromulentWeb.ChannelLive do
       }) do
         {:ok, message} ->
           message = Repo.preload(message, :user)
-          RoomServer.broadcast_message(socket.assigns.channel_id, message)
+          RoomServer.broadcast_message(socket.assigns.channel.id, message)
           {:noreply, assign(socket, message_input: "")}
 
         {:error, _changeset} ->
@@ -64,7 +63,7 @@ defmodule CromulentWeb.ChannelLive do
 
   def handle_event("typing_start", _params, socket) do
     RoomServer.typing_start(
-      socket.assigns.channel_id,
+      socket.assigns.channel.id,
       socket.assigns.current_user.id,
       socket.assigns.current_user.email
     )
@@ -73,12 +72,12 @@ defmodule CromulentWeb.ChannelLive do
   end
 
   def handle_event("typing_stop", _params, socket) do
-    RoomServer.typing_stop(socket.assigns.channel_id, socket.assigns.current_user.id)
+    RoomServer.typing_stop(socket.assigns.channel.id, socket.assigns.current_user.id)
     {:noreply, socket}
   end
 
   def handle_event("join_voice", %{"channel-id" => channel_id}, socket) do
-    channel = channel_id |> String.to_integer() |> Cromulent.Channels.get_channel()
+    channel = Cromulent.Channels.get_channel(channel_id)
     Cromulent.VoiceState.join(socket.assigns.current_user.id, channel)
 
     {:noreply,
@@ -116,6 +115,7 @@ defmodule CromulentWeb.ChannelLive do
   def handle_info({:typing_stopped, user_id}, socket) do
     {:noreply, update(socket, :typing_users, &Map.delete(&1, user_id))}
   end
+
   def handle_info(_, socket), do: {:noreply, socket}
 
   def render(assigns) do
@@ -155,7 +155,7 @@ defmodule CromulentWeb.ChannelLive do
           <input
             type="text"
             name="body"
-            placeholder={"Message ##{@channel.name |> String.replace("# ", "")}"}
+            placeholder={"Message ##{@channel.name}"}
             class="block w-full border-0 bg-gray-800 px-0 text-sm text-white placeholder:text-gray-400 focus:ring-0"
             autocomplete="off"
             value=""

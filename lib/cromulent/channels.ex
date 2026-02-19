@@ -15,6 +15,10 @@ defmodule Cromulent.Channels do
     Repo.get_by(Channel, name: name)
   end
 
+  def get_channel_by_slug(slug) do
+    Repo.get_by(Channel, slug: slug)
+  end
+
   def create_channel(attrs) do
     %Channel{}
     |> Channel.changeset(attrs)
