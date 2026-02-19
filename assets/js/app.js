@@ -83,57 +83,62 @@ const Hooks = {
     }
   },
   ChatScroll: {
-    mounted() {
-      this.scrollContainer = this.el
-      this.scrollBtn = document.getElementById("scroll-to-bottom-btn")
-      this.isAtBottom = true
+  mounted() {
+    this.scrollContainer = this.el
+    this.scrollBtn = document.getElementById("scroll-to-bottom-btn")
+    this.isAtBottom = true
+    this.loadingMore = false
 
-      // Scroll to bottom on initial load
-      this.scrollToBottom(false)
+    this.scrollToBottom(false)
 
-      // Track whether user has scrolled up
-      this.scrollContainer.addEventListener("scroll", () => {
-        const distanceFromBottom =
-          this.scrollContainer.scrollHeight -
-          this.scrollContainer.scrollTop -
-          this.scrollContainer.clientHeight
+    this.scrollContainer.addEventListener("scroll", () => {
+      const distanceFromBottom =
+        this.scrollContainer.scrollHeight -
+        this.scrollContainer.scrollTop -
+        this.scrollContainer.clientHeight
 
-        this.isAtBottom = distanceFromBottom < 50
+      this.isAtBottom = distanceFromBottom < 50
 
-        if (this.isAtBottom) {
-          this.scrollBtn.classList.add("hidden")
-        }
-      })
-
-      // Listen for new message events from the server
-      this.handleEvent("chat:new_message", () => {
-        if (this.isAtBottom) {
-          this.scrollToBottom(true)
-        } else {
-          this.scrollBtn.classList.remove("hidden")
-        }
-      })
-
-      // Expose scrollToBottom so the button's onclick can call it
-      window.chatScroll = this
-    },
-
-    updated() {
-      // Called after LiveView patches the DOM — if at bottom, stay there
       if (this.isAtBottom) {
-        this.scrollToBottom(false)
+        this.scrollBtn.classList.add("hidden")
       }
-    },
 
-    scrollToBottom(smooth) {
-      this.scrollContainer.scrollTo({
-        top: this.scrollContainer.scrollHeight,
-        behavior: smooth ? "smooth" : "instant"
-      })
-      this.scrollBtn.classList.add("hidden")
-      this.isAtBottom = true
+      // Trigger load more when near the top
+      if (this.scrollContainer.scrollTop < 100 && !this.loadingMore) {
+        this.loadingMore = true
+        this.pushEvent("load_more", {}, () => {
+          this.loadingMore = false
+        })
+      }
+    })
+
+    this.handleEvent("chat:new_message", () => {
+      if (this.isAtBottom) {
+        this.scrollToBottom(true)
+      } else {
+        this.scrollBtn.classList.remove("hidden")
+      }
+    })
+
+    window.chatScroll = this
+  },
+
+  updated() {
+    // Only auto-scroll if we're at the bottom (don't jump when prepending old messages)
+    if (this.isAtBottom) {
+      this.scrollToBottom(false)
     }
+  },
+
+  scrollToBottom(smooth) {
+    this.scrollContainer.scrollTo({
+      top: this.scrollContainer.scrollHeight,
+      behavior: smooth ? "smooth" : "instant"
+    })
+    this.scrollBtn.classList.add("hidden")
+    this.isAtBottom = true
   }
+}
 }
 
 let liveSocket = new LiveSocket("/live", Socket, {

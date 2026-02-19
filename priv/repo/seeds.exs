@@ -26,16 +26,20 @@ import Ecto.Query
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 IO.puts("Seeds starting...")
+
 defmodule Seeds.Helpers do
   IO.puts("Seeds starting...")
+
   def find_or_create_user(attrs) do
     case Repo.get_by(User, email: attrs.email) do
       nil ->
-        {:ok, user} = Accounts.register_user(%{
-          email: attrs.email,
-          password: attrs.password,
-          username: attrs.username
-        })
+        {:ok, user} =
+          Accounts.register_user(%{
+            email: attrs.email,
+            password: attrs.password,
+            username: attrs.username
+          })
+
         user
 
       user ->
@@ -74,7 +78,9 @@ general_channel =
     nil ->
       {:ok, ch} = Cromulent.Channels.create_channel(%{name: "general", type: :text})
       ch
-    ch -> ch
+
+    ch ->
+      ch
   end
 
 random_channel =
@@ -82,7 +88,9 @@ random_channel =
     nil ->
       {:ok, ch} = Cromulent.Channels.create_channel(%{name: "random", type: :text})
       ch
-    ch -> ch
+
+    ch ->
+      ch
   end
 
 _voice_channel =
@@ -90,7 +98,9 @@ _voice_channel =
     nil ->
       {:ok, ch} = Cromulent.Channels.create_channel(%{name: "voice-main", type: :voice})
       ch
-    ch -> ch
+
+    ch ->
+      ch
   end
 
 IO.puts("Channels ready.")
@@ -100,20 +110,90 @@ IO.puts("Channels ready.")
 IO.puts("Creating users...")
 
 # Simpsons crew (for #random)
-homer   = Seeds.Helpers.find_or_create_user(%{email: "homer@springfield.gov",   username: "homer_s",    password: "donutsdonuts123"})
-marge   = Seeds.Helpers.find_or_create_user(%{email: "marge@springfield.gov",   username: "marge_s",    password: "donutsdonuts123"})
-bart    = Seeds.Helpers.find_or_create_user(%{email: "bart@springfield.gov",     username: "el_barto",   password: "donutsdonuts123"})
-lisa    = Seeds.Helpers.find_or_create_user(%{email: "lisa@springfield.gov",     username: "lisa_s",     password: "donutsdonuts123"})
-burns   = Seeds.Helpers.find_or_create_user(%{email: "burns@montsimco.com",      username: "mrburns",    password: "donutsdonuts123"})
-moe     = Seeds.Helpers.find_or_create_user(%{email: "moe@moestav.com",          username: "moe_szys",   password: "donutsdonuts123"})
+homer =
+  Seeds.Helpers.find_or_create_user(%{
+    email: "homer@springfield.gov",
+    username: "homer_s",
+    password: "donutsdonuts123"
+  })
+
+marge =
+  Seeds.Helpers.find_or_create_user(%{
+    email: "marge@springfield.gov",
+    username: "marge_s",
+    password: "donutsdonuts123"
+  })
+
+bart =
+  Seeds.Helpers.find_or_create_user(%{
+    email: "bart@springfield.gov",
+    username: "el_barto",
+    password: "donutsdonuts123"
+  })
+
+lisa =
+  Seeds.Helpers.find_or_create_user(%{
+    email: "lisa@springfield.gov",
+    username: "lisa_s",
+    password: "donutsdonuts123"
+  })
+
+burns =
+  Seeds.Helpers.find_or_create_user(%{
+    email: "burns@montsimco.com",
+    username: "mrburns",
+    password: "donutsdonuts123"
+  })
+
+moe =
+  Seeds.Helpers.find_or_create_user(%{
+    email: "moe@moestav.com",
+    username: "moe_szys",
+    password: "donutsdonuts123"
+  })
 
 # Stormlight crew (for #general)
-kaladin = Seeds.Helpers.find_or_create_user(%{email: "kaladin@windrunners.org",  username: "kaladin",    password: "goblessedbythestorms1"})
-shallan = Seeds.Helpers.find_or_create_user(%{email: "shallan@house-davar.com",  username: "shallan_d",  password: "goblessedbythestorms1"})
-dalinar = Seeds.Helpers.find_or_create_user(%{email: "dalinar@kholin.com",       username: "the_blackthorn", password: "goblessedbythestorms1"})
-adolin  = Seeds.Helpers.find_or_create_user(%{email: "adolin@kholin.com",        username: "adolin_k",   password: "goblessedbythestorms1"})
-szeth   = Seeds.Helpers.find_or_create_user(%{email: "szeth@truthless.net",      username: "szeth",      password: "goblessedbythestorms1"})
-navani  = Seeds.Helpers.find_or_create_user(%{email: "navani@kholin.com",        username: "navani_k",   password: "goblessedbythestorms1"})
+kaladin =
+  Seeds.Helpers.find_or_create_user(%{
+    email: "kaladin@windrunners.org",
+    username: "kaladin",
+    password: "goblessedbythestorms1"
+  })
+
+shallan =
+  Seeds.Helpers.find_or_create_user(%{
+    email: "shallan@house-davar.com",
+    username: "shallan_d",
+    password: "goblessedbythestorms1"
+  })
+
+dalinar =
+  Seeds.Helpers.find_or_create_user(%{
+    email: "dalinar@kholin.com",
+    username: "the_blackthorn",
+    password: "goblessedbythestorms1"
+  })
+
+adolin =
+  Seeds.Helpers.find_or_create_user(%{
+    email: "adolin@kholin.com",
+    username: "adolin_k",
+    password: "goblessedbythestorms1"
+  })
+
+szeth =
+  Seeds.Helpers.find_or_create_user(%{
+    email: "szeth@truthless.net",
+    username: "szeth",
+    password: "goblessedbythestorms1"
+  })
+
+navani =
+  Seeds.Helpers.find_or_create_user(%{
+    email: "navani@kholin.com",
+    username: "navani_k",
+    password: "goblessedbythestorms1"
+  })
 
 IO.puts("Users created.")
 
@@ -123,17 +203,23 @@ IO.puts("Users created.")
 # migration creates them automatically, those rows will be found here.
 # If not, create them:
 
-general_channel = case Seeds.Helpers.find_channel_by_name("general") do
-  nil ->
-    Repo.insert!(%Channel{name: "general", type: :text})
-  ch -> ch
-end
+general_channel =
+  case Seeds.Helpers.find_channel_by_name("general") do
+    nil ->
+      Repo.insert!(%Channel{name: "general", type: :text})
 
-random_channel = case Seeds.Helpers.find_channel_by_name("random") do
-  nil ->
-    Repo.insert!(%Channel{name: "random", type: :text})
-  ch -> ch
-end
+    ch ->
+      ch
+  end
+
+random_channel =
+  case Seeds.Helpers.find_channel_by_name("random") do
+    nil ->
+      Repo.insert!(%Channel{name: "random", type: :text})
+
+    ch ->
+      ch
+  end
 
 IO.puts("Channels ready.")
 
@@ -141,50 +227,222 @@ IO.puts("Channels ready.")
 IO.puts("Seeding #general (Stormlight Archive)...")
 
 base = ~U[2026-02-16 10:00:00Z]
-times = Seeds.Helpers.timestamps(base, 40)
+times = Seeds.Helpers.timestamps(base, 200, 60)
 
 general_messages = [
-  {kaladin, "Another highstorm last night. Lost two practice dummies off the plateau. Bridge Four is fine though."},
-  {shallan,  "I sketched the storm from the window. The lightning patterns were actually beautiful if you ignored the screaming wind."},
-  {dalinar,  "The Codes require we remain prepared regardless of weather. A soldier who blames the storm is blaming the wrong enemy."},
-  {adolin,   "Father, with respect, the Codes don't say anything about getting sleep. Some of us dueled three times yesterday."},
-  {navani,   "I've been working on a new fabrials design to measure highstorm pressure at altitude. The data could help predict arrival windows."},
-  {kaladin,  "That would actually be useful. We lost a scouting patrol last month because the warning came too late."},
-  {shallan,  "Navani, could I sit in on your fabrial work sometime? The intersection of art and engineering is fascinating to me."},
-  {navani,   "Of course. Bring your sketchbook — I find visual records of the process invaluable."},
-  {szeth,    "I will be present at the appointed location. That is all."},
-  {adolin,   "Szeth, do you want anything from the market? We're making a run before the afternoon drills."},
-  {szeth,    "I require nothing."},
-  {kaladin,  "He literally never wants anything. It's unsettling."},
-  {shallan,  "I find it kind of admirable? No, actually I find it deeply concerning. Never mind."},
-  {dalinar,  "Focus. The Parshendi movements on the eastern plateaus suggest they are consolidating rather than raiding. I want analysis from everyone."},
-  {adolin,   "Their formation discipline has gotten sharper. They weren't fighting like this a year ago."},
-  {kaladin,  "Bridge Four noticed the same thing. They're coordinating across plateau groups now, not just within them."},
-  {navani,   "The gemstone records from three years ago don't match current behavior at all. Something changed. Or someone changed it for them."},
-  {shallan,  "I've been comparing the historical sketches. Their carapace arrangements are different too — more structured."},
-  {dalinar,  "Good observations. Keep them coming. This matters."},
-  {kaladin,  "One other thing — the bridgemen have been asking about the Radiants again. Specifically whether the old orders are actually gone."},
-  {adolin,   "People ask that every time something weird happens. It's basically Alethi small talk at this point."},
-  {szeth,    "The Radiants are not gone."},
-  {shallan,  "...Do you want to expand on that, Szeth?"},
-  {szeth,    "No."},
-  {kaladin,  "Great. Very helpful. Thanks."},
-  {navani,   "I'll note that the historical accounts of Radiants are remarkably consistent across disparate cultures, which suggests a real shared referent rather than mythologizing."},
-  {dalinar,  "My dreams have shown me things I cannot explain through natural means. I don't say this lightly."},
-  {adolin,   "Father... are you sure you want to put that in writing?"},
-  {dalinar,  "I am sure of nothing. That is why I'm documenting it."},
-  {shallan,  "For what it's worth, I've seen things I also can't explain. The world may be stranger than the Vorin church would prefer."},
-  {kaladin,  "Bridge Four's official position: we fight, we protect, we ask questions later."},
-  {navani,   "A practical philosophy. I'll take rigorous documentation over battle cries any day, but each to their own."},
-  {adolin,   "Speaking of documentation — anyone want to witness my duel against Brightlord Reshphin tomorrow? Noon at the arena."},
-  {shallan,  "I'll be there. I want sketches of his face when he realizes what he's walked into."},
-  {kaladin,  "I'll post a few of my men at the entrance. Just in case."},
-  {dalinar,  "I'll attend. Win decisively, Adolin. No unnecessary cruelty, but leave no doubt."},
-  {adolin,   "When do I ever leave doubt?"},
-  {szeth,    "I will observe from a position of concealment."},
-  {adolin,   "...you know there are seats, right?"},
-  {szeth,    "Yes."},
-  {navani,   "On that note, I've put together some notes on Shardplate maintenance that I'd like everyone to review when they have time. It matters more than people realize."},
+  {kaladin,
+   "Another highstorm last night. Lost two practice dummies off the plateau. Bridge Four is fine though."},
+  {shallan,
+   "I sketched the storm from the window. There's something beautiful about the destruction if you catch it at the right angle."},
+  {dalinar, "Beauty in destruction is how wars start, Shallan."},
+  {navani, "Dalinar, she's talking about art."},
+  {dalinar, "I know. I'm talking about the mindset."},
+  {adolin, "Good morning everyone. Anyone want to spar? I've been up since the fourth bell."},
+  {kaladin, "I'll pass. I've had enough of people swinging things at me this week."},
+  {szeth, "I will spar."},
+  {adolin, "...I'm good actually."},
+  {shallan, "Smart choice Adolin."},
+  {kaladin,
+   "Has anyone seen Pattern? He keeps trying to have philosophical debates with the spren in the courtyard."},
+  {shallan,
+   "He's fine, he's just very interested in lies. He says the Parshmen tell fascinating ones."},
+  {dalinar, "That's worth documenting. Navani, add it to the research log."},
+  {navani, "Already done. I've been watching them for weeks."},
+  {szeth, "I have observed that humans lie about small things as frequently as large ones."},
+  {adolin, "Szeth, buddy, that's kind of unsettling when you phrase it like that."},
+  {szeth, "I am often told this."},
+  {kaladin,
+   "I grew up in Hearthstone. We lied about harvests and debts. Never about anything that mattered."},
+  {shallan,
+   "My family lied about everything that mattered. I lied about everything too. Still do sometimes."},
+  {navani, "Honesty is a practice. Not a state."},
+  {dalinar,
+   "The most honest thing I ever did was stop pretending I was a good man and start trying to be one."},
+  {adolin, "Father, that was unexpectedly profound."},
+  {dalinar, "Don't get used to it."},
+  {kaladin,
+   "We got new recruits this morning. Twelve of them. Most look like they've never held a spear."},
+  {adolin, "Give them to Bridge Four. You'll have them ready in a week."},
+  {kaladin, "Three weeks, realistically. One of them held the spear upside down."},
+  {shallan, "To be fair, I held a Shardblade the wrong way the first time."},
+  {adolin, "You did not."},
+  {shallan, "I absolutely did. I thought the pointy end went up."},
+  {navani, "It does go up when it's sheathed."},
+  {shallan, "See? Reasonable mistake."},
+  {szeth, "I have never made a mistake with a blade."},
+  {kaladin, "We know, Szeth."},
+  {szeth, "I am simply saying."},
+  {dalinar, "Let's focus. The Parshendi summit is in four days. I need everyone sharp."},
+  {adolin, "Sharp like a Shardblade or sharp like a tactician?"},
+  {dalinar, "Both. Preferably."},
+  {kaladin, "What's the threat assessment?"},
+  {navani, "Unknown. Which is the concerning part."},
+  {shallan,
+   "I can try to sketch their body language during the meeting. Sometimes the nonverbal tells more."},
+  {dalinar, "Good idea. Bring Pattern. He can verify if they're being truthful."},
+  {shallan, "He'll be thrilled. He loves detecting lies."},
+  {szeth, "I will stand in the corner and look threatening."},
+  {adolin, "That is genuinely your best skill in diplomatic settings."},
+  {szeth, "Thank you."},
+  {adolin, "It wasn't a compliment."},
+  {szeth, "I am aware. I choose to receive it as one."},
+  {kaladin, "I like that about Szeth, honestly."},
+  {shallan, "Kaladin, you're going soft."},
+  {kaladin, "I'm not going soft. I'm just... recalibrating."},
+  {navani, "That's what going soft looks like from the outside."},
+  {dalinar, "Leave Kaladin alone. He's earned some peace."},
+  {kaladin, "Thank you, Brightlord."},
+  {dalinar, "Don't thank me. It makes me uncomfortable."},
+  {adolin, "Father, you're the one who said—"},
+  {dalinar, "Next topic."},
+  {shallan,
+   "I've been working on a new series of sketches. The Unmade. I want to capture what they feel like, not just what they look like."},
+  {navani, "That's a fascinating distinction. Do you think they have a feel?"},
+  {shallan, "Everything has a feel. Even the void."},
+  {szeth, "The void feels like nothing. Which is its own kind of feeling."},
+  {kaladin, "Szeth, are you doing okay?"},
+  {szeth, "I am functional."},
+  {kaladin, "That's not what I asked."},
+  {szeth, "...I am managing."},
+  {adolin, "That's more honest than most answers I get."},
+  {navani,
+   "The fabrials are responding to the new storm patterns. We're getting readings we've never seen before."},
+  {dalinar, "Favorable?"},
+  {navani, "Uncertain. The Everstorm is changing the baseline. We need more data."},
+  {shallan, "Can I come to the fabrial lab? I want to sketch the readings."},
+  {navani, "Of course. Bring Pattern, I want to see if he responds to the output frequencies."},
+  {shallan, "He's going to be so excited he might vibrate into a wall."},
+  {kaladin, "Has he done that before?"},
+  {shallan, "Once. When he found out that fish lie to each other."},
+  {adolin, "...Fish lie?"},
+  {shallan, "Apparently. Something about camouflage being a form of deception."},
+  {szeth, "This is philosophically significant."},
+  {kaladin, "Only to Pattern."},
+  {szeth, "And to me."},
+  {dalinar, "I am now genuinely concerned about this meeting."},
+  {adolin, "The summit or the fish?"},
+  {dalinar, "Both, now."},
+  {navani, "I'll add 'piscine deception' to the research log."},
+  {shallan, "You're my favorite person, Navani."},
+  {navani, "I know."},
+  {kaladin, "Lopen wants to know if he can join the summit delegation."},
+  {adolin, "...Why?"},
+  {kaladin, "He says he has 'diplomatic presence' now that he has two arms."},
+  {shallan, "I mean, he's not wrong?"},
+  {dalinar, "Absolutely not."},
+  {kaladin,
+   "I told him that. He said to tell you he 'understands and respects your position, gancho.'"},
+  {dalinar, "He called me gancho?"},
+  {kaladin, "He calls everyone gancho."},
+  {adolin, "He called me gancho at my own Shardplate ceremony."},
+  {szeth, "He called me gancho when I nearly killed him."},
+  {shallan, "Lopen is unkillable through sheer force of friendliness."},
+  {navani, "Add him to the reserve list. If someone drops out, he's in."},
+  {kaladin, "He's going to be so happy."},
+  {dalinar, "He's not going to be happy because he's not going."},
+  {kaladin, "He's going to be so happy about being on the reserve list."},
+  {dalinar, "...Fine."},
+  {adolin, "Father, Lopen has beaten you twice now."},
+  {dalinar, "I am aware."},
+  {shallan,
+   "The highstorm from last week left some incredible deposits on the eastern face. I want to go sketch them."},
+  {kaladin, "I'll assign a guard detail."},
+  {shallan, "I don't need a guard detail."},
+  {kaladin, "You absolutely need a guard detail."},
+  {shallan, "I have Pattern and a Shardblade."},
+  {kaladin, "Two guards and Pattern and a Shardblade."},
+  {shallan, "One guard."},
+  {kaladin, "Two."},
+  {adolin, "I'll go."},
+  {shallan, "...Okay, Adolin can go."},
+  {kaladin, "That's not how guard assignments work."},
+  {adolin, "I want to see the deposits too."},
+  {dalinar, "Let them go, Kaladin. Adolin is perfectly capable."},
+  {szeth, "I will also attend."},
+  {adolin, "Great, it's a field trip."},
+  {navani, "Bring one of my resonance meters. I want readings from those deposits."},
+  {shallan, "This went from 'quick sketch' to 'expedition' very quickly."},
+  {kaladin, "This is what happens when you announce plans in group chat."},
+  {dalinar, "Is that what this is? Group chat?"},
+  {navani, "Effectively, yes."},
+  {dalinar, "Hm."},
+  {adolin, "Father, are you okay?"},
+  {dalinar, "I'm fine. I just didn't expect to have something called a 'group chat' at my age."},
+  {szeth, "I did not expect to be alive at any age. This is an improvement."},
+  {kaladin, "Szeth..."},
+  {szeth, "That was meant to be optimistic."},
+  {shallan, "We took it that way."},
+  {navani, "Dalinar, stop overthinking and eat something. You skipped breakfast again."},
+  {dalinar, "I was reviewing the maps."},
+  {navani, "Eat and review. You're capable of both."},
+  {adolin, "She has a point."},
+  {dalinar, "I know she has a point. She always has a point."},
+  {navani, "That's why you married me."},
+  {dalinar, "Among other reasons."},
+  {shallan, "This is actually very sweet."},
+  {adolin, "Don't tell them that, they'll get worse."},
+  {kaladin, "Bridgemen report the new patrols are working. No incidents overnight."},
+  {dalinar, "Good. Keep the eastern routes doubled until we have better intelligence."},
+  {kaladin, "Already done."},
+  {adolin, "You two are terrifyingly efficient."},
+  {szeth, "Efficiency in the field prevents death."},
+  {kaladin, "What Szeth said."},
+  {shallan, "Can someone remind me when the summit actually starts? I have conflicting notes."},
+  {navani, "Four days. The sixth."},
+  {shallan, "And the reception dinner?"},
+  {adolin, "Fifth. Formal dress."},
+  {shallan, "I don't own formal dress."},
+  {adolin, "We'll get you something."},
+  {shallan, "Adolin, last time you picked my outfit I looked like a Horneater wedding cake."},
+  {adolin, "You looked wonderful."},
+  {shallan, "I looked like a pastry."},
+  {dalinar, "The Kholins wear blue. The color is non-negotiable."},
+  {szeth, "I do not own blue."},
+  {dalinar, "We'll find you something."},
+  {szeth, "I do not require formal dress."},
+  {dalinar, "You're standing in a corner at a summit. You require dress."},
+  {szeth, "...Understood."},
+  {kaladin, "My dress uniform is the one thing I actually have sorted."},
+  {adolin, "Windrunner blue suits you."},
+  {kaladin, "Don't make it weird."},
+  {adolin, "I'm complimenting your uniform."},
+  {kaladin, "It always sounds weird when you do it."},
+  {navani, "I'll need the resonance readings before the fifth. The summit is connected."},
+  {shallan,
+   "I'll go to the deposits tomorrow then. Early. Before Adolin wants to 'pop by' the armory."},
+  {adolin, "I was only going to take a few minutes—"},
+  {shallan, "Adolin."},
+  {adolin, "Twenty minutes max."},
+  {shallan, "We can do fifteen."},
+  {adolin, "Done."},
+  {dalinar, "I'm glad you two communicate."},
+  {kaladin, "They've gotten better at it."},
+  {szeth, "I communicate through silence primarily."},
+  {navani, "We've noticed."},
+  {szeth, "Is that a problem?"},
+  {navani, "No, Szeth. We're used to it."},
+  {szeth, "Good."},
+  {kaladin, "Rock is making stew tonight. Everyone's invited."},
+  {adolin, "Rock's stew is the best thing about this whole war."},
+  {shallan, "I won't argue with that."},
+  {dalinar, "I'll attend."},
+  {navani, "Dalinar, you actually like Rock's stew?"},
+  {dalinar, "I respect any cook who treats their work as sacred."},
+  {kaladin, "He does treat it as sacred."},
+  {szeth, "I will attend also. The stew was... comforting. Last time."},
+  {shallan, "Szeth, that might be the most human thing you've ever said."},
+  {szeth, "I am human."},
+  {shallan, "I know. That's what I mean."},
+  {adolin, "This is going to be a good evening."},
+  {kaladin, "Don't jinx it."},
+  {adolin, "I'm not jinxing anything."},
+  {navani, "Someone always jinxes it."},
+  {dalinar, "Then no one say anything until the stew."},
+  {shallan, "Deal."},
+  {szeth, "Agreed."},
+  {kaladin, "...Fine."},
+  {adolin, "This is the most discipline we've shown all day."},
+  {dalinar, "Don't ruin it."}
 ]
 
 general_messages
@@ -201,56 +459,63 @@ base2 = ~U[2026-02-16 09:00:00Z]
 times2 = Seeds.Helpers.timestamps(base2, 50, 75)
 
 random_messages = [
-  {moe,    "Is there a Hugh Jass here? I'm looking for a Hugh Jass."},
-  {homer,  "D'oh! I am so smart. S-M-R-T."},
-  {bart,   "I didn't do it. Nobody saw me do it. You can't prove anything."},
-  {lisa,   "Can everyone please use this channel responsibly? It's called #random, not #chaos."},
-  {bart,   "Lisa, chaos IS random."},
-  {marge,  "Bart, that is not a philosophy. Homer, put down the donut."},
-  {homer,  "But Marge, this donut has BOTH chocolate AND sprinkles. It's like it was made for me specifically."},
-  {burns,  "Smithers, who are all these people and why are they on my channel?"},
-  {moe,    "Mr. Burns, you don't own this channel."},
-  {burns,  "Not yet."},
-  {homer,  "To alcohol! The cause of, and solution to, all of life's problems."},
-  {marge,  "Homer, it is nine in the morning."},
-  {homer,  "Okay, to breakfast alcohol."},
-  {bart,   "Cowabunga! Anybody want to come to the skate park? I found a new gap over by the Kwik-E-Mart dumpsters."},
-  {lisa,   "Please don't go near the Kwik-E-Mart dumpsters, Bart."},
-  {bart,   "Too late. Anyway 8 out of 10, would gap again."},
-  {moe,    "I've been called ugly, pug-ugly, fugly, pug-fugly, but never ugly-ugly. There is a difference, people."},
-  {homer,  "Moe, you're not ugly. You're... lived-in."},
-  {moe,    "Homer that somehow made it worse."},
-  {burns,  "What good is money if it can't inspire terror in your fellow man?"},
-  {lisa,   "Mr. Burns, that's not a healthy relationship with wealth."},
-  {burns,  "Young lady, I have had a healthy relationship with wealth for over 100 years. The wealth is healthy. I am... fine."},
-  {bart,   "Ay caramba, did anyone see that thing on TV last night? The one with the thing?"},
-  {homer,  "Yes! And then the other thing happened!"},
-  {marge,  "I don't think either of you actually watched the same show."},
-  {homer,  "Marge, we watched TV together. In the same room. You were there."},
-  {marge,  "You both fell asleep at 8pm."},
-  {homer,  "In the same room. Counts."},
-  {lisa,   "I finished my essay on the socioeconomic impact of the Shelbyville-Springfield rivalry. Does anyone want to proofread it?"},
-  {bart,   "Hard pass."},
-  {marge,  "I would love to, sweetie!"},
-  {homer,  "College? Pfft. I didn't go to college and look how I turned out."},
-  {burns,  "I went to Yale. Twice. Once as a student, once to purchase the endowment."},
-  {moe,    "Anybody seen Barney? He left his tab open again. Third time this week."},
-  {homer,  "Barney's a free spirit, Moe. You gotta respect that."},
-  {moe,    "Homer, your tab is literally longer than my arm and I am not a small man."},
-  {homer,  "Put it on my tab."},
-  {bart,   "Nobody better lay a finger on my Butterfinger."},
-  {lisa,   "No one was going to, Bart."},
-  {bart,   "Good. Just so we're clear."},
-  {burns,  "Release the hounds."},
-  {moe,    "Mr. Burns there are no hounds in this chat."},
-  {burns,  "Then I shall release a strongly worded message."},
-  {homer,  "Facts are meaningless. You could use facts to prove anything that's even remotely true."},
-  {lisa,   "Dad, that's... I actually don't know where to begin."},
-  {marge,  "Homer, that's not how facts work."},
-  {homer,  "Marge, I have used it successfully many times."},
-  {bart,   "He's not wrong about the outcomes, to be fair."},
-  {lisa,   "Bart, do not encourage him."},
-  {moe,    "You know what I always say. \"If you can't beat 'em, arrange to have them beaten.\" Legally. Allegedly."},
+  {moe, "Is there a Hugh Jass here? I'm looking for a Hugh Jass."},
+  {homer, "D'oh! I am so smart. S-M-R-T."},
+  {bart, "I didn't do it. Nobody saw me do it. You can't prove anything."},
+  {lisa, "Can everyone please use this channel responsibly? It's called #random, not #chaos."},
+  {bart, "Lisa, chaos IS random."},
+  {marge, "Bart, that is not a philosophy. Homer, put down the donut."},
+  {homer,
+   "But Marge, this donut has BOTH chocolate AND sprinkles. It's like it was made for me specifically."},
+  {burns, "Smithers, who are all these people and why are they on my channel?"},
+  {moe, "Mr. Burns, you don't own this channel."},
+  {burns, "Not yet."},
+  {homer, "To alcohol! The cause of, and solution to, all of life's problems."},
+  {marge, "Homer, it is nine in the morning."},
+  {homer, "Okay, to breakfast alcohol."},
+  {bart,
+   "Cowabunga! Anybody want to come to the skate park? I found a new gap over by the Kwik-E-Mart dumpsters."},
+  {lisa, "Please don't go near the Kwik-E-Mart dumpsters, Bart."},
+  {bart, "Too late. Anyway 8 out of 10, would gap again."},
+  {moe,
+   "I've been called ugly, pug-ugly, fugly, pug-fugly, but never ugly-ugly. There is a difference, people."},
+  {homer, "Moe, you're not ugly. You're... lived-in."},
+  {moe, "Homer that somehow made it worse."},
+  {burns, "What good is money if it can't inspire terror in your fellow man?"},
+  {lisa, "Mr. Burns, that's not a healthy relationship with wealth."},
+  {burns,
+   "Young lady, I have had a healthy relationship with wealth for over 100 years. The wealth is healthy. I am... fine."},
+  {bart, "Ay caramba, did anyone see that thing on TV last night? The one with the thing?"},
+  {homer, "Yes! And then the other thing happened!"},
+  {marge, "I don't think either of you actually watched the same show."},
+  {homer, "Marge, we watched TV together. In the same room. You were there."},
+  {marge, "You both fell asleep at 8pm."},
+  {homer, "In the same room. Counts."},
+  {lisa,
+   "I finished my essay on the socioeconomic impact of the Shelbyville-Springfield rivalry. Does anyone want to proofread it?"},
+  {bart, "Hard pass."},
+  {marge, "I would love to, sweetie!"},
+  {homer, "College? Pfft. I didn't go to college and look how I turned out."},
+  {burns, "I went to Yale. Twice. Once as a student, once to purchase the endowment."},
+  {moe, "Anybody seen Barney? He left his tab open again. Third time this week."},
+  {homer, "Barney's a free spirit, Moe. You gotta respect that."},
+  {moe, "Homer, your tab is literally longer than my arm and I am not a small man."},
+  {homer, "Put it on my tab."},
+  {bart, "Nobody better lay a finger on my Butterfinger."},
+  {lisa, "No one was going to, Bart."},
+  {bart, "Good. Just so we're clear."},
+  {burns, "Release the hounds."},
+  {moe, "Mr. Burns there are no hounds in this chat."},
+  {burns, "Then I shall release a strongly worded message."},
+  {homer,
+   "Facts are meaningless. You could use facts to prove anything that's even remotely true."},
+  {lisa, "Dad, that's... I actually don't know where to begin."},
+  {marge, "Homer, that's not how facts work."},
+  {homer, "Marge, I have used it successfully many times."},
+  {bart, "He's not wrong about the outcomes, to be fair."},
+  {lisa, "Bart, do not encourage him."},
+  {moe,
+   "You know what I always say. \"If you can't beat 'em, arrange to have them beaten.\" Legally. Allegedly."}
 ]
 
 random_messages
