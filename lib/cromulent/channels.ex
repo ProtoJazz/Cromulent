@@ -24,4 +24,12 @@ defmodule Cromulent.Channels do
     |> Channel.changeset(attrs)
     |> Repo.insert()
   end
+
+  def delete_channel(%Cromulent.Channels.Channel{} = channel) do
+    Cromulent.Repo.delete(channel)
+  end
+
+  def get_channel!(id) do
+    Cromulent.Repo.get!(Cromulent.Channels.Channel, id)
+  end
 end

@@ -149,6 +149,14 @@ defmodule CromulentWeb.UserAuth do
     {:cont, mount_current_user(socket, session)}
   end
 
+  def on_mount(:require_admin, _params, _session, socket) do
+    if socket.assigns.current_user && socket.assigns.current_user.role == :admin do
+      {:cont, socket}
+    else
+      {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/")}
+    end
+  end
+
   def on_mount(:ensure_authenticated, _params, session, socket) do
     channels = Cromulent.Channels.list_channels()
 
@@ -186,7 +194,11 @@ defmodule CromulentWeb.UserAuth do
 
           socket
           |> Phoenix.Component.assign(:presence_hook_attached, true)
-          |> Phoenix.LiveView.attach_hook(:presence_updates, :handle_info, &handle_presence_info/2)
+          |> Phoenix.LiveView.attach_hook(
+            :presence_updates,
+            :handle_info,
+            &handle_presence_info/2
+          )
         else
           socket
         end
@@ -202,7 +214,10 @@ defmodule CromulentWeb.UserAuth do
     end
   end
 
-  defp handle_presence_info(%Phoenix.Socket.Broadcast{event: "presence_diff", topic: "voice:" <> channel_id}, socket) do
+  defp handle_presence_info(
+         %Phoenix.Socket.Broadcast{event: "presence_diff", topic: "voice:" <> channel_id},
+         socket
+       ) do
     users =
       CromulentWeb.Presence.list("voice:#{channel_id}")
       |> Enum.map(fn {_id, %{metas: [meta | _]}} -> meta end)

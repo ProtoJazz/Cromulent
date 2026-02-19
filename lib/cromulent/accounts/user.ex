@@ -10,6 +10,7 @@ defmodule Cromulent.Accounts.User do
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
     field :username, :string
+    field :role, Ecto.Enum, values: [:admin, :member], default: :member
 
     timestamps(type: :utc_datetime)
   end
