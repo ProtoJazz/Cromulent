@@ -40,7 +40,7 @@ defmodule CromulentWeb.Components.Sidebar do
             <ul class="space-y-1">
               <li :for={ch <- @text_channels}>
                 <.link
-                  patch={~p"/channels/#{ch.id}"}
+                  patch={~p"/channels/#{ch.slug}"}
                   class={[
                     "flex items-center px-2 py-1.5 text-sm font-medium rounded-md group",
                     if(@current_channel && @current_channel.id == ch.id,
