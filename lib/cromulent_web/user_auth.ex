@@ -178,7 +178,6 @@ defmodule CromulentWeb.UserAuth do
           Cromulent.VoiceState.get(socket.assigns.current_user.id)
         end)
 
-      # Subscribe and attach hook only once per LiveView process
       socket =
         if Phoenix.LiveView.connected?(socket) && !socket.assigns[:presence_hook_attached] do
           for ch <- voice_channels do
@@ -204,13 +203,11 @@ defmodule CromulentWeb.UserAuth do
   end
 
   defp handle_presence_info(%Phoenix.Socket.Broadcast{event: "presence_diff", topic: "voice:" <> channel_id}, socket) do
-    channel_id_int = String.to_integer(channel_id)
-
     users =
-      CromulentWeb.Presence.list("voice:#{channel_id_int}")
+      CromulentWeb.Presence.list("voice:#{channel_id}")
       |> Enum.map(fn {_id, %{metas: [meta | _]}} -> meta end)
 
-    voice_presences = Map.put(socket.assigns.voice_presences, channel_id_int, users)
+    voice_presences = Map.put(socket.assigns.voice_presences, channel_id, users)
     {:cont, Phoenix.Component.assign(socket, :voice_presences, voice_presences)}
   end
 
