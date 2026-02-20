@@ -7,8 +7,12 @@ defmodule Cromulent.Channels.Channel do
     field :name, :string
     field :slug, :string
     field :type, Ecto.Enum, values: [:text, :voice], default: :text
+    field :is_default, :boolean, default: false
+    field :is_private, :boolean, default: false
+    field :write_permission, Ecto.Enum, values: [:everyone, :admin_only],default: :everyone
 
     has_many :messages, Cromulent.Messages.Message
+    has_many :memberships, Cromulent.Channels.ChannelMembership
 
     timestamps(type: :utc_datetime)
   end
@@ -21,9 +25,9 @@ defmodule Cromulent.Channels.Channel do
     |> String.trim("-")
   end
 
-  def changeset(channel, attrs) do
+   def changeset(channel, attrs) do
     channel
-    |> cast(attrs, [:name, :type])
+    |> cast(attrs, [:name, :type, :is_default, :is_private, :write_permission])
     |> validate_required([:name, :type])
     |> then(fn cs ->
       put_change(cs, :slug, slugify(get_field(cs, :name) || ""))

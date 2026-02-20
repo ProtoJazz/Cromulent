@@ -78,6 +78,14 @@ defmodule Cromulent.Accounts do
     %User{}
     |> User.registration_changeset(attrs)
     |> Repo.insert()
+    |> case do
+      {:ok, user} = result ->
+        Cromulent.Channels.enroll_in_default_channels(user)
+        result
+
+      error ->
+        error
+    end
   end
 
   @doc """

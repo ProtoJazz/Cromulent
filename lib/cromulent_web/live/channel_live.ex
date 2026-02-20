@@ -19,7 +19,8 @@ defmodule CromulentWeb.ChannelLive do
        user_id: socket.assigns.current_user.id,
        channel: nil,
        messages: [],
-       typing_users: %{}
+       typing_users: %{},
+       can_write: nil
      )}
   end
 
@@ -30,6 +31,7 @@ defmodule CromulentWeb.ChannelLive do
 
     channel = Cromulent.Channels.get_channel_by_slug(slug)
     messages = Cromulent.Messages.list_messages(channel.id)
+    can_write = Cromulent.Channels.can_write?(socket.assigns.current_user, channel)
 
     RoomServer.ensure_started(channel.id)
     Phoenix.PubSub.subscribe(Cromulent.PubSub, "text:#{channel.id}")
@@ -39,7 +41,8 @@ defmodule CromulentWeb.ChannelLive do
        channel: channel,
        messages: messages,
        oldest_id: List.first(messages) && List.first(messages).id,
-       all_loaded: length(messages) < 50
+       all_loaded: length(messages) < 50,
+       can_write: can_write
      )}
   end
 
@@ -67,17 +70,25 @@ defmodule CromulentWeb.ChannelLive do
     end
   end
 
+  def handle_event("send_message", _params, %{assigns: %{can_write: false}} = socket) do
+    {:noreply, put_flash(socket, :error, "You don't have permission to post in this channel.")}
+  end
+
   def handle_event("send_message", %{"body" => ""}, socket), do: {:noreply, socket}
 
   def handle_event("send_message", %{"body" => body}, socket) do
     body = String.trim(body)
 
     if body != "" do
-      case Cromulent.Messages.create_message(%{
-             channel_id: socket.assigns.channel.id,
-             user_id: socket.assigns.current_user.id,
-             body: body
-           }) do
+      case Cromulent.Messages.create_message(
+             socket.assigns.current_user,
+             socket.assigns.channel,
+             %{
+               channel_id: socket.assigns.channel.id,
+               user_id: socket.assigns.current_user.id,
+               body: body
+             }
+           ) do
         {:ok, message} ->
           message = Repo.preload(message, :user)
           RoomServer.broadcast_message(socket.assigns.channel.id, message)
@@ -181,34 +192,40 @@ defmodule CromulentWeb.ChannelLive do
 
       <%!-- Message input --%>
       <div class="flex-shrink-0 border-t border-gray-700 bg-gray-800">
-        <form phx-submit="send_message" class="flex items-center gap-2 px-4 h-12">
-          <input
-            type="text"
-            name="body"
-            placeholder={"Message ##{@channel.name}"}
-            class="block w-full border-0 bg-gray-800 px-0 text-sm text-white placeholder:text-gray-400 focus:ring-0"
-            autocomplete="off"
-            value=""
-            id={"msg-input-#{length(@messages)}"}
-            phx-keydown="typing_start"
-            phx-blur="typing_stop"
-          />
-          <button
-            type="submit"
-            class="inline-flex cursor-pointer justify-center rounded-full p-2 text-indigo-500 hover:bg-gray-700"
-          >
-            <svg
-              class="h-5 w-5 rotate-90"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 18 20"
+        <%= if @can_write do %>
+          <form phx-submit="send_message" class="flex items-center gap-2 px-4 h-12">
+            <input
+              type="text"
+              name="body"
+              placeholder={"Message ##{@channel.name}"}
+              class="block w-full border-0 bg-gray-800 px-0 text-sm text-white placeholder:text-gray-400 focus:ring-0"
+              autocomplete="off"
+              value=""
+              id={"msg-input-#{length(@messages)}"}
+              phx-keydown="typing_start"
+              phx-blur="typing_stop"
+            />
+            <button
+              type="submit"
+              class="inline-flex cursor-pointer justify-center rounded-full p-2 text-indigo-500 hover:bg-gray-700"
             >
-              <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
-            </svg>
-            <span class="sr-only">Send message</span>
-          </button>
-        </form>
+              <svg
+                class="h-5 w-5 rotate-90"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 18 20"
+              >
+                <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
+              </svg>
+              <span class="sr-only">Send message</span>
+            </button>
+          </form>
+        <% else %>
+          <div class="flex items-center px-4 h-12">
+            <p class="text-sm text-gray-500 italic">This channel is read-only.</p>
+          </div>
+        <% end %>
       </div>
     </div>
     """
