@@ -161,9 +161,10 @@ defmodule CromulentWeb.UserAuth do
     socket =
       socket
       |> mount_current_user(session)
+      |> Phoenix.Component.assign(:join_modal_type, nil)
 
     if socket.assigns.current_user do
-      channels = Cromulent.Channels.list_visible_channels(socket.assigns.current_user)
+      channels = Cromulent.Channels.list_joined_channels(socket.assigns.current_user)
       voice_channels = Enum.filter(channels, &(&1.type == :voice))
 
       socket =
