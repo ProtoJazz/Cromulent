@@ -20,7 +20,8 @@ defmodule CromulentWeb.ChannelLive do
        channel: nil,
        messages: [],
        typing_users: %{},
-       can_write: nil
+       can_write: nil,
+       join_modal_type: nil
      )}
   end
 
@@ -138,6 +139,24 @@ defmodule CromulentWeb.ChannelLive do
      socket
      |> assign(:voice_channel, nil)
      |> push_event("voice:leave", %{})}
+  end
+
+  def handle_event("open_join_modal", %{"type" => type}, socket) do
+    {:noreply, assign(socket, :join_modal_type, String.to_existing_atom(type))}
+  end
+
+  def handle_info(:close_join_modal, socket) do
+    {:noreply, assign(socket, :join_modal_type, nil)}
+  end
+
+  def handle_info({:channel_joined, _channel}, socket) do
+    channels = Cromulent.Channels.list_joined_channels(socket.assigns.current_user)
+
+    {:noreply,
+     socket
+     |> assign(:channels, channels)
+     |> assign(:join_modal_type, nil)
+     |> put_flash(:info, "Channel joined!")}
   end
 
   def handle_info({:new_message, message}, socket) do

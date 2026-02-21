@@ -8,6 +8,7 @@ defmodule CromulentWeb.Components.Sidebar do
   attr :voice_presences, :map, default: %{}
   attr :voice_channel, :any, default: nil
   attr :current_channel, :any, default: nil
+  attr :join_modal_type, :atom, default: nil
 
   def sidebar(assigns) do
     text_channels = Enum.filter(assigns.channels, &(&1.type == :text))
@@ -66,9 +67,26 @@ defmodule CromulentWeb.Components.Sidebar do
         <div class="flex-1 overflow-y-auto px-3 py-4">
           <%!-- Text Channels --%>
           <div class="mb-4">
-            <h2 class="px-2 mb-2 text-xs font-semibold tracking-wide uppercase text-gray-400">
-              Text Channels
-            </h2>
+            <div class="flex items-center justify-between px-2 mb-2">
+              <h2 class="text-xs font-semibold tracking-wide uppercase text-gray-400">
+                Text Channels
+              </h2>
+              <button
+                phx-click="open_join_modal"
+                phx-value-type="text"
+                class="text-gray-500 hover:text-gray-300 transition-colors rounded p-0.5 hover:bg-gray-700 cursor-pointer"
+                title="Browse text channels"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2.5"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+              </button>
+            </div>
             <ul class="space-y-1">
               <li :for={ch <- @text_channels}>
                 <.link
@@ -108,9 +126,26 @@ defmodule CromulentWeb.Components.Sidebar do
 
           <%!-- Voice Channels --%>
           <div>
-            <h2 class="px-2 mb-2 text-xs font-semibold tracking-wide uppercase text-gray-400">
-              Voice Channels
-            </h2>
+            <div class="flex items-center justify-between px-2 mb-2">
+              <h2 class="text-xs font-semibold tracking-wide uppercase text-gray-400">
+                Voice Channels
+              </h2>
+              <button
+                phx-click="open_join_modal"
+                phx-value-type="voice"
+                class="text-gray-500 hover:text-gray-300 transition-colors rounded p-0.5 hover:bg-gray-700 cursor-pointer"
+                title="Browse voice channels"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2.5"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+              </button>
+            </div>
             <ul class="space-y-1">
               <li :for={ch <- @voice_channels}>
                 <button
@@ -205,6 +240,14 @@ defmodule CromulentWeb.Components.Sidebar do
           </div>
         <% end %>
       </div>
+      <%= if @join_modal_type do %>
+        <.live_component
+          module={CromulentWeb.JoinChannelModal}
+          id="join-channel-modal"
+          current_user={@current_user}
+          channel_type={@join_modal_type}
+        />
+      <% end %>
     </aside>
     """
   end
