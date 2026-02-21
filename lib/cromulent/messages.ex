@@ -2,6 +2,7 @@ defmodule Cromulent.Messages do
   import Ecto.Query
   alias Cromulent.Repo
   alias Cromulent.Messages.Message
+  alias Cromulent.Channels
 
   @page_size 50
 
@@ -26,9 +27,13 @@ defmodule Cromulent.Messages do
   end
 
 
-  def create_message(attrs) do
-    %Message{}
-    |> Message.changeset(attrs)
-    |> Repo.insert()
+  def create_message(user, channel, attrs) do
+    if Channels.can_write?(user, channel) do
+      %Message{}
+      |> Message.changeset(attrs)
+      |> Repo.insert()
+    else
+      {:error, :permission_denied}
+    end
   end
 end

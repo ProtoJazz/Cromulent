@@ -158,15 +158,17 @@ defmodule CromulentWeb.UserAuth do
   end
 
   def on_mount(:ensure_authenticated, _params, session, socket) do
-    channels = Cromulent.Channels.list_channels()
-
     socket =
       socket
       |> mount_current_user(session)
-      |> Phoenix.Component.assign(:channels, channels)
 
     if socket.assigns.current_user do
+      channels = Cromulent.Channels.list_visible_channels(socket.assigns.current_user)
       voice_channels = Enum.filter(channels, &(&1.type == :voice))
+
+      socket =
+        socket
+        |> Phoenix.Component.assign(:channels, channels)
 
       # Build initial voice presences map
       voice_presences =
