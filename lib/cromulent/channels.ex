@@ -25,12 +25,21 @@ defmodule Cromulent.Channels do
       |> Repo.all()
     end
   end
+
   def list_joinable_channels(user, type) do
     from(c in Channel,
       left_join: m in ChannelMembership,
       on: m.channel_id == c.id and m.user_id == ^user.id,
       where: is_nil(m.user_id) and c.is_private == false and c.type == ^type,
       order_by: [asc: c.name]
+    )
+    |> Repo.all()
+  end
+
+  def list_channel_member_ids(channel_id) do
+    from(m in ChannelMembership,
+      where: m.channel_id == ^channel_id,
+      select: m.user_id
     )
     |> Repo.all()
   end

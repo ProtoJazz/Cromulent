@@ -6,19 +6,19 @@ defmodule Cromulent.Chat.RoomServer do
   alias Phoenix.PubSub
 
   @type state :: %{
-    channel_id: integer(),
-    typing_timers: %{integer() => reference()}
-  }
+          channel_id: integer(),
+          typing_timers: %{integer() => reference()}
+        }
 
-def ensure_started(channel_id) do
-  case DynamicSupervisor.start_child(
-    Cromulent.RoomSupervisor,
-    {__MODULE__, channel_id}
-  ) do
-    {:ok, _} -> :ok
-    {:error, {:already_started, _}} -> :ok
+  def ensure_started(channel_id) do
+    case DynamicSupervisor.start_child(
+           Cromulent.RoomSupervisor,
+           {__MODULE__, channel_id}
+         ) do
+      {:ok, _} -> :ok
+      {:error, {:already_started, _}} -> :ok
+    end
   end
-end
 
   # ── Public API ──────────────────────────────────────────────
 
@@ -48,6 +48,18 @@ end
   @impl true
   def handle_cast({:broadcast_message, message}, state) do
     PubSub.broadcast(Cromulent.PubSub, topic(state.channel_id), {:new_message, message})
+
+    member_ids =
+      Cromulent.Channels.list_channel_member_ids(state.channel_id)
+
+    for user_id <- member_ids do
+      PubSub.broadcast(Cromulent.PubSub, "user:#{user_id}", %Phoenix.Socket.Broadcast{
+        event: "unread_changed",
+        topic: "user:#{user_id}",
+        payload: %{}
+      })
+    end
+
     {:noreply, state}
   end
 
@@ -88,7 +100,9 @@ end
 
   defp cancel_typing_timer(state, user_id) do
     case Map.get(state.typing_timers, user_id) do
-      nil -> state
+      nil ->
+        state
+
       timer ->
         Process.cancel_timer(timer)
         update_in(state.typing_timers, &Map.delete(&1, user_id))

@@ -9,6 +9,7 @@ defmodule CromulentWeb.Components.Sidebar do
   attr :voice_channel, :any, default: nil
   attr :current_channel, :any, default: nil
   attr :join_modal_type, :atom, default: nil
+  attr :unread_counts, :map, default: %{}
 
   def sidebar(assigns) do
     text_channels = Enum.filter(assigns.channels, &(&1.type == :text))
@@ -99,26 +100,35 @@ defmodule CromulentWeb.Components.Sidebar do
                     )
                   ]}
                 >
-                  <svg
-                    class={[
-                      "w-5 h-5 mr-2 group-hover:text-gray-300",
-                      if(@current_channel && @current_channel.id == ch.id,
-                        do: "text-gray-300",
-                        else: "text-gray-400"
-                      )
-                    ]}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
-                    />
-                  </svg>
-                  {ch.name |> String.replace("# ", "")}
+                  <span class="flex items-center">
+                    <svg
+                      class={[
+                        "w-5 h-5 mr-2 group-hover:text-gray-300",
+                        if(@current_channel && @current_channel.id == ch.id,
+                          do: "text-gray-300",
+                          else: "text-gray-400"
+                        )
+                      ]}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                      />
+                    </svg>
+                    {ch.name |> String.replace("# ", "")}
+                  </span>
+                  <%= if Map.get(@unread_counts, ch.id, 0) > 0 do %>
+                    <span class="ml-auto min-w-[1.25rem] h-5 px-1 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">
+                      {if Map.get(@unread_counts, ch.id) > 99,
+                        do: "99+",
+                        else: Map.get(@unread_counts, ch.id)}
+                    </span>
+                  <% end %>
                 </.link>
               </li>
             </ul>

@@ -1,35 +1,44 @@
 <%= if assigns[:current_user] do %>
   <%!-- Mobile top bar --%>
- <nav class="bg-gray-800 border-b border-gray-700 px-4 py-2.5 fixed lg:hidden left-0 right-0 top-0 z-50">
-  <div class="flex items-center justify-between">
-    <button
-      data-drawer-target="drawer-navigation"
-      data-drawer-show="drawer-navigation"
-      aria-controls="drawer-navigation"
-      class="p-2 text-gray-400 rounded-lg hover:text-white hover:bg-gray-700"
-    >
-      <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-      </svg>
-      <span class="sr-only">Toggle sidebar</span>
-    </button>
+  <nav class="bg-gray-800 border-b border-gray-700 px-4 py-2.5 fixed lg:hidden left-0 right-0 top-0 z-50">
+    <div class="flex items-center justify-between">
+      <button
+        data-drawer-target="drawer-navigation"
+        data-drawer-show="drawer-navigation"
+        aria-controls="drawer-navigation"
+        class="p-2 text-gray-400 rounded-lg hover:text-white hover:bg-gray-700"
+      >
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fill-rule="evenodd"
+            d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <span class="sr-only">Toggle sidebar</span>
+      </button>
 
-    <span class="text-lg font-semibold text-white">Cromulent</span>
+      <span class="text-lg font-semibold text-white">Cromulent</span>
 
-    <button
-      data-drawer-target="drawer-members"
-      data-drawer-show="drawer-members"
-      data-drawer-placement="right"
-      aria-controls="drawer-members"
-      class="p-2 text-gray-400 rounded-lg hover:text-white hover:bg-gray-700"
-    >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-      <span class="sr-only">Toggle members</span>
-    </button>
-  </div>
-</nav>
+      <button
+        data-drawer-target="drawer-members"
+        data-drawer-show="drawer-members"
+        data-drawer-placement="right"
+        aria-controls="drawer-members"
+        class="p-2 text-gray-400 rounded-lg hover:text-white hover:bg-gray-700"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+        <span class="sr-only">Toggle members</span>
+      </button>
+    </div>
+  </nav>
 
   <%!-- Persistent voice hook --%>
   <div id="voice-hook" phx-hook="VoiceRoom" class="hidden"></div>
@@ -42,6 +51,7 @@
     voice_channel={assigns[:voice_channel]}
     current_channel={assigns[:channel]}
     join_modal_type={assigns[:join_modal_type]}
+    unread_counts={assigns[:unread_counts] || %{}}
   />
 
   <%!-- Right sidebar --%>
