@@ -37,14 +37,32 @@ defmodule CromulentWeb.ChannelLive do
     RoomServer.ensure_started(channel.id)
     Phoenix.PubSub.subscribe(Cromulent.PubSub, "text:#{channel.id}")
 
+    if latest = List.last(messages) do
+      Cromulent.Notifications.mark_channel_read(
+        socket.assigns.current_user.id,
+        channel.id,
+        latest.id
+      )
+    end
+
     {:noreply,
-     assign(socket,
+     socket
+     |> assign(
        channel: channel,
        messages: messages,
        oldest_id: List.first(messages) && List.first(messages).id,
        all_loaded: length(messages) < 50,
        can_write: can_write
-     )}
+     )
+     |> refresh_unread_counts()}
+  end
+
+  defp refresh_unread_counts(socket) do
+    assign(
+      socket,
+      :unread_counts,
+      Cromulent.Notifications.unread_counts_for_user(socket.assigns.current_user.id)
+    )
   end
 
   def handle_event("load_more", _params, %{assigns: %{all_loaded: true}} = socket) do
@@ -160,10 +178,17 @@ defmodule CromulentWeb.ChannelLive do
   end
 
   def handle_info({:new_message, message}, socket) do
+    Cromulent.Notifications.mark_channel_read(
+      socket.assigns.current_user.id,
+      socket.assigns.channel.id,
+      message.id
+    )
+
     socket =
       socket
       |> update(:messages, &(&1 ++ [message]))
       |> push_event("chat:new_message", %{})
+      |> refresh_unread_counts()
 
     {:noreply, socket}
   end

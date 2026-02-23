@@ -176,6 +176,10 @@ defmodule CromulentWeb.UserAuth do
       socket =
         socket
         |> Phoenix.Component.assign(:channels, channels)
+        |> Phoenix.Component.assign(
+          :unread_counts,
+          Cromulent.Notifications.unread_counts_for_user(socket.assigns.current_user.id)
+        )
 
       # Build initial voice presences map
       voice_presences =
@@ -209,6 +213,11 @@ defmodule CromulentWeb.UserAuth do
 
           Phoenix.PubSub.subscribe(Cromulent.PubSub, "server:all")
 
+          Phoenix.PubSub.subscribe(
+            Cromulent.PubSub,
+            "user:#{socket.assigns.current_user.id}"
+          )
+
           socket
           |> Phoenix.Component.assign(:presence_hook_attached, true)
           |> Phoenix.LiveView.attach_hook(
@@ -229,6 +238,16 @@ defmodule CromulentWeb.UserAuth do
 
       {:halt, socket}
     end
+  end
+
+  defp handle_presence_info(
+         %Phoenix.Socket.Broadcast{event: "unread_changed", topic: "user:" <> _user_id},
+         socket
+       ) do
+    counts =
+      Cromulent.Notifications.unread_counts_for_user(socket.assigns.current_user.id)
+
+    {:cont, Phoenix.Component.assign(socket, :unread_counts, counts)}
   end
 
   defp handle_presence_info(
