@@ -180,7 +180,7 @@ defmodule CromulentWeb.ChannelLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex flex-col h-screen fixed inset-0 lg:left-64">
+    <div class="flex flex-col h-full">
       <%!-- Message list --%>
       <div id="message-list" class="flex-1 overflow-y-auto py-4 space-y-1" phx-hook="ChatScroll">
         <.message :for={msg <- @messages} message={msg} current_user={@current_user} />

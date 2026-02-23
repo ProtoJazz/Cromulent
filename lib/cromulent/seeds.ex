@@ -104,9 +104,9 @@ defmodule Cromulent.Seeds do
     IO.puts("Seeding #general...")
 
     base = ~U[2026-02-16 10:00:00Z]
-    times = timestamps(base, 25)
+    times = timestamps(base, 200)
 
-    messages = [
+    general_messages = [
       {kaladin, "Another highstorm last night. Lost two practice dummies off the plateau. Bridge Four is fine though."},
       {shallan, "I sketched the storm from the window. There's something beautiful about the destruction if you catch it at the right angle."},
       {dalinar, "Beauty in destruction is how wars start, Shallan."},
@@ -309,7 +309,7 @@ defmodule Cromulent.Seeds do
     ]
 
 
-    messages
+    general_messages
     |> Enum.zip(times)
     |> Enum.each(fn {{user, body}, ts} ->
       insert_message(general_channel, user, body, ts)

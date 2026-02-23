@@ -1,38 +1,101 @@
 <%= if assigns[:current_user] do %>
   <%!-- Mobile top bar --%>
-  <nav class="bg-gray-800 border-b border-gray-700 px-4 py-2.5 fixed lg:hidden left-0 right-0 top-0 z-50">
-    <div class="flex items-center justify-between">
-      <button
-        data-drawer-target="drawer-navigation"
-        data-drawer-show="drawer-navigation"
-        aria-controls="drawer-navigation"
-        class="p-2 text-gray-400 rounded-lg hover:text-white hover:bg-gray-700"
-      >
-        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-        </svg>
-        <span class="sr-only">Toggle sidebar</span>
-      </button>
-      <span class="text-lg font-semibold text-white">Cromulent</span>
-      <div class="w-8"></div>
-    </div>
-  </nav>
+ <nav class="bg-gray-800 border-b border-gray-700 px-4 py-2.5 fixed lg:hidden left-0 right-0 top-0 z-50">
+  <div class="flex items-center justify-between">
+    <button
+      data-drawer-target="drawer-navigation"
+      data-drawer-show="drawer-navigation"
+      aria-controls="drawer-navigation"
+      class="p-2 text-gray-400 rounded-lg hover:text-white hover:bg-gray-700"
+    >
+      <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+      </svg>
+      <span class="sr-only">Toggle sidebar</span>
+    </button>
 
-  <%!-- Persistent voice hook — always in the DOM so it survives navigation --%>
+    <span class="text-lg font-semibold text-white">Cromulent</span>
+
+    <button
+      data-drawer-target="drawer-members"
+      data-drawer-show="drawer-members"
+      data-drawer-placement="right"
+      aria-controls="drawer-members"
+      class="p-2 text-gray-400 rounded-lg hover:text-white hover:bg-gray-700"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+      <span class="sr-only">Toggle members</span>
+    </button>
+  </div>
+</nav>
+
+  <%!-- Persistent voice hook --%>
   <div id="voice-hook" phx-hook="VoiceRoom" class="hidden"></div>
 
-  <%!-- Sidebar --%>
-  <.sidebar channels={assigns[:channels] || []} current_user={@current_user} voice_presences={assigns[:voice_presences] || %{}} voice_channel={assigns[:voice_channel]} current_channel={assigns[:channel]}  join_modal_type={assigns[:join_modal_type]} />
+  <%!-- Left sidebar --%>
+  <.sidebar
+    channels={assigns[:channels] || []}
+    current_user={@current_user}
+    voice_presences={assigns[:voice_presences] || %{}}
+    voice_channel={assigns[:voice_channel]}
+    current_channel={assigns[:channel]}
+    join_modal_type={assigns[:join_modal_type]}
+  />
+
+  <%!-- Right sidebar --%>
+  <.members_sidebar
+    server_presences={assigns[:server_presences] || []}
+    all_members={assigns[:all_members] || []}
+    voice_presences={assigns[:voice_presences] || %{}}
+  />
 
   <%!-- Main content --%>
-  <main class="lg:ml-64 min-h-screen pt-14 lg:pt-0">
-    <div class="p-4 h-full">
+  <main class="lg:ml-64 lg:mr-60 h-screen flex flex-col pt-14 lg:pt-0">
+    <%!-- Desktop toolbar with sidebar toggles --%>
+    <div class="hidden lg:flex items-center justify-between px-3 h-12 bg-gray-900 border-b border-gray-700">
+      <button
+        data-drawer-target="drawer-navigation"
+        data-drawer-toggle="drawer-navigation"
+        aria-controls="drawer-navigation"
+        class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded"
+        title="Toggle channels"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h7"
+          />
+        </svg>
+      </button>
+
+      <button
+        data-drawer-target="drawer-members"
+        data-drawer-toggle="drawer-members"
+        aria-controls="drawer-members"
+        data-drawer-placement="right"
+        class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded"
+        title="Toggle members"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+      </button>
+    </div>
+    <div class="flex-1 min-h-0">
       <.flash_group flash={@flash} />
       {@inner_content}
     </div>
   </main>
 <% else %>
-  <%!-- Unauthenticated layout --%>
   <main class="min-h-screen flex items-center justify-center">
     <div class="w-full max-w-md px-4">
       <.flash_group flash={@flash} />
