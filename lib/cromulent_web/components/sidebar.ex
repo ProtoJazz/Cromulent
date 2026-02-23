@@ -27,7 +27,7 @@ defmodule CromulentWeb.Components.Sidebar do
     >
       <div class="flex flex-col h-full">
         <%!-- Server header --%>
-        <div class="px-4 py-4 border-b border-gray-700 flex items-center justify-between">
+        <div class="h-12 px-4 border-b border-gray-700 flex items-center justify-between">
           <h1 class="text-xl font-bold text-white">Cromulent</h1>
           <%= if @current_user && @current_user.role == :admin do %>
             <.link

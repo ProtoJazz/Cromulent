@@ -91,6 +91,7 @@ defmodule CromulentWeb do
       import CromulentWeb.CoreComponents
       import CromulentWeb.Components.Sidebar
       import CromulentWeb.Components.VoiceBar
+      import CromulentWeb.Components.MembersSidebar
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

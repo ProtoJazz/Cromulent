@@ -158,10 +158,16 @@ defmodule CromulentWeb.UserAuth do
   end
 
   def on_mount(:ensure_authenticated, _params, session, socket) do
+    server_presences =
+      CromulentWeb.Presence.list("server:all")
+      |> Enum.map(fn {_id, %{metas: [meta | _]}} -> meta end)
+
     socket =
       socket
       |> mount_current_user(session)
       |> Phoenix.Component.assign(:join_modal_type, nil)
+      |> Phoenix.Component.assign(:server_presences, server_presences)
+      |> Phoenix.Component.assign(:all_members, Cromulent.Accounts.list_users())
 
     if socket.assigns.current_user do
       channels = Cromulent.Channels.list_joined_channels(socket.assigns.current_user)
@@ -195,6 +201,14 @@ defmodule CromulentWeb.UserAuth do
             Phoenix.PubSub.subscribe(Cromulent.PubSub, "voice:#{ch.id}")
           end
 
+          CromulentWeb.Presence.track(self(), "server:all", socket.assigns.current_user.id, %{
+            user_id: socket.assigns.current_user.id,
+            username: socket.assigns.current_user.username,
+            online_at: System.system_time(:millisecond)
+          })
+
+          Phoenix.PubSub.subscribe(Cromulent.PubSub, "server:all")
+
           socket
           |> Phoenix.Component.assign(:presence_hook_attached, true)
           |> Phoenix.LiveView.attach_hook(
@@ -227,6 +241,17 @@ defmodule CromulentWeb.UserAuth do
 
     voice_presences = Map.put(socket.assigns.voice_presences, channel_id, users)
     {:cont, Phoenix.Component.assign(socket, :voice_presences, voice_presences)}
+  end
+
+  defp handle_presence_info(
+         %Phoenix.Socket.Broadcast{event: "presence_diff", topic: "server:all"},
+         socket
+       ) do
+    server_presences =
+      CromulentWeb.Presence.list("server:all")
+      |> Enum.map(fn {_id, %{metas: [meta | _]}} -> meta end)
+
+    {:cont, Phoenix.Component.assign(socket, :server_presences, server_presences)}
   end
 
   defp handle_presence_info(_msg, socket), do: {:cont, socket}
