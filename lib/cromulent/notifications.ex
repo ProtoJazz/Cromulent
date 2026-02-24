@@ -114,6 +114,47 @@ defmodule Cromulent.Notifications do
     channel_member_ids
   end
 
+  # ── Notification Inbox ───────────────────────────────────────────────────
+
+  def list_unread_notifications(user_id, limit \\ 20) do
+    from(n in Notification,
+      where: n.user_id == ^user_id and is_nil(n.read_at),
+      join: m in assoc(n, :message),
+      join: u in assoc(m, :user),
+      join: c in assoc(n, :channel),
+      order_by: [desc: n.inserted_at],
+      limit: ^limit,
+      select: %{
+        id: n.id,
+        channel_id: c.id,
+        channel_name: c.name,
+        channel_slug: c.slug,
+        author: u.username,
+        message_preview: fragment("LEFT(?, 100)", m.body),
+        inserted_at: n.inserted_at,
+        mention_type: n.mention_type
+      }
+    )
+    |> Repo.all()
+  end
+
+  def unread_notification_count(user_id) do
+    from(n in Notification,
+      where: n.user_id == ^user_id and is_nil(n.read_at),
+      select: count(n.id)
+    )
+    |> Repo.one()
+  end
+
+  def mark_all_read(user_id) do
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+    from(n in Notification,
+      where: n.user_id == ^user_id and is_nil(n.read_at)
+    )
+    |> Repo.update_all(set: [read_at: now])
+  end
+
   # ── Read State ─────────────────────────────────────────────────────────────
 
   defp mark_notifications_read(user_id, channel_id) do

@@ -1,3 +1,16 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
+last_updated: "2026-02-27T15:00:00.000Z"
+progress:
+  total_phases: 2
+  completed_phases: 1
+  total_plans: 5
+  completed_plans: 5
+---
+
 # Project State
 
 ## Project Reference
@@ -5,35 +18,30 @@
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Friends can reliably chat and voice call on a self-hosted server that just works
-**Current focus:** Phase 1 - Mention Autocomplete
+**Current focus:** Phase 2 - Notification System
 
 ## Current Position
 
-Phase: 1 of 5 (Mention Autocomplete)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-26 — Roadmap created
+Phase: 2 of 5 (Notification System)
+Plan: 3 of 3 in current phase
+Status: All plans complete — awaiting verification
+Last activity: 2026-02-27 — Completed plans 02-01, 02-02, 02-03
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: N/A
-- Total execution time: 0.0 hours
+- Total plans completed: 3
+- Average duration: 1.9 minutes
+- Total execution time: 0.13 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
-
-**Recent Trend:**
-- Last 5 plans: None yet
-- Trend: Baseline
-
-*Updated after each plan completion*
+| 01 | 2 | 5 min | 2.5 min |
+| 02 | 1 | 2.3 min | 2.3 min |
 
 ## Accumulated Context
 
@@ -45,6 +53,16 @@ Recent decisions affecting current work:
 - Bundled TURN server (coturn) — Self-hosters shouldn't need external TURN service
 - Feature toggles via server config — Server owners control features without code changes
 - Type-ahead popup for @mentions — Good UX without full Discord-style mention chips
+- Dropdown renders above input (not below) for better visibility (01-01)
+- Max 5 items visible before scrolling in autocomplete (01-01)
+- ARIA attributes added for screen reader accessibility (01-01)
+- Tab key selects mention (Discord/Slack behavior) (01-02)
+- Stable input ID prevents Hook event listener breakage (01-02)
+- Input re-acquisition in updated() handles LiveView DOM replacements (01-02)
+- User-specific PubSub topic subscription for desktop notifications (02-01)
+- Client-side notification suppression when viewing mentioned channel (02-01)
+- Notification sound preloading with audio node cloning for overlapping playback (02-01)
+- Permission request on first notification attempt, not on page load (02-01)
 
 ### Pending Todos
 
@@ -56,6 +74,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-26
-Stopped at: Roadmap created, ready for phase planning
+Last session: 2026-02-27
+Stopped at: All phase 02 plans complete — verification pending
 Resume file: None
