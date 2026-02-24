@@ -167,7 +167,11 @@ defmodule CromulentWeb.ChannelLive do
     {:noreply, assign(socket, :join_modal_type, nil)}
   end
 
-  def handle_info({:channel_joined, _channel}, socket) do
+  def handle_info({:channel_joined, channel}, socket) do
+    if channel.type == :voice do
+      Phoenix.PubSub.subscribe(Cromulent.PubSub, "voice:#{channel.id}")
+    end
+
     channels = Cromulent.Channels.list_joined_channels(socket.assigns.current_user)
 
     {:noreply,
