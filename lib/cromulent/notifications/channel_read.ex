@@ -6,7 +6,7 @@ defmodule Cromulent.Notifications.ChannelRead do
   schema "channel_reads" do
     belongs_to :user, Cromulent.Accounts.User, type: :binary_id
     belongs_to :channel, Cromulent.Channels.Channel, type: :binary_id
-    belongs_to :last_read_message, Cromulent.Chat.Message, type: :binary_id
+    belongs_to :last_read_message, Cromulent.Messages.Message, type: :binary_id
 
     timestamps(type: :utc_datetime)
   end

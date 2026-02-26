@@ -82,7 +82,7 @@ defmodule Cromulent.Notifications do
           user_id: user_id,
           channel_id: message.channel_id,
           message_id: message.id,
-          mention_type: to_string(mention.mention_type),
+          mention_type: mention.mention_type,
           read_at: nil,
           inserted_at: now,
           updated_at: now
@@ -94,6 +94,8 @@ defmodule Cromulent.Notifications do
       on_conflict: :nothing,
       conflict_target: [:user_id, :message_id]
     )
+
+    Enum.map(notification_rows, & &1.user_id)
   end
 
   defp recipients_for_mention(%{mention_type: :user, user_id: uid}, _members, _online) do

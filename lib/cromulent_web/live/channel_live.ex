@@ -21,7 +21,8 @@ defmodule CromulentWeb.ChannelLive do
        messages: [],
        typing_users: %{},
        can_write: nil,
-       join_modal_type: nil
+       join_modal_type: nil,
+       mention_counts: %{}
      )}
   end
 
@@ -58,11 +59,11 @@ defmodule CromulentWeb.ChannelLive do
   end
 
   defp refresh_unread_counts(socket) do
-    assign(
-      socket,
-      :unread_counts,
-      Cromulent.Notifications.unread_counts_for_user(socket.assigns.current_user.id)
-    )
+    user_id = socket.assigns.current_user.id
+
+    socket
+    |> assign(:unread_counts, Cromulent.Notifications.unread_counts_for_user(user_id))
+    |> assign(:mention_counts, Cromulent.Notifications.mention_counts_for_user(user_id))
   end
 
   def handle_event("load_more", _params, %{assigns: %{all_loaded: true}} = socket) do
@@ -99,6 +100,10 @@ defmodule CromulentWeb.ChannelLive do
     body = String.trim(body)
 
     if body != "" do
+      online_user_ids =
+        CromulentWeb.Presence.list("server:all")
+        |> Enum.map(fn {_id, %{metas: [meta | _]}} -> meta.user_id end)
+
       case Cromulent.Messages.create_message(
              socket.assigns.current_user,
              socket.assigns.channel,
@@ -106,11 +111,11 @@ defmodule CromulentWeb.ChannelLive do
                channel_id: socket.assigns.channel.id,
                user_id: socket.assigns.current_user.id,
                body: body
-             }
+             },
+             online_user_ids
            ) do
-        {:ok, message} ->
-          message = Repo.preload(message, :user)
-          RoomServer.broadcast_message(socket.assigns.channel.id, message)
+        {:ok, {message, notified_user_ids}} ->
+          RoomServer.broadcast_message(socket.assigns.channel.id, message, notified_user_ids)
           {:noreply, assign(socket, message_input: "")}
 
         {:error, _changeset} ->
@@ -163,6 +168,24 @@ defmodule CromulentWeb.ChannelLive do
     {:noreply, assign(socket, :join_modal_type, String.to_existing_atom(type))}
   end
 
+  def handle_event("delete_message", %{"id" => id}, socket) do
+    case Cromulent.Messages.delete_message(socket.assigns.current_user, id) do
+      {:ok, _} ->
+        Cromulent.Chat.RoomServer.broadcast_message_deleted(socket.assigns.channel.id, id)
+        {:noreply, socket}
+
+      {:error, :permission_denied} ->
+        {:noreply, put_flash(socket, :error, "You don't have permission to delete that message.")}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Could not delete message.")}
+    end
+  end
+
+  def handle_info({:message_deleted, message_id}, socket) do
+    {:noreply, update(socket, :messages, &Enum.reject(&1, fn m -> m.id == message_id end))}
+  end
+
   def handle_info(:close_join_modal, socket) do
     {:noreply, assign(socket, :join_modal_type, nil)}
   end
@@ -203,6 +226,14 @@ defmodule CromulentWeb.ChannelLive do
 
   def handle_info({:typing_stopped, user_id}, socket) do
     {:noreply, update(socket, :typing_users, &Map.delete(&1, user_id))}
+  end
+
+  def handle_info({:unread_changed}, socket) do
+    {:noreply, refresh_unread_counts(socket)}
+  end
+
+  def handle_info({:mention_changed}, socket) do
+    {:noreply, refresh_unread_counts(socket)}
   end
 
   def handle_info(_, socket), do: {:noreply, socket}
