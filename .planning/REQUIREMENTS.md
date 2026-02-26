@@ -81,30 +81,30 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MENT-01 | TBD | Pending |
-| MENT-02 | TBD | Pending |
-| MENT-03 | TBD | Pending |
-| MENT-04 | TBD | Pending |
-| NOTF-01 | TBD | Pending |
-| NOTF-02 | TBD | Pending |
-| NOTF-03 | TBD | Pending |
-| NOTF-04 | TBD | Pending |
-| NOTF-05 | TBD | Pending |
-| NOTF-06 | TBD | Pending |
-| NOTF-07 | TBD | Pending |
-| RTXT-01 | TBD | Pending |
-| RTXT-02 | TBD | Pending |
-| RTXT-03 | TBD | Pending |
-| RTXT-04 | TBD | Pending |
-| VOIC-01 | TBD | Pending |
-| VOIC-02 | TBD | Pending |
-| ADMN-01 | TBD | Pending |
+| MENT-01 | Phase 1 | Pending |
+| MENT-02 | Phase 1 | Pending |
+| MENT-03 | Phase 1 | Pending |
+| MENT-04 | Phase 1 | Pending |
+| NOTF-01 | Phase 2 | Pending |
+| NOTF-02 | Phase 2 | Pending |
+| NOTF-03 | Phase 2 | Pending |
+| NOTF-04 | Phase 2 | Pending |
+| NOTF-05 | Phase 2 | Pending |
+| NOTF-06 | Phase 2 | Pending |
+| NOTF-07 | Phase 2 | Pending |
+| RTXT-01 | Phase 4 | Pending |
+| RTXT-02 | Phase 4 | Pending |
+| RTXT-03 | Phase 4 | Pending |
+| RTXT-04 | Phase 4 | Pending |
+| VOIC-01 | Phase 3 | Pending |
+| VOIC-02 | Phase 3 | Pending |
+| ADMN-01 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 18 total
-- Mapped to phases: 0
-- Unmapped: 18 ⚠️
+- Mapped to phases: 18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after initial definition*
+*Last updated: 2026-02-26 after roadmap creation*
