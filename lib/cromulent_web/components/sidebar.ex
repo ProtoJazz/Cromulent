@@ -10,6 +10,7 @@ defmodule CromulentWeb.Components.Sidebar do
   attr :current_channel, :any, default: nil
   attr :join_modal_type, :atom, default: nil
   attr :unread_counts, :map, default: %{}
+  attr :mention_counts, :map, default: %{}
 
   def sidebar(assigns) do
     text_channels = Enum.filter(assigns.channels, &(&1.type == :text))
@@ -90,43 +91,55 @@ defmodule CromulentWeb.Components.Sidebar do
             </div>
             <ul class="space-y-1">
               <li :for={ch <- @text_channels}>
+                <% mentions = Map.get(@mention_counts, ch.id, 0) %>
+                <% unread = Map.get(@unread_counts, ch.id, 0) %>
+                <% is_active = @current_channel && @current_channel.id == ch.id %>
+                <% has_mention = mentions > 0 %>
+                <% has_unread = unread > 0 %>
                 <.link
                   patch={~p"/channels/#{ch.slug}"}
                   class={[
-                    "flex items-center px-2 py-1.5 text-sm font-medium rounded-md group",
-                    if(@current_channel && @current_channel.id == ch.id,
-                      do: "bg-gray-700 text-white",
-                      else: "text-gray-300 hover:bg-gray-700 hover:text-white"
+                    "flex items-center px-2 py-1.5 text-sm rounded-md group",
+                    if(is_active,
+                      do: "bg-gray-700 text-white font-medium",
+                      else:
+                        if(has_unread || has_mention,
+                          do: "text-white font-semibold hover:bg-gray-700",
+                          else: "text-gray-400 font-medium hover:bg-gray-700 hover:text-white"
+                        )
                     )
                   ]}
                 >
-                  <span class="flex items-center">
-                    <svg
-                      class={[
-                        "w-5 h-5 mr-2 group-hover:text-gray-300",
-                        if(@current_channel && @current_channel.id == ch.id,
-                          do: "text-gray-300",
-                          else: "text-gray-400"
-                        )
-                      ]}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
-                      />
-                    </svg>
+                  <%!-- # icon --%>
+                  <svg
+                    class={[
+                      "w-5 h-5 mr-2 flex-shrink-0",
+                      if(is_active || has_unread || has_mention,
+                        do: "text-gray-300",
+                        else: "text-gray-500 group-hover:text-gray-300"
+                      )
+                    ]}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                    />
+                  </svg>
+
+                  <%!-- Channel name --%>
+                  <span class="flex-1 truncate">
                     {ch.name |> String.replace("# ", "")}
                   </span>
-                  <%= if Map.get(@unread_counts, ch.id, 0) > 0 do %>
-                    <span class="ml-auto min-w-[1.25rem] h-5 px-1 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">
-                      {if Map.get(@unread_counts, ch.id) > 99,
-                        do: "99+",
-                        else: Map.get(@unread_counts, ch.id)}
+
+                  <%!-- Red badge only for direct mentions/notifications --%>
+                  <%= if has_mention do %>
+                    <span class="ml-2 flex-shrink-0 min-w-[1.25rem] h-5 px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
+                      {if mentions > 99, do: "99+", else: mentions}
                     </span>
                   <% end %>
                 </.link>

@@ -8,6 +8,7 @@ defmodule Cromulent.Messages.Message do
 
     belongs_to :channel, Cromulent.Channels.Channel
     belongs_to :user, Cromulent.Accounts.User
+    has_many :mentions, Cromulent.Messages.MessageMention
 
     timestamps(type: :utc_datetime, updated_at: false)
   end

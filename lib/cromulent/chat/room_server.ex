@@ -26,8 +26,12 @@ defmodule Cromulent.Chat.RoomServer do
     GenServer.start_link(__MODULE__, channel_id, name: via(channel_id))
   end
 
-  def broadcast_message(channel_id, message) do
-    GenServer.cast(via(channel_id), {:broadcast_message, message})
+  def broadcast_message(channel_id, message, notified_user_ids \\ []) do
+    GenServer.cast(via(channel_id), {:broadcast_message, message, notified_user_ids})
+  end
+
+  def broadcast_message_deleted(channel_id, message_id) do
+    GenServer.cast(via(channel_id), {:broadcast_message_deleted, message_id})
   end
 
   def typing_start(channel_id, user_id, username) do
@@ -46,20 +50,25 @@ defmodule Cromulent.Chat.RoomServer do
   end
 
   @impl true
-  def handle_cast({:broadcast_message, message}, state) do
+  def handle_cast({:broadcast_message, message, notified_user_ids}, state) do
     PubSub.broadcast(Cromulent.PubSub, topic(state.channel_id), {:new_message, message})
 
     member_ids =
       Cromulent.Channels.list_channel_member_ids(state.channel_id)
 
     for user_id <- member_ids do
-      PubSub.broadcast(Cromulent.PubSub, "user:#{user_id}", %Phoenix.Socket.Broadcast{
-        event: "unread_changed",
-        topic: "user:#{user_id}",
-        payload: %{}
-      })
+      PubSub.broadcast(Cromulent.PubSub, "user:#{user_id}", {:unread_changed})
     end
 
+    for user_id <- notified_user_ids do
+      PubSub.broadcast(Cromulent.PubSub, "user:#{user_id}", {:mention_changed})
+    end
+
+    {:noreply, state}
+  end
+
+  def handle_cast({:broadcast_message_deleted, message_id}, state) do
+    PubSub.broadcast(Cromulent.PubSub, topic(state.channel_id), {:message_deleted, message_id})
     {:noreply, state}
   end
 

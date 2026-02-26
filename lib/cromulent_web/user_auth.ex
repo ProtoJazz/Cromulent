@@ -173,12 +173,18 @@ defmodule CromulentWeb.UserAuth do
       channels = Cromulent.Channels.list_joined_channels(socket.assigns.current_user)
       voice_channels = Enum.filter(channels, &(&1.type == :voice))
 
+      user_id = socket.assigns.current_user.id
+
       socket =
         socket
         |> Phoenix.Component.assign(:channels, channels)
         |> Phoenix.Component.assign(
           :unread_counts,
-          Cromulent.Notifications.unread_counts_for_user(socket.assigns.current_user.id)
+          Cromulent.Notifications.unread_counts_for_user(user_id)
+        )
+        |> Phoenix.Component.assign(
+          :mention_counts,
+          Cromulent.Notifications.mention_counts_for_user(user_id)
         )
 
       # Build initial voice presences map
