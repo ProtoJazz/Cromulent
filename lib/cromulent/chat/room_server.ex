@@ -64,6 +64,22 @@ defmodule Cromulent.Chat.RoomServer do
       PubSub.broadcast(Cromulent.PubSub, "user:#{user_id}", {:mention_changed})
     end
 
+    # Broadcast desktop notifications to mentioned users
+    channel = Cromulent.Channels.get_channel(state.channel_id)
+
+    for user_id <- notified_user_ids do
+      notification_data = %{
+        channel_id: state.channel_id,
+        channel_name: channel.name,
+        channel_slug: channel.slug,
+        author: message.user.username,
+        message_preview: String.slice(message.body, 0..100),
+        notification_id: message.id
+      }
+
+      PubSub.broadcast(Cromulent.PubSub, "user:#{user_id}", {:desktop_notification, notification_data})
+    end
+
     {:noreply, state}
   end
 

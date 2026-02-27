@@ -12,7 +12,7 @@ This milestone transforms Cromulent's basic chat into a polished communication p
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Mention Autocomplete** - Type-ahead @mention UI with keyboard navigation
+- [x] **Phase 1: Mention Autocomplete** - Type-ahead @mention UI with keyboard navigation
 - [ ] **Phase 2: Notification System** - Desktop alerts, sound, unread indicators, and inbox
 - [ ] **Phase 3: Voice Reliability** - TURN server and double-join prevention
 - [ ] **Phase 4: Rich Text Rendering** - Markdown, link previews, and image embeds
@@ -30,10 +30,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. @everyone and @here appear in autocomplete results alongside users
   4. @group mentions display all user groups in autocomplete alongside individual users
   5. Selected mention inserts into message and closes autocomplete popup
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- TBD
+- [x] 01-01-PLAN.md — Backend autocomplete state, filtering logic, and Flowbite dropdown component
+- [x] 01-02-PLAN.md — JS Hook for keyboard navigation, cursor detection, mention insertion, and human verification
 
 ### Phase 2: Notification System
 **Goal**: Users receive timely, multi-channel notifications for mentions with unread tracking
@@ -47,10 +48,12 @@ Plans:
   5. Users can view a notification inbox showing all missed mentions and alerts
   6. Hovering over a username displays a tooltip with avatar, online status, and role
   7. Notifications only fire when user is online and not currently viewing the mentioned channel
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- TBD
+- [x] 02-01-PLAN.md — Desktop notification delivery pipeline (Electron + Web + sound)
+- [ ] 02-02-PLAN.md — Notification inbox with bell icon and dropdown panel
+- [x] 02-03-PLAN.md — User popover tooltips on hover
 
 ### Phase 3: Voice Reliability
 **Goal**: Voice connections work reliably through restrictive NATs without duplicate joins
@@ -103,8 +106,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Mention Autocomplete | 0/TBD | Not started | - |
-| 2. Notification System | 0/TBD | Not started | - |
+| 1. Mention Autocomplete | 2/2 | Complete | 2026-02-26 |
+| 2. Notification System | 2/3 | In Progress | - |
 | 3. Voice Reliability | 0/TBD | Not started | - |
 | 4. Rich Text Rendering | 0/TBD | Not started | - |
 | 5. Feature Toggles | 0/TBD | Not started | - |

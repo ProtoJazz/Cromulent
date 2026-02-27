@@ -9,20 +9,20 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Mentions
 
-- [ ] **MENT-01**: User can type @ in message input and see a filterable dropdown of channel members
-- [ ] **MENT-02**: User can navigate autocomplete with keyboard (up/down/enter/escape)
-- [ ] **MENT-03**: @everyone and @here mentions display correctly in autocomplete alongside users
-- [ ] **MENT-04**: @group mentions display correctly in autocomplete alongside users
+- [x] **MENT-01**: User can type @ in message input and see a filterable dropdown of channel members
+- [x] **MENT-02**: User can navigate autocomplete with keyboard (up/down/enter/escape)
+- [x] **MENT-03**: @everyone and @here mentions display correctly in autocomplete alongside users
+- [x] **MENT-04**: @group mentions display correctly in autocomplete alongside users
 
 ### Notifications
 
-- [ ] **NOTF-01**: System detects whether user is on Electron or web browser client
-- [ ] **NOTF-02**: Electron users receive native OS desktop notifications when mentioned
-- [ ] **NOTF-03**: Web browser users receive Web Notifications API alerts when mentioned
-- [ ] **NOTF-04**: Notifications only fire when user is online and not viewing the mentioned channel
-- [ ] **NOTF-05**: User hears an audible sound when mentioned in a channel they're not viewing
+- [x] **NOTF-01**: System detects whether user is on Electron or web browser client
+- [x] **NOTF-02**: Electron users receive native OS desktop notifications when mentioned
+- [x] **NOTF-03**: Web browser users receive Web Notifications API alerts when mentioned
+- [x] **NOTF-04**: Notifications only fire when user is online and not viewing the mentioned channel
+- [x] **NOTF-05**: User hears an audible sound when mentioned in a channel they're not viewing
 - [ ] **NOTF-06**: User can view a notification inbox tab showing missed mentions and alerts
-- [ ] **NOTF-07**: User tooltip/popover shows display name, avatar, online status, and role on hover
+- [x] **NOTF-07**: User tooltip/popover shows display name, avatar, online status, and role on hover
 
 ### Rich Text
 
@@ -81,17 +81,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MENT-01 | Phase 1 | Pending |
-| MENT-02 | Phase 1 | Pending |
-| MENT-03 | Phase 1 | Pending |
-| MENT-04 | Phase 1 | Pending |
-| NOTF-01 | Phase 2 | Pending |
-| NOTF-02 | Phase 2 | Pending |
-| NOTF-03 | Phase 2 | Pending |
-| NOTF-04 | Phase 2 | Pending |
-| NOTF-05 | Phase 2 | Pending |
+| MENT-01 | Phase 1 | Complete |
+| MENT-02 | Phase 1 | Complete |
+| MENT-03 | Phase 1 | Complete |
+| MENT-04 | Phase 1 | Complete |
+| NOTF-01 | Phase 2 | Complete |
+| NOTF-02 | Phase 2 | Complete |
+| NOTF-03 | Phase 2 | Complete |
+| NOTF-04 | Phase 2 | Complete |
+| NOTF-05 | Phase 2 | Complete |
 | NOTF-06 | Phase 2 | Pending |
-| NOTF-07 | Phase 2 | Pending |
+| NOTF-07 | Phase 2 | Complete |
 | RTXT-01 | Phase 4 | Pending |
 | RTXT-02 | Phase 4 | Pending |
 | RTXT-03 | Phase 4 | Pending |

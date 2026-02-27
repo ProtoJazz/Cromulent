@@ -1,5 +1,6 @@
 defmodule CromulentWeb.Components.MembersSidebar do
   use Phoenix.Component
+  import CromulentWeb.Components.UserPopover
 
   attr :server_presences, :list, default: []
   attr :all_members, :list, default: []
@@ -62,7 +63,9 @@ defmodule CromulentWeb.Components.MembersSidebar do
                   </div>
                   <%!-- Name + voice badge --%>
                   <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-200 truncate">{member.username}</p>
+                    <.user_popover_wrapper user={member} online={true} context="sidebar-online" placement="left">
+                      <p class="text-sm font-medium text-gray-200 truncate">{member.username}</p>
+                    </.user_popover_wrapper>
                     <%= if channel_id = Map.get(@voice_channel_by_user, member.id) do %>
                       <p class="text-xs text-green-400 truncate flex items-center gap-1">
                         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -93,7 +96,9 @@ defmodule CromulentWeb.Components.MembersSidebar do
                     <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-gray-600 border-2 border-gray-800 rounded-full">
                     </span>
                   </div>
-                  <p class="text-sm font-medium text-gray-500 truncate">{member.username}</p>
+                  <.user_popover_wrapper user={member} online={false} context="sidebar-offline" placement="left">
+                    <p class="text-sm font-medium text-gray-500 truncate">{member.username}</p>
+                  </.user_popover_wrapper>
                 </div>
               </li>
             </ul>

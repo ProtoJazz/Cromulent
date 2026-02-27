@@ -24,11 +24,15 @@ import topbar from "../vendor/topbar"
 import "flowbite/dist/flowbite.phoenix.js";
 import VoiceRoom from "./voice"
 import "./electron-bridge.js"
+import MentionAutocomplete from "./hooks/mention_autocomplete"
+import NotificationHandler from "./hooks/notification_handler"
 
 let voiceRoom = null
 let voiceSocket = null
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const Hooks = {
+  MentionAutocomplete,
+  NotificationHandler,
   VoiceRoom: {
     mounted() {
       // This element is always in the DOM, so mounted() fires once on page load.

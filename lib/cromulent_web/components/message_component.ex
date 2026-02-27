@@ -1,5 +1,6 @@
 defmodule CromulentWeb.Components.MessageComponent do
   use Phoenix.Component
+  import CromulentWeb.Components.UserPopover
 
   attr :message, :map, required: true
   attr :current_user, :any, required: true
@@ -69,7 +70,9 @@ defmodule CromulentWeb.Components.MessageComponent do
           "flex items-center space-x-2",
           if(@is_own, do: "flex-row-reverse space-x-reverse")
         ]}>
-          <span class="text-sm font-semibold text-white">{@message.user.username}</span>
+          <.user_popover_wrapper user={@message.user} online={false} context="message">
+            <span class="text-sm font-semibold text-white">{@message.user.username}</span>
+          </.user_popover_wrapper>
           <span class="text-sm font-normal text-gray-400">{@timestamp}</span>
         </div>
 

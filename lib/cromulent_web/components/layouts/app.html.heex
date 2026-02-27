@@ -20,13 +20,21 @@
 
       <span class="text-lg font-semibold text-white">Cromulent</span>
 
-      <button
-        data-drawer-target="drawer-members"
-        data-drawer-show="drawer-members"
-        data-drawer-placement="right"
-        aria-controls="drawer-members"
-        class="p-2 text-gray-400 rounded-lg hover:text-white hover:bg-gray-700"
-      >
+      <div class="flex items-center gap-1">
+        <%= if assigns[:current_user] do %>
+          <.live_component
+            module={CromulentWeb.Components.NotificationInbox}
+            id="notification-inbox-mobile"
+            current_user={@current_user}
+          />
+        <% end %>
+        <button
+          data-drawer-target="drawer-members"
+          data-drawer-show="drawer-members"
+          data-drawer-placement="right"
+          aria-controls="drawer-members"
+          class="p-2 text-gray-400 rounded-lg hover:text-white hover:bg-gray-700"
+        >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
@@ -35,8 +43,9 @@
             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
           />
         </svg>
-        <span class="sr-only">Toggle members</span>
-      </button>
+          <span class="sr-only">Toggle members</span>
+        </button>
+      </div>
     </div>
   </nav>
 
@@ -83,23 +92,32 @@
         </svg>
       </button>
 
-      <button
-        data-drawer-target="drawer-members"
-        data-drawer-toggle="drawer-members"
-        aria-controls="drawer-members"
-        data-drawer-placement="right"
-        class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded"
-        title="Toggle members"
-      >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+      <div class="flex items-center gap-1">
+        <%= if assigns[:current_user] do %>
+          <.live_component
+            module={CromulentWeb.Components.NotificationInbox}
+            id="notification-inbox"
+            current_user={@current_user}
           />
-        </svg>
-      </button>
+        <% end %>
+        <button
+          data-drawer-target="drawer-members"
+          data-drawer-toggle="drawer-members"
+          aria-controls="drawer-members"
+          data-drawer-placement="right"
+          class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded"
+          title="Toggle members"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
     <div class="flex-1 min-h-0">
       <.flash_group flash={@flash} />
