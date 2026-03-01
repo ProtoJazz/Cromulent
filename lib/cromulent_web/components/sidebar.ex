@@ -7,6 +7,7 @@ defmodule CromulentWeb.Components.Sidebar do
   attr :current_user, :any, default: nil
   attr :voice_presences, :map, default: %{}
   attr :voice_channel, :any, default: nil
+  attr :voice_connection_state, :atom, default: nil
   attr :current_channel, :any, default: nil
   attr :join_modal_type, :atom, default: nil
   attr :unread_counts, :map, default: %{}
@@ -214,7 +215,7 @@ defmodule CromulentWeb.Components.Sidebar do
 
         <%!-- Voice connection bar --%>
         <%= if @voice_channel do %>
-          <.voice_bar voice_channel={@voice_channel} />
+          <.voice_bar voice_channel={@voice_channel} connection_state={@voice_connection_state || :connecting} />
         <% end %>
 
         <%!-- User panel at bottom --%>
