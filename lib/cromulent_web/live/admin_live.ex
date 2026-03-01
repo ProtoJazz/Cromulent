@@ -76,6 +76,28 @@ defmodule CromulentWeb.AdminLive do
     end
   end
 
+
+  def handle_event("make_default", %{"id" => id}, socket) do
+    channel = Channels.get_channel!(id)
+    Channels.set_default(channel, true)
+
+     {:noreply,
+         socket
+         |> put_flash(:info, "Channel ##{channel.name} made default.")
+         |> assign(:channels, Channels.list_channels())}
+  end
+
+  def handle_event("remove_default", %{"id" => id}, socket) do
+    channel = Channels.get_channel!(id)
+    Channels.set_default(channel, false)
+
+     {:noreply,
+         socket
+         |> put_flash(:info, "Channel ##{channel.name} removed from default.")
+         |> assign(:channels, Channels.list_channels())}
+  end
+
+
   defp do_set_role(socket, user, role) do
     case Accounts.set_user_role(user, String.to_atom(role)) do
       {:ok, _} ->
@@ -242,6 +264,7 @@ defmodule CromulentWeb.AdminLive do
               <tr>
                 <th scope="col" class="px-6 py-3">Name</th>
                 <th scope="col" class="px-6 py-3">Type</th>
+                <th scope="col" class="px-6 py-3">Default</th>
                 <th scope="col" class="px-6 py-3">Actions</th>
               </tr>
             </thead>
@@ -264,6 +287,26 @@ defmodule CromulentWeb.AdminLive do
                   ]}>
                     <%= channel.type %>
                   </span>
+                </td><td class="px-6 py-4">
+                  <%= if channel.is_default do %>
+                    <button
+                      phx-click="remove_default"
+                      phx-value-id={channel.id}
+                      class="text-xs font-medium text-red-400 hover:text-red-300 cursor-pointer"
+                    >
+                      Remove Default
+                    </button>
+                  <% end %>
+
+                     <%= if !channel.is_default do %>
+                    <button
+                      phx-click="make_default"
+                      phx-value-id={channel.id}
+                      class="text-xs font-medium text-green-400 hover:text-green-300 cursor-pointer"
+                    >
+                      Make Default
+                    </button>
+                  <% end %>
                 </td>
                 <td class="px-6 py-4">
                   <button
