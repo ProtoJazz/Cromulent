@@ -29,7 +29,9 @@ defmodule CromulentWeb.ChannelLive do
        autocomplete_open: false,
        autocomplete_query: "",
        autocomplete_results: [],
-       autocomplete_index: 0
+       autocomplete_index: 0,
+       voice_channel: nil,
+       voice_connection_state: nil
      )}
   end
 
@@ -149,16 +151,35 @@ defmodule CromulentWeb.ChannelLive do
   end
 
   def handle_event("join_voice", %{"channel-id" => channel_id}, socket) do
+    # Cross-channel auto-leave: if already in a voice channel, push leave event first.
+    # Both events arrive in the same LiveView batch; JS processes them in order.
+    socket =
+      if socket.assigns[:voice_channel] do
+        push_event(socket, "voice:leave", %{})
+      else
+        socket
+      end
+
     channel = Cromulent.Channels.get_channel(channel_id)
     Cromulent.VoiceState.join(socket.assigns.current_user.id, channel)
+
+    ice_servers =
+      case get_ice_servers(socket.assigns.current_user.id) do
+        {:ok, servers} -> servers
+        # Graceful fallback: TURN credential failure falls back to STUN-only.
+        # Voice still works on most networks; only restrictive NATs are affected.
+        {:error, _reason} -> [%{urls: "stun:stun.l.google.com:19302"}]
+      end
 
     {:noreply,
      socket
      |> assign(:voice_channel, channel)
+     |> assign(:voice_connection_state, :connecting)
      |> push_event("voice:join", %{
        channel_id: channel_id,
        user_token: socket.assigns.user_token,
-       user_id: socket.assigns.user_id
+       user_id: socket.assigns.user_id,
+       ice_servers: ice_servers
      })}
   end
 
@@ -168,7 +189,19 @@ defmodule CromulentWeb.ChannelLive do
     {:noreply,
      socket
      |> assign(:voice_channel, nil)
+     |> assign(:voice_connection_state, nil)
      |> push_event("voice:leave", %{})}
+  end
+
+  def handle_event("voice_state_changed", %{"state" => state}, socket) do
+    connection_state =
+      case state do
+        "connected" -> :connected
+        "disconnected" -> :disconnected
+        _ -> socket.assigns[:voice_connection_state]
+      end
+
+    {:noreply, assign(socket, :voice_connection_state, connection_state)}
   end
 
   def handle_event("open_join_modal", %{"type" => type}, socket) do
@@ -487,6 +520,15 @@ defmodule CromulentWeb.ChannelLive do
       :broadcast -> "@#{item.token} "
       :user -> "@#{item.user.username} "
       :group -> "@#{item.group.slug} "
+    end
+  end
+
+  defp get_ice_servers(user_id) do
+    case System.get_env("TURN_PROVIDER") do
+      "coturn" -> Cromulent.Turn.Coturn.get_ice_servers(user_id)
+      "metered" -> Cromulent.Turn.Metered.get_ice_servers(user_id)
+      # No TURN_PROVIDER set = STUN-only mode (default, preserves existing behavior)
+      _ -> {:ok, [%{urls: "stun:stun.l.google.com:19302"}]}
     end
   end
 
