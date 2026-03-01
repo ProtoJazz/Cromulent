@@ -40,3 +40,4 @@ npm-debug.log
 /electron-client/dist
 /electron-client/ptt-daemon/target
 /electron-client/ptt-daemon/dist
+.envrc
