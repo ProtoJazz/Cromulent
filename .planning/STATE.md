@@ -64,6 +64,9 @@ Recent decisions affecting current work:
 - Client-side notification suppression when viewing mentioned channel (02-01)
 - Notification sound preloading with audio node cloning for overlapping playback (02-01)
 - Permission request on first notification attempt, not on page load (02-01)
+- @behaviour pattern for swappable TURN providers (Coturn/Metered) via TURN_PROVIDER env var (03-01)
+- Use :crypto.mac/4 not deprecated :crypto.hmac/3 which was removed in OTP 26 (03-01)
+- TURN env vars read at runtime in provider modules, not at boot — server starts STUN-only without config (03-01)
 - network_mode: host used on Linux to avoid Docker NAT breaking TURN relay (03-02)
 - Relay port range kept narrow for local dev (49152-49200); Dockerfile.coturn EXPOSE covers full range for production (03-02)
 - TURN_SECRET env var substitution is native Coturn feature — no shell scripting needed (03-02)
@@ -79,5 +82,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 03-02-PLAN.md (Coturn infrastructure)
+Stopped at: Completed 03-01-PLAN.md (TURN provider abstraction)
 Resume file: None

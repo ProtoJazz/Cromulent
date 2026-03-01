@@ -67,8 +67,8 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — TURN provider Elixir abstraction (behaviour + Coturn + Metered implementations, runtime.exs env vars)
-- [ ] 03-02-PLAN.md — Coturn deployment infrastructure (docker-compose.yml, Dockerfile.coturn, priv/coturn/turnserver.conf)
+- [x] 03-01-PLAN.md — TURN provider Elixir abstraction (behaviour + Coturn + Metered implementations, runtime.exs env vars)
+- [x] 03-02-PLAN.md — Coturn deployment infrastructure (docker-compose.yml, Dockerfile.coturn, priv/coturn/turnserver.conf)
 - [ ] 03-03-PLAN.md — Server-side join guard (Presence duplicate-join check, cross-channel auto-leave, TURN wiring in channel_live.ex)
 - [ ] 03-04-PLAN.md — JS client + VoiceBar UI (consume ice_servers, push connection state events, dynamic dot/label display) + human verify
 
