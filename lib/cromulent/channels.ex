@@ -110,6 +110,14 @@ defmodule Cromulent.Channels do
     |> Repo.insert(on_conflict: :nothing)
   end
 
+  def set_default(%Cromulent.Channels.Channel{} = channel, default) do
+    channel|>
+    Channel.changeset(%{
+      is_default: default
+    })
+    |> Repo.update!
+  end
+
   def leave_channel(user, channel) do
     from(m in ChannelMembership,
       where: m.channel_id == ^channel.id and m.user_id == ^user.id
