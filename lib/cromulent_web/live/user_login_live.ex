@@ -75,6 +75,12 @@ defmodule CromulentWeb.UserLoginLive do
             >
               Sign in
             </button>
+             <p class="text-sm font-light text-gray-500 dark:text-gray-400">
+              Don't have an account?
+              <.link navigate={~p"/users/register"} class="font-medium text-blue-600 hover:underline dark:text-blue-500">
+                Register
+              </.link>
+            </p>
           </form>
         </div>
       </div>
