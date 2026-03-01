@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in_progress
-last_updated: "2026-03-01T18:16:00.000Z"
+status: unknown
+last_updated: "2026-03-01T18:18:33.014Z"
 progress:
-  total_phases: 5
+  total_phases: 3
   completed_phases: 2
-  total_plans: 8
+  total_plans: 9
   completed_plans: 8
 ---
 
@@ -23,9 +23,9 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 3 of 5 (Voice Reliability)
-Plan: 3 of 4 in current phase
-Status: Plans 03-01 and 03-02 complete — continuing phase 03
-Last activity: 2026-03-01 — Completed plan 03-01 (TURN provider abstraction)
+Plan: 4 of 4 in current phase
+Status: Plans 03-01, 03-02, and 03-03 complete — continuing phase 03
+Last activity: 2026-03-01 — Completed plan 03-03 (server-side voice reliability)
 
 Progress: [████████░░] 60%
 
@@ -43,6 +43,7 @@ Progress: [████████░░] 60%
 | 01 | 2 | 5 min | 2.5 min |
 | 02 | 1 | 2.3 min | 2.3 min |
 | 03 | 2 | 2 min | 1 min |
+| Phase 03 P03 | 2 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,9 @@ Recent decisions affecting current work:
 - network_mode: host used on Linux to avoid Docker NAT breaking TURN relay (03-02)
 - Relay port range kept narrow for local dev (49152-49200); Dockerfile.coturn EXPOSE covers full range for production (03-02)
 - TURN_SECRET env var substitution is native Coturn feature — no shell scripting needed (03-02)
+- [Phase 03]: Use Presence.list(topic_string) not Presence.list(socket) for duplicate-join guard — global topic check catches all tabs/connections
+- [Phase 03]: TURN credential fetch failure falls back to STUN-only silently — preserves voice on most networks without crashing
+- [Phase 03]: voice_connection_state lifecycle: nil (mount) -> :connecting (server join) -> :connected/:disconnected (JS via voice_state_changed) -> nil (server leave)
 
 ### Pending Todos
 
@@ -82,5 +86,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 03-01-PLAN.md (TURN provider abstraction)
+Stopped at: Completed 03-03-PLAN.md (server-side voice reliability)
 Resume file: None
