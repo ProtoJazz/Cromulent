@@ -34,7 +34,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 ### Voice
 
 - [ ] **VOIC-01**: User cannot join the same voice channel multiple times
-- [ ] **VOIC-02**: Server includes a bundled TURN server (coturn) for NAT traversal
+- [x] **VOIC-02**: Server includes a bundled TURN server (coturn) for NAT traversal
 
 ### Admin/Config
 
@@ -97,7 +97,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RTXT-03 | Phase 4 | Pending |
 | RTXT-04 | Phase 4 | Pending |
 | VOIC-01 | Phase 3 | Pending |
-| VOIC-02 | Phase 3 | Pending |
+| VOIC-02 | Phase 3 | Complete |
 | ADMN-01 | Phase 5 | Pending |
 
 **Coverage:**
