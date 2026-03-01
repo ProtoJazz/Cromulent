@@ -8,6 +8,7 @@ defmodule Cromulent.Turn.Coturn do
 
   @impl true
   def get_ice_servers(user_id) do
+    IO.puts("USING LOCAL HOSTED COTURN")
     secret = System.get_env("TURN_SECRET") || raise "TURN_SECRET env var not set"
     turn_url = System.get_env("TURN_URL") || raise "TURN_URL env var not set"
 
