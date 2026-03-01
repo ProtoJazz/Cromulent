@@ -66,7 +66,7 @@ defmodule CromulentWeb.Components.MembersSidebar do
                     <.user_popover_wrapper user={member} online={true} context="sidebar-online" placement="left">
                       <p class="text-sm font-medium text-gray-200 truncate">{member.username}</p>
                     </.user_popover_wrapper>
-                    <%= if channel_id = Map.get(@voice_channel_by_user, member.id) do %>
+                    <%= if _channel_id = Map.get(@voice_channel_by_user, member.id) do %>
                       <p class="text-xs text-green-400 truncate flex items-center gap-1">
                         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M7 4a3 3 0 016 0v6a3 3 0 11-6 0V4z" />
