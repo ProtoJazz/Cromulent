@@ -1,0 +1,21 @@
+# Dockerfile.coturn
+# Standalone Coturn TURN server for production deployment (Coolify, Docker).
+# Deploy alongside the main app container as a separate service.
+#
+# Build: docker build -f Dockerfile.coturn -t cromulent-coturn .
+# Run:   docker run -e TURN_SECRET=your_secret --network host cromulent-coturn
+#
+# Required env var: TURN_SECRET (generate with: openssl rand -hex 32)
+# Ports: 3478/tcp+udp (STUN/TURN), 49152-65535/udp (relay range)
+# Note: --network host is recommended on Linux to avoid Docker NAT issues with TURN relay.
+
+FROM coturn/coturn:4.6
+
+# Copy config (TURN_SECRET is substituted from environment at runtime by Coturn)
+COPY priv/coturn/turnserver.conf /etc/coturn/turnserver.conf
+
+EXPOSE 3478/tcp
+EXPOSE 3478/udp
+# Relay port range — widen for production (was 49152-49200 for local dev)
+# Set min-port / max-port in turnserver.conf to match your firewall rules.
+EXPOSE 49152-65535/udp

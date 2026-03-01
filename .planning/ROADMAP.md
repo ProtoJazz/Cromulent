@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Mention Autocomplete** - Type-ahead @mention UI with keyboard navigation
 - [ ] **Phase 2: Notification System** - Desktop alerts, sound, unread indicators, and inbox
-- [ ] **Phase 3: Voice Reliability** - TURN server and double-join prevention
+- [x] **Phase 3: Voice Reliability** - TURN server and double-join prevention (completed 2026-03-01)
 - [ ] **Phase 4: Rich Text Rendering** - Markdown, link previews, and image embeds
 - [ ] **Phase 5: Feature Toggles** - Operator controls for self-hosted deployments
 
@@ -64,10 +64,13 @@ Plans:
   2. Users behind restrictive firewalls successfully connect to voice via TURN relay
   3. TURN credentials are time-limited and generated server-side (not exposed in client)
   4. Voice connection state clearly indicates connecting, connected, or disconnected status
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- TBD
+- [x] 03-01-PLAN.md — TURN provider Elixir abstraction (behaviour + Coturn + Metered implementations, runtime.exs env vars)
+- [x] 03-02-PLAN.md — Coturn deployment infrastructure (docker-compose.yml, Dockerfile.coturn, priv/coturn/turnserver.conf)
+- [x] 03-03-PLAN.md — Server-side join guard (Presence duplicate-join check, cross-channel auto-leave, TURN wiring in channel_live.ex)
+- [x] 03-04-PLAN.md — JS client + VoiceBar UI (consume ice_servers, push connection state events, dynamic dot/label display) + human verify
 
 ### Phase 4: Rich Text Rendering
 **Goal**: Messages display rich formatting with markdown, link previews, and embedded images
@@ -108,6 +111,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Mention Autocomplete | 2/2 | Complete | 2026-02-26 |
 | 2. Notification System | 2/3 | In Progress | - |
-| 3. Voice Reliability | 0/TBD | Not started | - |
+| 3. Voice Reliability | 4/4 | Complete   | 2026-03-01 |
 | 4. Rich Text Rendering | 0/TBD | Not started | - |
 | 5. Feature Toggles | 0/TBD | Not started | - |

@@ -2,14 +2,32 @@ defmodule CromulentWeb.Components.VoiceBar do
   use Phoenix.Component
 
   attr :voice_channel, :any, required: true
+  attr :connection_state, :atom, default: :connecting
 
   def voice_bar(assigns) do
     ~H"""
     <div class="px-3 py-3 border-t border-gray-700 bg-gray-900">
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center gap-2 min-w-0">
-          <div class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
-          <span class="text-sm font-medium text-green-500 truncate">{@voice_channel.name}</span>
+          <div class={[
+            "w-2 h-2 rounded-full flex-shrink-0",
+            @connection_state == :connecting && "bg-yellow-500",
+            @connection_state == :connected && "bg-green-500",
+            @connection_state == :disconnected && "bg-red-500"
+          ]}></div>
+          <span class={[
+            "text-sm font-medium truncate",
+            @connection_state == :connecting && "text-yellow-500",
+            @connection_state == :connected && "text-green-500",
+            @connection_state == :disconnected && "text-red-500"
+          ]}>
+            <%= case @connection_state do %>
+              <% :connecting -> %>Connecting...
+              <% :connected -> %>{@voice_channel.name}
+              <% :disconnected -> %>Disconnected
+              <% _ -> %>Connecting...
+            <% end %>
+          </span>
         </div>
         <button
           phx-click="leave_voice"

@@ -37,7 +37,7 @@ const Hooks = {
     mounted() {
       // This element is always in the DOM, so mounted() fires once on page load.
       // Voice join/leave is driven entirely by server-pushed events.
-      this.handleEvent("voice:join", ({ channel_id, user_token, user_id }) => {
+      this.handleEvent("voice:join", ({ channel_id, user_token, user_id, ice_servers }) => {
         // Leave existing voice session if switching channels
         if (voiceRoom) {
           voiceRoom.leave()
@@ -57,8 +57,16 @@ const Hooks = {
         voiceSocket.onError((err) => console.error("Voice socket error:", err))
         voiceSocket.onClose(() => console.log("Voice socket closed"))
 
-        voiceRoom = new VoiceRoom(channel_id, user_id, voiceSocket)
+        voiceRoom = new VoiceRoom(channel_id, user_id, voiceSocket, ice_servers)
         voiceRoom.join()
+          .then(() => {
+            // Phoenix Channel join succeeded = "connected" (peers connect independently)
+            this.pushEvent("voice_state_changed", { state: "connected" })
+          })
+          .catch((err) => {
+            console.error("Failed to join voice channel:", err)
+            this.pushEvent("voice_state_changed", { state: "disconnected" })
+          })
       })
 
       this.handleEvent("voice:leave", () => {
