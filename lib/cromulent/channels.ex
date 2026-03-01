@@ -95,7 +95,8 @@ defmodule Cromulent.Channels do
     Cromulent.Repo.get!(Cromulent.Channels.Channel, id)
   end
 
-  def join_channel(user, %Channel{is_private: true}) do
+  def join_channel(_user, %Channel{is_private: true}) do
+    #eventually private channel permissions go here
     {:error, :private_channel}
   end
 

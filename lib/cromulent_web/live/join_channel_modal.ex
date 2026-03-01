@@ -34,6 +34,11 @@ defmodule CromulentWeb.JoinChannelModal do
         {:noreply, assign(socket, :error, "Something went wrong.")}
     end
   end
+   # Let the parent close the modal via its own event handler
+  def handle_event("close_join_modal", _, socket) do
+    send(self(), :close_join_modal)
+    {:noreply, socket}
+  end
 
   @impl true
   def render(assigns) do
@@ -129,9 +134,5 @@ defmodule CromulentWeb.JoinChannelModal do
     """
   end
 
-  # Let the parent close the modal via its own event handler
-  def handle_event("close_join_modal", _, socket) do
-    send(self(), :close_join_modal)
-    {:noreply, socket}
-  end
+
 end

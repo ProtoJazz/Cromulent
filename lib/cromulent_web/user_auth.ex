@@ -149,6 +149,17 @@ defmodule CromulentWeb.UserAuth do
     {:cont, mount_current_user(socket, session)}
   end
 
+
+  def on_mount(:redirect_if_user_is_authenticated, _params, session, socket) do
+    socket = mount_current_user(socket, session)
+
+    if socket.assigns.current_user do
+      {:halt, Phoenix.LiveView.redirect(socket, to: signed_in_path(socket))}
+    else
+      {:cont, socket}
+    end
+  end
+
   def on_mount(:require_admin, _params, _session, socket) do
     if socket.assigns.current_user && socket.assigns.current_user.role == :admin do
       {:cont, socket}
@@ -280,16 +291,6 @@ defmodule CromulentWeb.UserAuth do
   end
 
   defp handle_presence_info(_msg, socket), do: {:cont, socket}
-
-  def on_mount(:redirect_if_user_is_authenticated, _params, session, socket) do
-    socket = mount_current_user(socket, session)
-
-    if socket.assigns.current_user do
-      {:halt, Phoenix.LiveView.redirect(socket, to: signed_in_path(socket))}
-    else
-      {:cont, socket}
-    end
-  end
 
   defp mount_current_user(socket, session) do
     Phoenix.Component.assign_new(socket, :current_user, fn ->

@@ -383,9 +383,6 @@ defmodule Cromulent.Accounts do
     end
   end
 
-  @doc """
-  Updates the last_used_at timestamp for a refresh token.
-  """
   defp update_refresh_token_usage(token) do
     with {:ok, query} <- UserToken.get_refresh_token_record(token) do
       Repo.update_all(query, set: [last_used_at: DateTime.utc_now()])
