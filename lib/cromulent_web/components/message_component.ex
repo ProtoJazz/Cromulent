@@ -70,7 +70,7 @@ defmodule CromulentWeb.Components.MessageComponent do
           "flex items-center space-x-2",
           if(@is_own, do: "flex-row-reverse space-x-reverse")
         ]}>
-          <.user_popover_wrapper user={@message.user} online={false} context="message">
+          <.user_popover_wrapper user={@message.user} online={false} context={@message.id}>
             <span class="text-sm font-semibold text-white">{@message.user.username}</span>
           </.user_popover_wrapper>
           <span class="text-sm font-normal text-gray-400">{@timestamp}</span>
