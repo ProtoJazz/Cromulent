@@ -115,3 +115,9 @@ if config_env() == :prod do
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
 end
+
+# TURN server configuration (optional — defaults to STUN-only if not set)
+# TURN_PROVIDER: "coturn" | "metered" | unset (STUN-only)
+# For coturn: set TURN_SECRET and TURN_URL (e.g. "turn:your-server.example.com:3478")
+# For metered: set TURN_API_KEY and TURN_API_URL (e.g. "https://yourapp.metered.live")
+# See: lib/cromulent/turn/coturn.ex and lib/cromulent/turn/metered.ex
