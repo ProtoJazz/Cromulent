@@ -1,22 +1,12 @@
-const ICE_SERVERS = {
-  iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
-    // Add your TURN server here when testing across networks:
-    // {
-    //   urls: "turn:your-turn-server.com:3478",
-    //   username: "user",
-    //   credential: "pass"
-    // }
-  ]
-}
-
 class VoiceRoom {
-  constructor(channelId, userId, socket) {
+  constructor(channelId, userId, socket, iceServers) {
     this.channelId = channelId
     this.userId = String(userId)
     this.peers = {}
     this.channel = null
     this.localStream = null
+    // Use dynamic ICE servers from server; fall back to STUN-only if not provided
+    this.iceServers = iceServers || [{ urls: "stun:stun.l.google.com:19302" }]
 
     this.channel = socket.channel(`voice:${channelId}`)
     this.bindChannelEvents()
@@ -97,22 +87,28 @@ enablePTT(key = ' ') {
   }
 }
   async join() {
-   this.localStream = await navigator.mediaDevices.getUserMedia({
-    audio: {
+    this.localStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
         echoCancellation: true,
         noiseSuppression: true,
         autoGainControl: true,
         sampleRate: 48000
-    }
+      }
     })
-        console.log("🎤 Got local stream", this.localStream.getTracks())
+    console.log("🎤 Got local stream", this.localStream.getTracks())
 
-    this.channel.join()
-       .receive("ok", () => {
-      console.log("✅ Joined voice channel")
-      this.enablePTT(' ')  // spacebar
+    return new Promise((resolve, reject) => {
+      this.channel.join()
+        .receive("ok", () => {
+          console.log("✅ Joined voice channel")
+          this.enablePTT(' ')  // spacebar
+          resolve()
+        })
+        .receive("error", (err) => {
+          console.error("❌ Failed to join:", err)
+          reject(err)
+        })
     })
-      .receive("error", (err) => console.error("❌ Failed to join:", err))
   }
 
   bindChannelEvents() {
@@ -163,7 +159,7 @@ enablePTT(key = ' ') {
     const id = String(remoteUserId)
     console.log("🔗 Creating peer connection to", id, isOfferer ? "(offerer)" : "(answerer)")
 
-    const peer = new RTCPeerConnection(ICE_SERVERS)
+    const peer = new RTCPeerConnection({ iceServers: this.iceServers })
     this.peers[id] = peer
 
     this.localStream.getTracks().forEach(track => {
