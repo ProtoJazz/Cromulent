@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T18:18:33.014Z"
+last_updated: "2026-03-01T18:22:00.000Z"
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 3 of 5 (Voice Reliability)
-Plan: 4 of 4 in current phase
-Status: Plans 03-01, 03-02, and 03-03 complete — continuing phase 03
-Last activity: 2026-03-01 — Completed plan 03-03 (server-side voice reliability)
+Plan: 4 of 4 in current phase — COMPLETE (awaiting human-verify checkpoint)
+Status: All plans 03-01 through 03-04 complete
+Last activity: 2026-03-01 — Completed plan 03-04 (client-side voice reliability + VoiceBar states)
 
-Progress: [████████░░] 60%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -42,8 +42,7 @@ Progress: [████████░░] 60%
 |-------|-------|-------|----------|
 | 01 | 2 | 5 min | 2.5 min |
 | 02 | 1 | 2.3 min | 2.3 min |
-| 03 | 2 | 2 min | 1 min |
-| Phase 03 P03 | 2 | 2 tasks | 2 files |
+| 03 | 4 | 4 min | 1 min |
 
 ## Accumulated Context
 
@@ -74,6 +73,9 @@ Recent decisions affecting current work:
 - [Phase 03]: Use Presence.list(topic_string) not Presence.list(socket) for duplicate-join guard — global topic check catches all tabs/connections
 - [Phase 03]: TURN credential fetch failure falls back to STUN-only silently — preserves voice on most networks without crashing
 - [Phase 03]: voice_connection_state lifecycle: nil (mount) -> :connecting (server join) -> :connected/:disconnected (JS via voice_state_changed) -> nil (server leave)
+- [03-04]: join() wraps Phoenix Channel receive callbacks in Promise so app.js can use .then()/.catch() to push voice_state_changed
+- [03-04]: Mid-call peer drop detection via peer.onconnectionstatechange deferred — channel join .then()/.catch() covers primary case
+- [03-04]: connection_state attr defaults to :connecting so existing callers without the attr don't crash
 
 ### Pending Todos
 
@@ -86,5 +88,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 03-03-PLAN.md (server-side voice reliability)
+Stopped at: Checkpoint:human-verify after 03-04-PLAN.md tasks 1-2 — awaiting verification of Phase 3 full implementation
 Resume file: None

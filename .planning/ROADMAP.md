@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Mention Autocomplete** - Type-ahead @mention UI with keyboard navigation
 - [ ] **Phase 2: Notification System** - Desktop alerts, sound, unread indicators, and inbox
-- [ ] **Phase 3: Voice Reliability** - TURN server and double-join prevention
+- [x] **Phase 3: Voice Reliability** - TURN server and double-join prevention (completed 2026-03-01)
 - [ ] **Phase 4: Rich Text Rendering** - Markdown, link previews, and image embeds
 - [ ] **Phase 5: Feature Toggles** - Operator controls for self-hosted deployments
 
@@ -111,6 +111,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Mention Autocomplete | 2/2 | Complete | 2026-02-26 |
 | 2. Notification System | 2/3 | In Progress | - |
-| 3. Voice Reliability | 3/4 | In Progress|  |
+| 3. Voice Reliability | 4/4 | Complete   | 2026-03-01 |
 | 4. Rich Text Rendering | 0/TBD | Not started | - |
 | 5. Feature Toggles | 0/TBD | Not started | - |
