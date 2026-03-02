@@ -28,7 +28,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 - [x] **RTXT-01**: Messages render markdown formatting (bold, italic, code blocks, lists, blockquotes)
 - [x] **RTXT-02**: URLs in messages are automatically linked
-- [ ] **RTXT-03**: URLs display a preview card with title, description, and thumbnail (Open Graph)
+- [x] **RTXT-03**: URLs display a preview card with title, description, and thumbnail (Open Graph)
 - [x] **RTXT-04**: Image URLs display inline as embedded images
 
 ### Voice
@@ -94,7 +94,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NOTF-07 | Phase 2 | Complete |
 | RTXT-01 | Phase 4 | Complete |
 | RTXT-02 | Phase 4 | Complete |
-| RTXT-03 | Phase 4 | Pending |
+| RTXT-03 | Phase 4 | Complete |
 | RTXT-04 | Phase 4 | Complete |
 | VOIC-01 | Phase 3 | Complete |
 | VOIC-02 | Phase 3 | Complete |

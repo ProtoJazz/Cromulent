@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-02T02:09:36Z"
+last_updated: "2026-03-02T02:15:27Z"
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 12
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 4 of 6 (Rich Text Rendering) — IN PROGRESS
-Plan: 1 of 2 in current phase — COMPLETE (2026-03-02)
-Status: Plan 04-01 complete — MDEx markdown rendering, image embedding, XSS sanitization implemented
-Last activity: 2026-03-02 — Plan 04-01 executed and committed
+Plan: 2 of 3 in current phase — COMPLETE (2026-03-02)
+Status: Plan 04-02 complete — Ephemeral OG link preview cards implemented; 04-03 (human verify checkpoint) remaining
+Last activity: 2026-03-02 — Plan 04-02 executed and committed
 
-Progress: [███████░░░] 70%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
@@ -43,7 +43,7 @@ Progress: [███████░░░] 70%
 | 01 | 2 | 5 min | 2.5 min |
 | 02 | 1 | 2.3 min | 2.3 min |
 | 03 | 4 | 4 min | 1 min |
-| 04 | 1 | 5 min | 5 min |
+| 04 | 2 | 7 min | 3.5 min |
 
 ## Accumulated Context
 
@@ -80,6 +80,10 @@ Recent decisions affecting current work:
 - [04-01]: MDEx 0.11 uses sanitize: MDEx.Document.default_sanitize_options() not features: [sanitize: true] — API changed from pre-0.11
 - [04-01]: Image URL regex splits BEFORE MDEx processing — prevents image URLs being double-rendered as both img and anchor
 - [04-01]: MDEx default_sanitize_options allows code, pre, strong, em, a, blockquote — no explicit allow_tags needed
+- [04-02]: try/rescue wraps Finch.request to convert ArgumentError for invalid URL schemes (javascript:, bare words) into {:error, :fetch_failed}
+- [04-02]: Task.start (not Task.async) for fire-and-forget from GenServer cast — no caller awaiting result
+- [04-02]: LINK_PREVIEWS=disabled env guard checked at cast time (runtime), not compile time
+- [04-02]: og:image stripped to nil unless https:// scheme — prevents javascript: XSS in img src
 
 ### Roadmap Evolution
 
@@ -96,5 +100,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 04-01-PLAN.md — MDEx markdown rendering, image embedding, and XSS sanitization shipped
+Stopped at: Completed 04-02-PLAN.md — Ephemeral OG link preview cards shipped; RTXT-03 complete
 Resume file: None
