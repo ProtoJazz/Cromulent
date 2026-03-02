@@ -77,6 +77,10 @@ Recent decisions affecting current work:
 - [03-04]: Mid-call peer drop detection via peer.onconnectionstatechange deferred — channel join .then()/.catch() covers primary case
 - [03-04]: connection_state attr defaults to :connecting so existing callers without the attr don't crash
 
+### Roadmap Evolution
+
+- Phase 6 added: Voice improvement
+
 ### Pending Todos
 
 None yet.
