@@ -80,6 +80,27 @@ defmodule Cromulent.Chat.RoomServer do
       PubSub.broadcast(Cromulent.PubSub, "user:#{user_id}", {:desktop_notification, notification_data})
     end
 
+    # Async link preview fetch — fire-and-forget, does not block the cast
+    if System.get_env("LINK_PREVIEWS") != "disabled" do
+      channel_id = state.channel_id
+
+      if url = Cromulent.Messages.LinkPreview.extract_first_link(message.body) do
+        Task.start(fn ->
+          case Cromulent.Messages.LinkPreview.fetch(url) do
+            {:ok, preview} ->
+              PubSub.broadcast(
+                Cromulent.PubSub,
+                "text:#{channel_id}",
+                {:link_preview, message.id, preview}
+              )
+
+            _ ->
+              :noop
+          end
+        end)
+      end
+    end
+
     {:noreply, state}
   end
 
