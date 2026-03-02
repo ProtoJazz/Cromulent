@@ -111,7 +111,7 @@ defmodule CromulentWeb.Components.MessageComponent do
               <% end %>
             <% end %>
           </p>
-          <%= if preview = @message[:link_preview] do %>
+          <%= if preview = Map.get(@message, :link_preview) do %>
             <.link_preview preview={preview} />
           <% end %>
         </div>
