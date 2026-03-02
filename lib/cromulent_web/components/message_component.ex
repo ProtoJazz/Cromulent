@@ -92,8 +92,22 @@ defmodule CromulentWeb.Components.MessageComponent do
                     current_user={@current_user}
                     mentions={@message.mentions}
                   />
-                <% text -> %>
-                  {text}
+                <% {:image, url} -> %>
+                  <div class="mt-1">
+                    <img
+                      src={url}
+                      class="max-w-[400px] max-h-[300px] object-contain rounded"
+                      onerror="this.style.display='none'; this.nextElementSibling.removeAttribute('style')"
+                    />
+                    <div
+                      style="display:none"
+                      class="flex w-48 h-24 rounded bg-gray-600 items-center justify-center text-xs text-gray-400 mt-1"
+                    >
+                      Image unavailable
+                    </div>
+                  </div>
+                <% {:markdown, text} -> %>
+                  <%= render_markdown(text) %>
               <% end %>
             <% end %>
           </p>
@@ -141,15 +155,58 @@ defmodule CromulentWeb.Components.MessageComponent do
     end
   end
 
+  # ── Segment parsing pipeline ───────────────────────────────────────────────
+
+  @image_url_regex ~r/https?:\/\/\S+\.(?:jpg|jpeg|png|gif|webp|svg)(?:\?\S*)?/i
+
   defp parse_segments(body) do
-    ~r/@([\w]+)/
-    |> Regex.split(body, include_captures: true, trim: false)
+    # Phase 1: Split on image URLs — extract {:image, url} segments
+    body
+    |> split_images()
+    |> Enum.flat_map(fn
+      {:image, url} ->
+        [{:image, url}]
+
+      text when is_binary(text) ->
+        # Phase 2: Within non-image text, split on @mentions
+        ~r/@([\w]+)/
+        |> Regex.split(text, include_captures: true, trim: false)
+        |> Enum.map(fn part ->
+          case Regex.run(~r/^@([\w]+)$/, part, capture: :all_but_first) do
+            [token] -> {:mention, token}
+            nil -> {:markdown, part}
+          end
+        end)
+        |> Enum.reject(&match?({:markdown, ""}, &1))
+    end)
+    |> Enum.reject(fn
+      {:markdown, ""} -> true
+      _ -> false
+    end)
+  end
+
+  defp split_images(body) do
+    Regex.split(@image_url_regex, body, include_captures: true, trim: false)
     |> Enum.map(fn part ->
-      case Regex.run(~r/^@([\w]+)$/, part, capture: :all_but_first) do
-        [token] -> {:mention, token}
-        nil -> part
+      if Regex.match?(@image_url_regex, part) do
+        {:image, part}
+      else
+        part
       end
     end)
     |> Enum.reject(&(&1 == ""))
+  end
+
+  # ── Markdown rendering ─────────────────────────────────────────────────────
+
+  defp render_markdown(text) do
+    html =
+      MDEx.to_html!(text,
+        extension: [autolink: true, strikethrough: false, table: false],
+        parse: [relaxed_autolinks: true],
+        sanitize: MDEx.Document.default_sanitize_options()
+      )
+
+    Phoenix.HTML.raw(html)
   end
 end
