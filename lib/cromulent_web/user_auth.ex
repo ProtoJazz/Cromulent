@@ -181,7 +181,8 @@ defmodule CromulentWeb.UserAuth do
       |> Phoenix.Component.assign(:all_members, Cromulent.Accounts.list_users())
 
     if socket.assigns.current_user do
-      channels = Cromulent.Channels.list_joined_channels(socket.assigns.current_user)
+      flags = Cromulent.FeatureFlags.get_flags()
+      channels = Cromulent.Channels.list_joined_channels(socket.assigns.current_user, flags.voice_enabled)
       voice_channels = Enum.filter(channels, &(&1.type == :voice))
 
       user_id = socket.assigns.current_user.id
@@ -246,7 +247,6 @@ defmodule CromulentWeb.UserAuth do
           socket
         end
 
-      flags = Cromulent.FeatureFlags.get_flags()
       socket = Phoenix.Component.assign(socket, :feature_flags, flags)
 
       {:cont, socket}

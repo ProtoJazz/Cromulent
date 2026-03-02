@@ -534,11 +534,17 @@ defmodule CromulentWeb.ChannelLive do
   end
 
   defp get_ice_servers(user_id) do
-    case System.get_env("TURN_PROVIDER") do
-      "coturn" -> Cromulent.Turn.Coturn.get_ice_servers(user_id)
-      "metered" -> Cromulent.Turn.Metered.get_ice_servers(user_id)
-      # No TURN_PROVIDER set = STUN-only mode (default, preserves existing behavior)
-      _ -> {:ok, [%{urls: "stun:stun.l.google.com:19302"}]}
+    flags = Cromulent.FeatureFlags.get_flags()
+
+    case flags.turn_provider do
+      "coturn" ->
+        Cromulent.Turn.Coturn.get_ice_servers(user_id, flags.turn_url, flags.turn_secret)
+
+      "metered" ->
+        Cromulent.Turn.Metered.get_ice_servers(user_id, flags.turn_url, flags.turn_secret)
+
+      _ ->
+        {:ok, [%{urls: "stun:stun.l.google.com:19302"}]}
     end
   end
 

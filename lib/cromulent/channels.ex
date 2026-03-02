@@ -45,13 +45,19 @@ defmodule Cromulent.Channels do
   end
 
   # Channels a user is a member of (for sidebar)
-  def list_joined_channels(user) do
-    from(c in Channel,
-      join: m in ChannelMembership,
-      on: m.channel_id == c.id and m.user_id == ^user.id,
-      order_by: [asc: c.inserted_at]
-    )
-    |> Repo.all()
+  def list_joined_channels(user, voice_enabled \\ true) do
+    query =
+      from(c in Channel,
+        join: m in ChannelMembership,
+        on: m.channel_id == c.id and m.user_id == ^user.id,
+        order_by: [asc: c.inserted_at]
+      )
+
+    if voice_enabled do
+      Repo.all(query)
+    else
+      query |> where([c, _m], c.type != :voice) |> Repo.all()
+    end
   end
 
   def get_channel(id) do
