@@ -13,7 +13,7 @@ This milestone transforms Cromulent's basic chat into a polished communication p
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Mention Autocomplete** - Type-ahead @mention UI with keyboard navigation
-- [ ] **Phase 2: Notification System** - Desktop alerts, sound, unread indicators, and inbox
+- [x] **Phase 2: Notification System** - Desktop alerts, sound, unread indicators, and inbox
 - [x] **Phase 3: Voice Reliability** - TURN server and double-join prevention (completed 2026-03-01)
 - [ ] **Phase 4: Rich Text Rendering** - Markdown, link previews, and image embeds
 - [ ] **Phase 5: Feature Toggles** - Operator controls for self-hosted deployments
@@ -52,7 +52,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — Desktop notification delivery pipeline (Electron + Web + sound)
-- [ ] 02-02-PLAN.md — Notification inbox with bell icon and dropdown panel
+- [x] 02-02-PLAN.md — Notification inbox with bell icon and dropdown panel
 - [x] 02-03-PLAN.md — User popover tooltips on hover
 
 ### Phase 3: Voice Reliability
@@ -82,10 +82,12 @@ Plans:
   3. URLs display a preview card showing title, description, and thumbnail (Open Graph)
   4. Image URLs display inline as embedded images in the message feed
   5. User-generated markdown is sanitized to prevent XSS attacks
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- TBD
+- [ ] 04-01-PLAN.md — MDEx + Floki deps; extended parse_segments/1 pipeline; markdown, autolink, and image embedding in message_component.ex (RTXT-01, RTXT-02, RTXT-04)
+- [ ] 04-02-PLAN.md — LinkPreview module (Finch + Floki OG fetch); async fetch in RoomServer; ChannelLive handle_info patch; preview card component (RTXT-03)
+- [ ] 04-03-PLAN.md — Human verification checkpoint for all four RTXT requirements
 
 ### Phase 5: Feature Toggles
 **Goal**: Server operators can enable/disable features via configuration for their deployment
@@ -112,5 +114,15 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Mention Autocomplete | 2/2 | Complete | 2026-02-26 |
 | 2. Notification System | 2/3 | In Progress | - |
 | 3. Voice Reliability | 4/4 | Complete   | 2026-03-01 |
-| 4. Rich Text Rendering | 0/TBD | Not started | - |
+| 4. Rich Text Rendering | 0/3 | Not started | - |
 | 5. Feature Toggles | 0/TBD | Not started | - |
+
+### Phase 6: Voice improvement
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 5
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 6 to break down)
