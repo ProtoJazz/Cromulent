@@ -357,6 +357,16 @@ defmodule CromulentWeb.ChannelLive do
     end
   end
 
+  def handle_info({:link_preview, msg_id, preview}, socket) do
+    messages =
+      Enum.map(socket.assigns.messages, fn
+        %{id: ^msg_id} = m -> Map.put(m, :link_preview, preview)
+        m -> m
+      end)
+
+    {:noreply, assign(socket, :messages, messages)}
+  end
+
   def handle_info(_, socket), do: {:noreply, socket}
 
   def render(assigns) do

@@ -111,6 +111,9 @@ defmodule CromulentWeb.Components.MessageComponent do
               <% end %>
             <% end %>
           </p>
+          <%= if preview = @message[:link_preview] do %>
+            <.link_preview preview={preview} />
+          <% end %>
         </div>
       </div>
     </div>
@@ -153,6 +156,40 @@ defmodule CromulentWeb.Components.MessageComponent do
     else
       "bg-indigo-500/20 text-indigo-300 ring-1 ring-indigo-500/30"
     end
+  end
+
+  # ── Link preview card component ────────────────────────────────────────────
+
+  attr :preview, :map, required: true
+
+  defp link_preview(assigns) do
+    ~H"""
+    <div class="mt-2 max-w-sm rounded border border-gray-600 bg-gray-800 overflow-hidden">
+      <%= if @preview[:image_url] do %>
+        <img
+          src={@preview.image_url}
+          class="w-full max-h-40 object-cover"
+          onerror="this.style.display='none'"
+        />
+      <% end %>
+      <div class="p-2">
+        <%= if @preview[:title] do %>
+          <p class="text-sm font-semibold text-white truncate">{@preview.title}</p>
+        <% end %>
+        <%= if @preview[:description] do %>
+          <p class="text-xs text-gray-400 mt-0.5 line-clamp-2">{@preview.description}</p>
+        <% end %>
+        <a
+          href={@preview.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-xs text-indigo-400 hover:underline mt-1 block truncate"
+        >
+          {@preview.url}
+        </a>
+      </div>
+    </div>
+    """
   end
 
   # ── Segment parsing pipeline ───────────────────────────────────────────────
