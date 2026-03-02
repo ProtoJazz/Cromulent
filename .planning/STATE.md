@@ -100,5 +100,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 04-02-PLAN.md — Ephemeral OG link preview cards shipped; RTXT-03 complete
-Resume file: None
+Stopped at: Phase 5 context gathered — Feature Toggles discussion complete, CONTEXT.md written
+Resume file: .planning/phases/05-feature-toggles/05-CONTEXT.md
