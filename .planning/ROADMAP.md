@@ -94,15 +94,20 @@ Plans:
 **Depends on**: Phase 4 (wraps all features with config layer)
 **Requirements**: ADMN-01
 **Success Criteria** (what must be TRUE):
-  1. Operator can disable voice features via environment variable (hides voice channels)
-  2. Operator can disable TURN server via environment variable (uses STUN-only mode)
-  3. Operator can disable link previews via environment variable (shows plain URLs)
-  4. Operator can disable user registration via environment variable (invite-only mode)
-  5. Feature flags are checked at runtime without requiring code changes
-**Plans**: TBD
+  1. Operator can disable voice features via DB flag (hides voice channels, blocks channel join)
+  2. Operator can disable TURN server via DB flag (uses STUN-only mode)
+  3. Operator can disable link previews via DB flag (shows plain URLs)
+  4. Operator can disable user registration via DB flag (invite-only mode, admin can still create users)
+  5. Operator can require email confirmation via DB flag
+  6. Feature flags are checked at runtime without requiring code changes (next page load)
+  7. Admin panel Settings tab provides UI for all flag changes and TURN configuration
+**Plans**: 4 plans
 
 Plans:
-- TBD
+- [x] 05-01-PLAN.md — DB migration + FeatureFlags schema + context + ensure_authenticated inject (ADMN-01)
+- [ ] 05-02-PLAN.md — All enforcement points: voice, registration, link previews, email confirmation, TURN refactor (ADMN-01)
+- [ ] 05-03-PLAN.md — AdminLive Settings tab with Flowbite toggles + TURN form + Create User form (ADMN-01)
+- [ ] 05-04-PLAN.md — Human verification checkpoint for all five toggle scenarios
 
 ## Progress
 
@@ -115,7 +120,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Notification System | 2/3 | In Progress | - |
 | 3. Voice Reliability | 4/4 | Complete   | 2026-03-01 |
 | 4. Rich Text Rendering | 2/3 | In Progress | - |
-| 5. Feature Toggles | 0/TBD | Not started | - |
+| 5. Feature Toggles | 1/4 | In Progress | - |
 
 ### Phase 6: Voice improvement
 

@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-03-02T14:18:25.536Z"
+status: in_progress
+last_updated: "2026-03-02T15:21:32Z"
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 12
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Friends can reliably chat and voice call on a self-hosted server that just works
-**Current focus:** Phase 4 - Rich Text Rendering
+**Current focus:** Phase 5 - Feature Toggles
 
 ## Current Position
 
-Phase: 4 of 6 (Rich Text Rendering) — IN PROGRESS
-Plan: 2 of 3 in current phase — COMPLETE (2026-03-02)
-Status: Plan 04-02 complete — Ephemeral OG link preview cards implemented; 04-03 (human verify checkpoint) remaining
-Last activity: 2026-03-02 — Plan 04-02 executed and committed
+Phase: 5 of 5 (Feature Toggles) — IN PROGRESS
+Plan: 1 of 3 in current phase — COMPLETE (2026-03-02)
+Status: Plan 05-01 complete — FeatureFlags DB foundation, schema, context, and LiveView assign injection complete
+Last activity: 2026-03-02 — Plan 05-01 executed and committed
 
-Progress: [████████░░] 75%
+Progress: [█████████░] 85%
 
 ## Performance Metrics
 
@@ -44,6 +44,7 @@ Progress: [████████░░] 75%
 | 02 | 1 | 2.3 min | 2.3 min |
 | 03 | 4 | 4 min | 1 min |
 | 04 | 2 | 7 min | 3.5 min |
+| 05 | 1 | 3 min | 3 min |
 
 ## Accumulated Context
 
@@ -84,6 +85,10 @@ Recent decisions affecting current work:
 - [04-02]: Task.start (not Task.async) for fire-and-forget from GenServer cast — no caller awaiting result
 - [04-02]: LINK_PREVIEWS=disabled env guard checked at cast time (runtime), not compile time
 - [04-02]: og:image stripped to nil unless https:// scheme — prevents javascript: XSS in img src
+- [05-01]: feature_flags table uses binary_id (UUID7) PK consistent with all other tables in the project
+- [05-01]: get_flags/0 uses Repo.one(Flags) || %Flags{} — no crash on fresh install, returns safe defaults
+- [05-01]: upsert_flags/1 detects insert vs update by checking id == nil on returned struct from get_flags/0
+- [05-01]: feature_flags assign added in ensure_authenticated authenticated branch only (not unauthenticated path)
 
 ### Roadmap Evolution
 
@@ -100,5 +105,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Phase 5 context gathered — Feature Toggles discussion complete, CONTEXT.md written
-Resume file: .planning/phases/05-feature-toggles/05-CONTEXT.md
+Stopped at: Completed 05-01-PLAN.md — FeatureFlags DB foundation complete
+Resume file: .planning/phases/05-feature-toggles/05-02-PLAN.md
