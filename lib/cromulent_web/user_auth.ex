@@ -246,6 +246,9 @@ defmodule CromulentWeb.UserAuth do
           socket
         end
 
+      flags = Cromulent.FeatureFlags.get_flags()
+      socket = Phoenix.Component.assign(socket, :feature_flags, flags)
+
       {:cont, socket}
     else
       socket =
