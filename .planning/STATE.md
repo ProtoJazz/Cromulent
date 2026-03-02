@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-03-01T18:38:18.972Z"
+status: in_progress
+last_updated: "2026-03-02T02:09:36Z"
 progress:
-  total_phases: 3
+  total_phases: 6
   completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 12
+  completed_plans: 10
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Friends can reliably chat and voice call on a self-hosted server that just works
-**Current focus:** Phase 3 - Voice Reliability
+**Current focus:** Phase 4 - Rich Text Rendering
 
 ## Current Position
 
-Phase: 3 of 5 (Voice Reliability) — COMPLETE
-Plan: 4 of 4 in current phase — COMPLETE (human-verify checkpoint approved 2026-03-01)
-Status: All plans 03-01 through 03-04 complete and verified
-Last activity: 2026-03-01 — Checkpoint approved: Phase 3 Voice Reliability fully verified
+Phase: 4 of 6 (Rich Text Rendering) — IN PROGRESS
+Plan: 1 of 2 in current phase — COMPLETE (2026-03-02)
+Status: Plan 04-01 complete — MDEx markdown rendering, image embedding, XSS sanitization implemented
+Last activity: 2026-03-02 — Plan 04-01 executed and committed
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 70%
 
 ## Performance Metrics
 
@@ -43,6 +43,7 @@ Progress: [██████████] 100%
 | 01 | 2 | 5 min | 2.5 min |
 | 02 | 1 | 2.3 min | 2.3 min |
 | 03 | 4 | 4 min | 1 min |
+| 04 | 1 | 5 min | 5 min |
 
 ## Accumulated Context
 
@@ -76,6 +77,9 @@ Recent decisions affecting current work:
 - [03-04]: join() wraps Phoenix Channel receive callbacks in Promise so app.js can use .then()/.catch() to push voice_state_changed
 - [03-04]: Mid-call peer drop detection via peer.onconnectionstatechange deferred — channel join .then()/.catch() covers primary case
 - [03-04]: connection_state attr defaults to :connecting so existing callers without the attr don't crash
+- [04-01]: MDEx 0.11 uses sanitize: MDEx.Document.default_sanitize_options() not features: [sanitize: true] — API changed from pre-0.11
+- [04-01]: Image URL regex splits BEFORE MDEx processing — prevents image URLs being double-rendered as both img and anchor
+- [04-01]: MDEx default_sanitize_options allows code, pre, strong, em, a, blockquote — no explicit allow_tags needed
 
 ### Roadmap Evolution
 
@@ -91,6 +95,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-01
-Stopped at: Phase 3 complete — all 4 plans verified and approved. Ready to begin Phase 4 (Rich Text Rendering) or Phase 2 remaining plan (02-02 Notification Inbox).
+Last session: 2026-03-02
+Stopped at: Completed 04-01-PLAN.md — MDEx markdown rendering, image embedding, and XSS sanitization shipped
 Resume file: None

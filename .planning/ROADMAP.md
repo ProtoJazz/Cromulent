@@ -85,7 +85,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — MDEx + Floki deps; extended parse_segments/1 pipeline; markdown, autolink, and image embedding in message_component.ex (RTXT-01, RTXT-02, RTXT-04)
+- [x] 04-01-PLAN.md — MDEx + Floki deps; extended parse_segments/1 pipeline; markdown, autolink, and image embedding in message_component.ex (RTXT-01, RTXT-02, RTXT-04)
 - [ ] 04-02-PLAN.md — LinkPreview module (Finch + Floki OG fetch); async fetch in RoomServer; ChannelLive handle_info patch; preview card component (RTXT-03)
 - [ ] 04-03-PLAN.md — Human verification checkpoint for all four RTXT requirements
 
@@ -114,7 +114,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Mention Autocomplete | 2/2 | Complete | 2026-02-26 |
 | 2. Notification System | 2/3 | In Progress | - |
 | 3. Voice Reliability | 4/4 | Complete   | 2026-03-01 |
-| 4. Rich Text Rendering | 0/3 | Not started | - |
+| 4. Rich Text Rendering | 1/3 | In Progress | - |
 | 5. Feature Toggles | 0/TBD | Not started | - |
 
 ### Phase 6: Voice improvement
