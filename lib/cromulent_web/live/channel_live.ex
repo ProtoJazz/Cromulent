@@ -31,7 +31,9 @@ defmodule CromulentWeb.ChannelLive do
        autocomplete_results: [],
        autocomplete_index: 0,
        voice_channel: nil,
-       voice_connection_state: nil
+       voice_connection_state: nil,
+       voice_muted: false,
+       voice_deafened: false
      )}
   end
 
@@ -171,6 +173,8 @@ defmodule CromulentWeb.ChannelLive do
         {:error, _reason} -> [%{urls: "stun:stun.l.google.com:19302"}]
       end
 
+    user = socket.assigns.current_user
+
     {:noreply,
      socket
      |> assign(:voice_channel, channel)
@@ -179,7 +183,11 @@ defmodule CromulentWeb.ChannelLive do
        channel_id: channel_id,
        user_token: socket.assigns.user_token,
        user_id: socket.assigns.user_id,
-       ice_servers: ice_servers
+       ice_servers: ice_servers,
+       voice_mode: user.voice_mode || "ptt",
+       vad_threshold: user.vad_threshold || -40,
+       mic_device_id: user.mic_device_id,
+       speaker_device_id: user.speaker_device_id
      })}
   end
 
@@ -190,7 +198,28 @@ defmodule CromulentWeb.ChannelLive do
      socket
      |> assign(:voice_channel, nil)
      |> assign(:voice_connection_state, nil)
+     |> assign(:voice_muted, false)
+     |> assign(:voice_deafened, false)
      |> push_event("voice:leave", %{})}
+  end
+
+  def handle_event("toggle_mute", _params, socket) do
+    muted = !socket.assigns.voice_muted
+    {:noreply,
+     socket
+     |> assign(:voice_muted, muted)
+     |> push_event("voice:set_mute", %{muted: muted})}
+  end
+
+  def handle_event("toggle_deafen", _params, socket) do
+    deafened = !socket.assigns.voice_deafened
+    # Deafen forces mic mute; undeafen does NOT force unmute
+    muted = if deafened, do: true, else: socket.assigns.voice_muted
+    {:noreply,
+     socket
+     |> assign(:voice_deafened, deafened)
+     |> assign(:voice_muted, muted)
+     |> push_event("voice:set_deafen", %{deafened: deafened, muted: muted})}
   end
 
   def handle_event("voice_state_changed", %{"state" => state}, socket) do
