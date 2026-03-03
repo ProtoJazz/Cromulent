@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 06-04-PLAN.md — Voice settings UI and VAD implementation complete
-last_updated: "2026-03-03T18:18:00.000Z"
-last_activity: 2026-03-03 — Plan 06-04 executed and committed
+stopped_at: Completed 06-01-PLAN.md — Mute/deafen controls wired end-to-end
+last_updated: "2026-03-03T18:21:08Z"
+last_activity: 2026-03-03 — Plan 06-01 executed and committed
 progress:
   total_phases: 6
   completed_phases: 5
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 
 Phase: 6 of 6 (Voice Improvement) — COMPLETE
 Plan: 4 of 4 in current phase — COMPLETE (2026-03-03)
-Status: Plan 06-04 complete — Voice settings UI with PTT/VAD toggle, device pickers, mic test, and VAD loop in voice.js
-Last activity: 2026-03-03 — Plan 06-04 executed and committed
+Status: Plan 06-01 complete — Mute/deafen controls wired end-to-end; all Phase 6 plans complete
+Last activity: 2026-03-03 — Plan 06-01 executed and committed
 
 Progress: [██████████] 100%
 
@@ -51,6 +51,7 @@ Progress: [██████████] 100%
 | Phase 06-voice-improvement P03 | 2 | 2 tasks | 3 files |
 | Phase 06-voice-improvement P02 | 2 | 2 min | 1 min |
 | Phase 06-voice-improvement P04 | 2 | 8 min | 4 min |
+| Phase 06-voice-improvement P01 | 2 | 3 min | 1.5 min |
 
 ## Accumulated Context
 
@@ -105,6 +106,10 @@ Recent decisions affecting current work:
 - [06-04]: VAD uses track.enabled toggle (not mute) to suppress audio without destroying the WebRTC track/renegotiating
 - [06-04]: VAD loop cleanup: vadActive=false stops rAF loop; vadAudioCtx.close() releases Web Audio resources in leave()
 - [06-04]: setSinkId feature-detected at runtime (Chromium/Electron only; no-op on Firefox)
+- [06-01]: setDeafen calls setMute internally — Presence must show both muted and deafened accurately, so toggle_mute fires for every deafen toggle
+- [06-01]: Mute guard added in PTT activate() closure — muted state prevents any PTT transmission even if key/button held down
+- [06-01]: voice_muted/voice_deafened reset to false on leave_voice — prevents stale state if user rejoins without page reload
+- [06-01]: Deafen auto-mutes mic; undeafen does NOT auto-unmute — consistent with Discord/Slack behavior
 
 ### Roadmap Evolution
 
@@ -120,6 +125,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-03T18:18:00Z
-Stopped at: Completed 06-04-PLAN.md — Voice settings UI and VAD implementation complete
-Resume file: .planning/phases/06-voice-improvement/06-04-SUMMARY.md
+Last session: 2026-03-03T18:21:08Z
+Stopped at: Completed 06-01-PLAN.md — Mute/deafen controls wired end-to-end; all Phase 6 plans complete
+Resume file: .planning/phases/06-voice-improvement/06-01-SUMMARY.md
