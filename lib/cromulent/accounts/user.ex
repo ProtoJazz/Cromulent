@@ -11,6 +11,10 @@ defmodule Cromulent.Accounts.User do
     field :confirmed_at, :utc_datetime
     field :username, :string
     field :role, Ecto.Enum, values: [:admin, :member], default: :member
+    field :voice_mode, :string, default: "ptt"
+    field :vad_threshold, :integer, default: -40
+    field :mic_device_id, :string
+    field :speaker_device_id, :string
 
     timestamps(type: :utc_datetime)
   end
@@ -165,5 +169,18 @@ defmodule Cromulent.Accounts.User do
     else
       add_error(changeset, :current_password, "is not valid")
     end
+  end
+
+  @doc """
+  A user changeset for updating voice preferences.
+
+  Accepts: voice_mode ("ptt" or "vad"), vad_threshold (integer -60 to -20),
+  mic_device_id (string or nil), speaker_device_id (string or nil).
+  """
+  def voice_preferences_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:voice_mode, :vad_threshold, :mic_device_id, :speaker_device_id])
+    |> validate_inclusion(:voice_mode, ["ptt", "vad"])
+    |> validate_number(:vad_threshold, greater_than_or_equal_to: -60, less_than_or_equal_to: -20)
   end
 end
