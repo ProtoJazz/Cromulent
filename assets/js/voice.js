@@ -141,6 +141,36 @@ enablePTT(key = ' ') {
     console.log("VAD enabled, threshold:", threshold, "dBFS")
   }
 
+  setMute(muted) {
+    this.muted = muted
+    if (this.localStream) {
+      this.localStream.getTracks().forEach(t => t.enabled = !muted)
+    }
+    // If currently PTT-active and now muting, deactivate PTT
+    if (muted && this.pttActive) {
+      this.pttActive = false
+      this.channel.push("ptt_state", { active: false })
+      const btn = document.getElementById("ptt-button")
+      btn?.setAttribute("data-active", "false")
+      btn?.classList.replace("bg-green-500", "bg-gray-600")
+      if (btn) btn.textContent = "Push to Talk"
+    }
+    // Push mute state to channel so Presence meta updates
+    this.channel.push("toggle_mute", { muted: muted })
+  }
+
+  setDeafen(deafened, muted) {
+    this.deafened = deafened
+    // Mute all remote audio elements
+    document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
+      a.muted = deafened
+    })
+    // Apply mic mute (deafen auto-mutes; undeafen does NOT auto-unmute)
+    this.setMute(muted)
+    // Push deafen state to channel so Presence meta updates
+    this.channel.push("toggle_deafen", { deafened: deafened })
+  }
+
   async join(voiceMode = "ptt", vadThreshold = -40, micDeviceId = null, speakerDeviceId = null) {
     this.speakerDeviceId = speakerDeviceId
 
@@ -352,6 +382,13 @@ enablePTT(key = ' ') {
       this.vadAudioCtx.close()
       this.vadAudioCtx = null
     }
+
+    // Reset mute/deafen state on leave
+    this.muted = false
+    this.deafened = false
+    document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
+      a.muted = false
+    })
 
     // Only remove keyboard listeners if we added them (not using Electron)
     if (this._onKeyDown && this._onKeyUp) {

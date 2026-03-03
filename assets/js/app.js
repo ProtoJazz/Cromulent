@@ -82,6 +82,14 @@ const Hooks = {
           voiceSocket = null
         }
       })
+
+      this.handleEvent("voice:set_mute", ({ muted }) => {
+        if (voiceRoom) voiceRoom.setMute(muted)
+      })
+
+      this.handleEvent("voice:set_deafen", ({ deafened, muted }) => {
+        if (voiceRoom) voiceRoom.setDeafen(deafened, muted)
+      })
     },
     destroyed() {
       // Only fires on full page reload / logout
