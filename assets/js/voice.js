@@ -8,6 +8,15 @@ class VoiceRoom {
     // Use dynamic ICE servers from server; fall back to STUN-only if not provided
     this.iceServers = iceServers || [{ urls: "stun:stun.l.google.com:19302" }]
 
+    // VAD state
+    this.vadActive = false
+    this.vadAudioCtx = null
+    this.vadAnimFrame = null
+
+    // Mute/deafen state
+    this.muted = false
+    this.deafened = false
+
     this.channel = socket.channel(`voice:${channelId}`)
     this.bindChannelEvents()
   }
@@ -25,6 +34,7 @@ enablePTT(key = ' ') {
 
   const activate = () => {
     if (this.pttActive) return
+    if (this.muted) return  // mute blocks PTT
     this.pttActive = true
     this.localStream.getTracks().forEach(t => t.enabled = true)
     this.channel.push("ptt_state", { active: true })
@@ -86,26 +96,92 @@ enablePTT(key = ' ') {
     window.addEventListener("keyup", this._onKeyUp)
   }
 }
-  async join() {
-    this.localStream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-        sampleRate: 48000
+  enableVAD(threshold = -40) {
+    // Start muted; VAD will enable tracks when speech detected
+    if (this.localStream) {
+      this.localStream.getTracks().forEach(t => t.enabled = false)
+    }
+
+    this.vadActive = true
+    this.vadAudioCtx = new AudioContext()
+    const source = this.vadAudioCtx.createMediaStreamSource(this.localStream)
+    const analyser = this.vadAudioCtx.createAnalyser()
+    analyser.fftSize = 1024
+    source.connect(analyser)
+
+    const buffer = new Float32Array(analyser.fftSize)
+    let speaking = false
+
+    const tick = () => {
+      if (!this.vadActive) return
+      analyser.getFloatTimeDomainData(buffer)
+      const rms = Math.sqrt(buffer.reduce((s, v) => s + v * v, 0) / buffer.length)
+      const dBFS = 20 * Math.log10(rms || 0.000001)
+
+      if (dBFS > threshold && !speaking) {
+        speaking = true
+        if (this.localStream) {
+          this.localStream.getTracks().forEach(t => t.enabled = true)
+        }
+        this.channel.push("ptt_state", { active: true })
+        console.log("VAD: speech detected", dBFS.toFixed(1), "dBFS")
+      } else if (dBFS <= threshold && speaking) {
+        speaking = false
+        if (this.localStream) {
+          this.localStream.getTracks().forEach(t => t.enabled = false)
+        }
+        this.channel.push("ptt_state", { active: false })
+        console.log("VAD: silence detected", dBFS.toFixed(1), "dBFS")
       }
-    })
-    console.log("🎤 Got local stream", this.localStream.getTracks())
+
+      this.vadAnimFrame = requestAnimationFrame(tick)
+    }
+
+    this.vadAnimFrame = requestAnimationFrame(tick)
+    console.log("VAD enabled, threshold:", threshold, "dBFS")
+  }
+
+  async join(voiceMode = "ptt", vadThreshold = -40, micDeviceId = null, speakerDeviceId = null) {
+    this.speakerDeviceId = speakerDeviceId
+
+    // Use saved mic device if available, fall back gracefully on OverconstrainedError
+    let audioConstraints = {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+      sampleRate: 48000
+    }
+    if (micDeviceId) {
+      audioConstraints.deviceId = { exact: micDeviceId }
+    }
+
+    try {
+      this.localStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints })
+    } catch (err) {
+      if (err.name === "OverconstrainedError" || err.name === "NotFoundError") {
+        console.warn("Saved mic device not found, falling back to default mic")
+        delete audioConstraints.deviceId
+        this.localStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints })
+      } else {
+        throw err
+      }
+    }
+
+    console.log("Got local stream", this.localStream.getTracks())
 
     return new Promise((resolve, reject) => {
       this.channel.join()
         .receive("ok", () => {
-          console.log("✅ Joined voice channel")
-          this.enablePTT(' ')  // spacebar
+          console.log("Joined voice channel")
+          if (voiceMode === "vad") {
+            this.enableVAD(vadThreshold)
+          } else {
+            this.enablePTT(" ")
+          }
           resolve()
         })
         .receive("error", (err) => {
-          console.error("❌ Failed to join:", err)
+          console.error("Failed to join:", err)
           reject(err)
         })
     })
@@ -246,6 +322,14 @@ enablePTT(key = ' ') {
     audio.id = `audio-${id}`
     audio.srcObject = stream
     audio.autoplay = true
+
+    // Speaker device selection (Chromium/Electron only)
+    if (this.speakerDeviceId && typeof audio.setSinkId !== "undefined") {
+      audio.setSinkId(this.speakerDeviceId).catch(err => {
+        console.warn("setSinkId failed:", err)
+      })
+    }
+
     document.body.appendChild(audio)
   }
 
@@ -261,16 +345,24 @@ enablePTT(key = ' ') {
   }
 
   leave() {
-  // Only remove keyboard listeners if we added them (not using Electron)
-  if (this._onKeyDown && this._onKeyUp) {
-    window.removeEventListener("keydown", this._onKeyDown)
-    window.removeEventListener("keyup", this._onKeyUp)
+    // Stop VAD if active
+    this.vadActive = false
+    if (this.vadAnimFrame) cancelAnimationFrame(this.vadAnimFrame)
+    if (this.vadAudioCtx) {
+      this.vadAudioCtx.close()
+      this.vadAudioCtx = null
+    }
+
+    // Only remove keyboard listeners if we added them (not using Electron)
+    if (this._onKeyDown && this._onKeyUp) {
+      window.removeEventListener("keydown", this._onKeyDown)
+      window.removeEventListener("keyup", this._onKeyUp)
+    }
+
+    Object.keys(this.peers).forEach(id => this.removePeer(id))
+    this.localStream?.getTracks().forEach(t => t.stop())
+    this.channel.leave()
   }
-  
-  Object.keys(this.peers).forEach(id => this.removePeer(id))
-  this.localStream?.getTracks().forEach(t => t.stop())
-  this.channel.leave()
-}
 }
 
 export default VoiceRoom
