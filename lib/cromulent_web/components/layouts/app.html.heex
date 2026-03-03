@@ -64,6 +64,7 @@
     unread_counts={assigns[:unread_counts] || %{}}
     mention_counts={assigns[:mention_counts] || %{}}
     voice_enabled={if assigns[:feature_flags], do: assigns[:feature_flags].voice_enabled, else: true}
+    speaking_users={assigns[:speaking_users] || []}
   />
 
   <%!-- Right sidebar --%>

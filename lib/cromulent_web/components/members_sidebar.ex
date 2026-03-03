@@ -25,9 +25,17 @@ defmodule CromulentWeb.Components.MembersSidebar do
       end)
       |> Map.new()
 
+    voice_user_ids = MapSet.new(Map.keys(voice_channel_by_user))
+
+    online_members_sorted =
+      online_members
+      |> Enum.sort_by(fn member ->
+        if MapSet.member?(voice_user_ids, member.id), do: 0, else: 1
+      end)
+
     assigns =
       assigns
-      |> assign(:online_members, online_members)
+      |> assign(:online_members, online_members_sorted)
       |> assign(:offline_members, offline_members)
       |> assign(:voice_channel_by_user, voice_channel_by_user)
 
