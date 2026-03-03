@@ -121,17 +121,18 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 3. Voice Reliability | 4/4 | Complete   | 2026-03-01 |
 | 4. Rich Text Rendering | 2/3 | In Progress | - |
 | 5. Feature Toggles | 1/4 | In Progress | - |
+| 6. Voice Improvement | 4/5 | In Progress | - |
 
 ### Phase 6: Voice improvement
 
 **Goal:** Users have a polished voice experience with mute/deafen controls, speaking indicators, voice activity detection, and audio device selection
 **Requirements**: VOIC-MUTE, VOIC-DEAFEN, VOIC-SPEAKING, VOIC-VAD, VOIC-DEVICES, VOIC-SORT
 **Depends on:** Phase 5
-**Plans:** 2/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
-- [ ] 06-01-PLAN.md — Mute/deafen controls: VoiceChannel handler, channel_live events, VoiceBar buttons, JS setMute/setDeafen (VOIC-MUTE, VOIC-DEAFEN)
-- [ ] 06-02-PLAN.md — Speaking indicators: speaking_users assign, ptt_state handler, green ring in sidebar; members sidebar voice-first sort (VOIC-SPEAKING, VOIC-SORT)
-- [ ] 06-03-PLAN.md — DB migration + User schema voice prefs + Accounts context functions (VOIC-VAD, VOIC-DEVICES foundation)
-- [ ] 06-04-PLAN.md — VAD implementation in voice.js + VoiceSettings JS hook + settings page voice section (VOIC-VAD, VOIC-DEVICES)
+- [x] 06-01-PLAN.md — Mute/deafen controls: VoiceChannel handler, channel_live events, VoiceBar buttons, JS setMute/setDeafen (VOIC-MUTE, VOIC-DEAFEN)
+- [x] 06-02-PLAN.md — Speaking indicators: speaking_users assign, ptt_state handler, green ring in sidebar; members sidebar voice-first sort (VOIC-SPEAKING, VOIC-SORT)
+- [x] 06-03-PLAN.md — DB migration + User schema voice prefs + Accounts context functions (VOIC-VAD, VOIC-DEVICES foundation)
+- [x] 06-04-PLAN.md — VAD implementation in voice.js + VoiceSettings JS hook + settings page voice section (VOIC-VAD, VOIC-DEVICES)
 - [ ] 06-05-PLAN.md — Human verification checkpoint for all six VOIC requirements

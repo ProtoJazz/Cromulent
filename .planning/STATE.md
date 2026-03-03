@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 06-03-PLAN.md — Voice DB foundation complete
-last_updated: "2026-03-03T18:06:07.019Z"
-last_activity: 2026-03-02 — Plan 05-01 executed and committed
+stopped_at: Completed 06-04-PLAN.md — Voice settings UI and VAD implementation complete
+last_updated: "2026-03-03T18:18:00.000Z"
+last_activity: 2026-03-03 — Plan 06-04 executed and committed
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 21
-  completed_plans: 18
-  percent: 85
+  completed_plans: 21
+  percent: 100
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 
 ## Current Position
 
-Phase: 6 of 6 (Voice Improvement) — IN PROGRESS
-Plan: 2 of 4 in current phase — COMPLETE (2026-03-03)
-Status: Plan 06-02 complete — Speaking indicators (green ring) and voice-first sort in members sidebar
-Last activity: 2026-03-03 — Plan 06-02 executed and committed
+Phase: 6 of 6 (Voice Improvement) — COMPLETE
+Plan: 4 of 4 in current phase — COMPLETE (2026-03-03)
+Status: Plan 06-04 complete — Voice settings UI with PTT/VAD toggle, device pickers, mic test, and VAD loop in voice.js
+Last activity: 2026-03-03 — Plan 06-04 executed and committed
 
-Progress: [█████████░] 90%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Progress: [█████████░] 90%
 | 05 | 1 | 3 min | 3 min |
 | Phase 06-voice-improvement P03 | 2 | 2 tasks | 3 files |
 | Phase 06-voice-improvement P02 | 2 | 2 min | 1 min |
+| Phase 06-voice-improvement P04 | 2 | 8 min | 4 min |
 
 ## Accumulated Context
 
@@ -100,6 +101,10 @@ Recent decisions affecting current work:
 - [06-02]: speaking_users stored as plain list of string IDs (not MapSet) for LiveView assign serialization compatibility
 - [06-02]: broadcast_from! in voice_channel.ex means sender does not see their own speaking ring — acceptable, self-state can be tracked client-side if needed
 - [06-02]: Departed voice users cleared from speaking_users in presence_diff handler to prevent stuck ring indicators
+- [06-04]: getUserMedia called before enumerateDevices so browser populates device labels (known browser API requirement)
+- [06-04]: VAD uses track.enabled toggle (not mute) to suppress audio without destroying the WebRTC track/renegotiating
+- [06-04]: VAD loop cleanup: vadActive=false stops rAF loop; vadAudioCtx.close() releases Web Audio resources in leave()
+- [06-04]: setSinkId feature-detected at runtime (Chromium/Electron only; no-op on Firefox)
 
 ### Roadmap Evolution
 
@@ -115,6 +120,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-03T18:08:00Z
-Stopped at: Completed 06-02-PLAN.md — Speaking indicators and voice-first sort complete
-Resume file: .planning/phases/06-voice-improvement/06-01-PLAN.md
+Last session: 2026-03-03T18:18:00Z
+Stopped at: Completed 06-04-PLAN.md — Voice settings UI and VAD implementation complete
+Resume file: .planning/phases/06-voice-improvement/06-04-SUMMARY.md
