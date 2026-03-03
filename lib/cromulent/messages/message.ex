@@ -5,6 +5,7 @@ defmodule Cromulent.Messages.Message do
   @foreign_key_type :binary_id
   schema "messages" do
     field :body, :string
+    field :link_preview, :map
 
     belongs_to :channel, Cromulent.Channels.Channel
     belongs_to :user, Cromulent.Accounts.User

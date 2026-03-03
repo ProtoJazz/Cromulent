@@ -3,22 +3,28 @@ defmodule CromulentWeb.VoiceChannel do
   alias CromulentWeb.Presence
 
   def join("voice:" <> channel_id, _params, socket) do
-    channel = channel_id |> parse_id() |> Cromulent.Channels.get_channel()
+    flags = Cromulent.FeatureFlags.get_flags()
 
-    if channel && channel.type == :voice do
-      presences = Presence.list("voice:#{channel_id}")
-      user_key = to_string(socket.assigns.current_user.id)
-
-      if Map.has_key?(presences, user_key) do
-        # User already in this channel (rapid reconnect / multiple tabs).
-        # Rely on Presence timeout to clear the old entry.
-        {:error, %{reason: "already_in_channel"}}
-      else
-        send(self(), :after_join)
-        {:ok, assign(socket, :channel_id, channel_id)}
-      end
+    if !flags.voice_enabled do
+      {:error, %{reason: "voice_disabled"}}
     else
-      {:error, %{reason: "not found"}}
+      channel = channel_id |> parse_id() |> Cromulent.Channels.get_channel()
+
+      if channel && channel.type == :voice do
+        presences = Presence.list("voice:#{channel_id}")
+        user_key = to_string(socket.assigns.current_user.id)
+
+        if Map.has_key?(presences, user_key) do
+          # User already in this channel (rapid reconnect / multiple tabs).
+          # Rely on Presence timeout to clear the old entry.
+          {:error, %{reason: "already_in_channel"}}
+        else
+          send(self(), :after_join)
+          {:ok, assign(socket, :channel_id, channel_id)}
+        end
+      else
+        {:error, %{reason: "not found"}}
+      end
     end
   end
 

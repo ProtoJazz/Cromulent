@@ -4,6 +4,6 @@ defmodule Cromulent.Turn.Provider do
   Implementations return an iceServers array for RTCPeerConnection.
   """
 
-  @callback get_ice_servers(user_id :: integer()) ::
+  @callback get_ice_servers(user_id :: any(), url :: String.t(), secret :: String.t()) ::
               {:ok, list(map())} | {:error, term()}
 end

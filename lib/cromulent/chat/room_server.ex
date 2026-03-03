@@ -81,13 +81,17 @@ defmodule Cromulent.Chat.RoomServer do
     end
 
     # Async link preview fetch — fire-and-forget, does not block the cast
-    if System.get_env("LINK_PREVIEWS") != "disabled" do
+    flags = Cromulent.FeatureFlags.get_flags()
+
+    if flags.link_previews_enabled do
       channel_id = state.channel_id
 
       if url = Cromulent.Messages.LinkPreview.extract_first_link(message.body) do
         Task.start(fn ->
           case Cromulent.Messages.LinkPreview.fetch(url) do
             {:ok, preview} ->
+              Cromulent.Messages.update_link_preview(message.id, preview)
+
               PubSub.broadcast(
                 Cromulent.PubSub,
                 "text:#{channel_id}",

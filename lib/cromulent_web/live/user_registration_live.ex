@@ -101,25 +101,37 @@ defmodule CromulentWeb.UserRegistrationLive do
   end
 
   def mount(_params, _session, socket) do
-    changeset = Accounts.change_user_registration(%User{})
+    flags = Cromulent.FeatureFlags.get_flags()
 
-    socket =
-      socket
-      |> assign(trigger_submit: false, check_errors: false)
-      |> assign_form(changeset)
+    if !flags.registration_enabled do
+      {:ok,
+       socket
+       |> put_flash(:error, "Registration is closed on this server.")
+       |> redirect(to: ~p"/users/log_in")}
+    else
+      changeset = Accounts.change_user_registration(%User{})
 
-    {:ok, socket, temporary_assigns: [form: nil]}
+      socket =
+        socket
+        |> assign(trigger_submit: false, check_errors: false)
+        |> assign_form(changeset)
+
+      {:ok, socket, temporary_assigns: [form: nil]}
+    end
   end
 
   def handle_event("save", %{"user" => user_params}, socket) do
+    flags = Cromulent.FeatureFlags.get_flags()
+
     case Accounts.register_user(user_params) do
       {:ok, user} ->
-        # XXX: Renable confirmation emails eventually
-        # {:ok, _} =
-        #   Accounts.deliver_user_confirmation_instructions(
-        #     user,
-        #     &url(~p"/users/confirm/#{&1}")
-        #   )
+        if flags.email_confirmation_required do
+          {:ok, _} =
+            Accounts.deliver_user_confirmation_instructions(
+              user,
+              &url(~p"/users/confirm/#{&1}")
+            )
+        end
 
         changeset = Accounts.change_user_registration(user)
         {:noreply, socket |> assign(trigger_submit: true) |> assign_form(changeset)}

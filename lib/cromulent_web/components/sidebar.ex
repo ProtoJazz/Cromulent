@@ -12,6 +12,7 @@ defmodule CromulentWeb.Components.Sidebar do
   attr :join_modal_type, :atom, default: nil
   attr :unread_counts, :map, default: %{}
   attr :mention_counts, :map, default: %{}
+  attr :voice_enabled, :boolean, default: true
 
   def sidebar(assigns) do
     text_channels = Enum.filter(assigns.channels, &(&1.type == :text))
@@ -149,6 +150,7 @@ defmodule CromulentWeb.Components.Sidebar do
           </div>
 
           <%!-- Voice Channels --%>
+          <%= if @voice_enabled do %>
           <div>
             <div class="flex items-center justify-between px-2 mb-2">
               <h2 class="text-xs font-semibold tracking-wide uppercase text-gray-400">
@@ -211,6 +213,7 @@ defmodule CromulentWeb.Components.Sidebar do
               </li>
             </ul>
           </div>
+          <% end %>
         </div>
 
         <%!-- Voice connection bar --%>

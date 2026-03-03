@@ -6,19 +6,27 @@ defmodule CromulentWeb.AdminLive do
 
   alias Cromulent.Accounts
   alias Cromulent.Channels
+  alias Cromulent.FeatureFlags
 
   @impl true
   def mount(_params, _session, socket) do
+    flags = socket.assigns.feature_flags
+
     {:ok,
      socket
      |> assign(:tab, :users)
      |> assign(:users, Accounts.list_users())
      |> assign(:channels, Channels.list_channels())
-     |> assign(:channel_form, to_form(%{"name" => "", "type" => "text"}))}
+     |> assign(:channel_form, to_form(%{"name" => "", "type" => "text"}))
+     |> assign(:create_user_form, to_form(%{"email" => "", "username" => "", "password" => ""}))
+     |> assign(:turn_test_result, nil)
+     |> assign(:turn_draft_provider, flags.turn_provider || "disabled")
+     |> assign(:turn_draft_url, flags.turn_url || "")
+     |> assign(:turn_draft_secret, flags.turn_secret || "")}
   end
 
   @impl true
-  def handle_params(%{"tab" => tab}, _uri, socket) when tab in ~w(users channels) do
+  def handle_params(%{"tab" => tab}, _uri, socket) when tab in ~w(users channels settings) do
     {:noreply, assign(socket, :tab, String.to_atom(tab))}
   end
 
@@ -97,6 +105,127 @@ defmodule CromulentWeb.AdminLive do
          |> assign(:channels, Channels.list_channels())}
   end
 
+  def handle_event(
+        "turn_config_change",
+        %{"turn_provider" => provider, "turn_url" => url, "turn_secret" => secret},
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(:turn_draft_provider, provider)
+     |> assign(:turn_draft_url, url)
+     |> assign(:turn_draft_secret, secret)}
+  end
+
+  def handle_event("toggle_flag", %{"flag" => flag}, socket) do
+    flag_atom = String.to_existing_atom(flag)
+    current = Map.get(socket.assigns.feature_flags, flag_atom)
+    attrs = %{flag_atom => !current}
+
+    case FeatureFlags.upsert_flags(attrs) do
+      {:ok, flags} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Setting updated.")
+         |> assign(:feature_flags, flags)}
+
+      {:error, _changeset} ->
+        {:noreply, put_flash(socket, :error, "Failed to update setting.")}
+    end
+  end
+
+  def handle_event(
+        "save_turn_config",
+        %{"turn_provider" => provider, "turn_url" => url, "turn_secret" => secret},
+        socket
+      ) do
+    attrs = %{turn_provider: provider, turn_url: url, turn_secret: secret}
+
+    case FeatureFlags.upsert_flags(attrs) do
+      {:ok, flags} ->
+        test_result = test_turn_connection(flags)
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "TURN config saved.")
+         |> assign(:feature_flags, flags)
+         |> assign(:turn_draft_provider, flags.turn_provider || "disabled")
+         |> assign(:turn_draft_url, flags.turn_url || "")
+         |> assign(:turn_draft_secret, flags.turn_secret || "")
+         |> assign(:turn_test_result, test_result)}
+
+      {:error, _changeset} ->
+        {:noreply, put_flash(socket, :error, "Invalid TURN config.")}
+    end
+  end
+
+  def handle_event(
+        "admin_create_user",
+        %{"email" => email, "username" => username, "password" => password},
+        socket
+      ) do
+    case Accounts.register_user(%{email: email, username: username, password: password}) do
+      {:ok, _user} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "User #{username} created.")
+         |> assign(:users, Accounts.list_users())
+         |> assign(:create_user_form, to_form(%{"email" => "", "username" => "", "password" => ""}))}
+
+      {:error, changeset} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Failed to create user.")
+         |> assign(:create_user_form, to_form(changeset))}
+    end
+  end
+
+  defp test_turn_connection(%{turn_provider: "coturn", turn_url: url, turn_secret: secret})
+       when is_binary(url) and is_binary(secret) do
+    case parse_turn_host_port(url) do
+      {:ok, host, port} ->
+        case :gen_tcp.connect(String.to_charlist(host), port, [], 5000) do
+          {:ok, sock} ->
+            :gen_tcp.close(sock)
+            {:ok, "Connection successful — #{host}:#{port} reachable, credentials generated."}
+
+          {:error, reason} ->
+            {:error, "Server unreachable at #{host}:#{port} — #{:inet.format_error(reason)}"}
+        end
+
+      {:error, _} ->
+        {:error, "Invalid TURN URL — expected format: turn:host:port"}
+    end
+  end
+
+  defp test_turn_connection(%{turn_provider: "metered", turn_url: url, turn_secret: key})
+       when is_binary(url) and is_binary(key) do
+    case Cromulent.Turn.Metered.get_ice_servers("test_user", url, key) do
+      {:ok, _servers} -> {:ok, "Connection successful — ICE servers returned."}
+      {:error, reason} -> {:error, "Failed: #{inspect(reason)}"}
+    end
+  end
+
+  defp test_turn_connection(_flags), do: nil
+
+  defp parse_turn_host_port(url) do
+    # Strip turn: or turns: scheme
+    stripped = Regex.replace(~r/^turns?:\/\/|^turns?:/, url, "")
+
+    case String.split(stripped, ":") do
+      [host, port_str] ->
+        case Integer.parse(port_str) do
+          {port, ""} -> {:ok, host, port}
+          _ -> {:error, :bad_port}
+        end
+
+      [host] ->
+        {:ok, host, 3478}
+
+      _ ->
+        {:error, :bad_url}
+    end
+  end
 
   defp do_set_role(socket, user, role) do
     case Accounts.set_user_role(user, String.to_atom(role)) do
@@ -117,7 +246,7 @@ defmodule CromulentWeb.AdminLive do
     <div class="max-w-5xl mx-auto py-6">
       <div class="mb-6">
         <h1 class="text-2xl font-bold text-white">Admin</h1>
-        <p class="text-gray-400 text-sm mt-1">Manage users and channels</p>
+        <p class="text-gray-400 text-sm mt-1">Manage users, channels, and settings</p>
       </div>
 
       <%!-- Tab nav --%>
@@ -151,6 +280,21 @@ defmodule CromulentWeb.AdminLive do
             >
               <.icon name="hero-hashtag" class="w-4 h-4 me-2" />
               Channels
+            </.link>
+          </li>
+          <li class="me-2">
+            <.link
+              patch={~p"/admin?tab=settings"}
+              class={[
+                "inline-flex items-center justify-center p-4 border-b-2 rounded-t-lg group",
+                if(@tab == :settings,
+                  do: "text-indigo-400 border-indigo-400",
+                  else: "text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-600"
+                )
+              ]}
+            >
+              <.icon name="hero-cog-6-tooth" class="w-4 h-4 me-2" />
+              Settings
             </.link>
           </li>
         </ul>
@@ -219,6 +363,35 @@ defmodule CromulentWeb.AdminLive do
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <%!-- Create User form --%>
+        <div class="mt-6 p-4 bg-gray-800 rounded-lg border border-gray-700">
+          <h2 class="text-sm font-semibold text-white mb-3">Create User</h2>
+          <.form for={@create_user_form} phx-submit="admin_create_user" class="flex gap-3 items-end flex-wrap">
+            <div>
+              <label class="block mb-1 text-xs font-medium text-gray-400">Email</label>
+              <input type="email" name="email" value={@create_user_form[:email].value}
+                placeholder="user@example.com"
+                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" />
+            </div>
+            <div>
+              <label class="block mb-1 text-xs font-medium text-gray-400">Username</label>
+              <input type="text" name="username" value={@create_user_form[:username].value}
+                placeholder="coolperson42"
+                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" />
+            </div>
+            <div>
+              <label class="block mb-1 text-xs font-medium text-gray-400">Password</label>
+              <input type="password" name="password"
+                placeholder="••••••••"
+                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" />
+            </div>
+            <button type="submit"
+              class="text-white bg-indigo-600 hover:bg-indigo-700 font-medium rounded-lg text-sm px-4 py-2.5">
+              Create User
+            </button>
+          </.form>
         </div>
       </div>
 
@@ -322,6 +495,147 @@ defmodule CromulentWeb.AdminLive do
             </tbody>
           </table>
         </div>
+      </div>
+
+      <%!-- Settings tab --%>
+      <div :if={@tab == :settings}>
+        <%!-- Feature flag toggles --%>
+        <div class="p-4 mb-6 bg-gray-800 rounded-lg border border-gray-700">
+          <h2 class="text-sm font-semibold text-white mb-4">Feature Flags</h2>
+          <div class="space-y-4">
+
+            <%!-- Voice Channels toggle --%>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-white">Voice Channels</p>
+                <p class="text-xs text-gray-400">Enable or disable voice channel features</p>
+              </div>
+              <label class="inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked={@feature_flags.voice_enabled}
+                  phx-click="toggle_flag" phx-value-flag="voice_enabled"
+                  phx-value-value={!@feature_flags.voice_enabled}
+                  class="sr-only peer" />
+                <div class="relative w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4
+                            peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full
+                            rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white
+                            after:content-[''] after:absolute after:top-[2px] after:start-[2px]
+                            after:bg-white after:border-gray-300 after:border after:rounded-full
+                            after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+
+            <%!-- User Registration toggle --%>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-white">User Registration</p>
+                <p class="text-xs text-gray-400">Allow new users to register accounts</p>
+              </div>
+              <label class="inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked={@feature_flags.registration_enabled}
+                  phx-click="toggle_flag" phx-value-flag="registration_enabled"
+                  phx-value-value={!@feature_flags.registration_enabled}
+                  class="sr-only peer" />
+                <div class="relative w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4
+                            peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full
+                            rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white
+                            after:content-[''] after:absolute after:top-[2px] after:start-[2px]
+                            after:bg-white after:border-gray-300 after:border after:rounded-full
+                            after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+
+            <%!-- Link Previews toggle --%>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-white">Link Previews</p>
+                <p class="text-xs text-gray-400">Show Open Graph preview cards for URLs</p>
+              </div>
+              <label class="inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked={@feature_flags.link_previews_enabled}
+                  phx-click="toggle_flag" phx-value-flag="link_previews_enabled"
+                  phx-value-value={!@feature_flags.link_previews_enabled}
+                  class="sr-only peer" />
+                <div class="relative w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4
+                            peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full
+                            rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white
+                            after:content-[''] after:absolute after:top-[2px] after:start-[2px]
+                            after:bg-white after:border-gray-300 after:border after:rounded-full
+                            after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+
+            <%!-- Email Confirmation toggle --%>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-white">Require Email Confirmation</p>
+                <p class="text-xs text-gray-400">New accounts must confirm email before login. Enabling this will lock out existing unconfirmed users.</p>
+              </div>
+              <label class="inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked={@feature_flags.email_confirmation_required}
+                  phx-click="toggle_flag" phx-value-flag="email_confirmation_required"
+                  phx-value-value={!@feature_flags.email_confirmation_required}
+                  class="sr-only peer" />
+                <div class="relative w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4
+                            peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full
+                            rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white
+                            after:content-[''] after:absolute after:top-[2px] after:start-[2px]
+                            after:bg-white after:border-gray-300 after:border after:rounded-full
+                            after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+
+          </div>
+        </div>
+
+        <%!-- TURN Config section --%>
+        <div class="p-4 bg-gray-800 rounded-lg border border-gray-700">
+          <h2 class="text-sm font-semibold text-white mb-1">TURN Server Configuration</h2>
+          <p class="text-xs text-gray-400 mb-4">Configure TURN relay for voice behind restrictive firewalls</p>
+          <form phx-submit="save_turn_config" phx-change="turn_config_change" class="space-y-3">
+            <div>
+              <label class="block mb-1 text-xs font-medium text-gray-400">Provider</label>
+              <select name="turn_provider"
+                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
+                <option value="disabled" selected={@feature_flags.turn_provider == "disabled"}>Disabled (STUN only)</option>
+                <option value="coturn" selected={@feature_flags.turn_provider == "coturn"}>Coturn (self-hosted)</option>
+                <option value="metered" selected={@feature_flags.turn_provider == "metered"}>Metered (managed)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block mb-1 text-xs font-medium text-gray-400">Server URL / API URL</label>
+              <input type="text" name="turn_url" value={@feature_flags.turn_url || ""}
+                placeholder="turn:yourdomain.com:3478 or https://yourapp.metered.live"
+                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" />
+            </div>
+            <div>
+              <label class="block mb-1 text-xs font-medium text-gray-400">Secret / API Key</label>
+              <input type="password" name="turn_secret" value={@feature_flags.turn_secret || ""}
+                placeholder="••••••••"
+                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" />
+            </div>
+            <button type="submit"
+              disabled={@turn_draft_provider != "disabled" and (String.trim(@turn_draft_url) == "" or String.trim(@turn_draft_secret) == "")}
+              class="text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed font-medium rounded-lg text-sm px-4 py-2.5">
+              Save & Test
+            </button>
+          </form>
+
+          <%!-- TURN test result --%>
+          <%= if @turn_test_result do %>
+            <div class={["mt-3 text-sm px-3 py-2 rounded",
+              case @turn_test_result do
+                {:ok, _} -> "bg-green-900 text-green-300"
+                {:error, _} -> "bg-red-900 text-red-300"
+              end
+            ]}>
+              <%= case @turn_test_result do
+                {:ok, msg} -> msg
+                {:error, msg} -> msg
+              end %>
+            </div>
+          <% end %>
+        </div>
+
       </div>
     </div>
     """
