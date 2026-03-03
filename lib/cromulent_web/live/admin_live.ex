@@ -162,9 +162,19 @@ defmodule CromulentWeb.AdminLive do
 
   defp test_turn_connection(%{turn_provider: "coturn", turn_url: url, turn_secret: secret})
        when is_binary(url) and is_binary(secret) do
-    case Cromulent.Turn.Coturn.get_ice_servers("test_user", url, secret) do
-      {:ok, _servers} -> {:ok, "Connection successful — credentials generated."}
-      {:error, reason} -> {:error, "Failed: #{inspect(reason)}"}
+    case parse_turn_host_port(url) do
+      {:ok, host, port} ->
+        case :gen_tcp.connect(String.to_charlist(host), port, [], 5000) do
+          {:ok, sock} ->
+            :gen_tcp.close(sock)
+            {:ok, "Connection successful — #{host}:#{port} reachable, credentials generated."}
+
+          {:error, reason} ->
+            {:error, "Server unreachable at #{host}:#{port} — #{:inet.format_error(reason)}"}
+        end
+
+      {:error, _} ->
+        {:error, "Invalid TURN URL — expected format: turn:host:port"}
     end
   end
 
@@ -177,6 +187,25 @@ defmodule CromulentWeb.AdminLive do
   end
 
   defp test_turn_connection(_flags), do: nil
+
+  defp parse_turn_host_port(url) do
+    # Strip turn: or turns: scheme
+    stripped = Regex.replace(~r/^turns?:\/\/|^turns?:/, url, "")
+
+    case String.split(stripped, ":") do
+      [host, port_str] ->
+        case Integer.parse(port_str) do
+          {port, ""} -> {:ok, host, port}
+          _ -> {:error, :bad_port}
+        end
+
+      [host] ->
+        {:ok, host, 3478}
+
+      _ ->
+        {:error, :bad_url}
+    end
+  end
 
   defp do_set_role(socket, user, role) do
     case Accounts.set_user_role(user, String.to_atom(role)) do
