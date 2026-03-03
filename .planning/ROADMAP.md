@@ -124,10 +124,14 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 ### Phase 6: Voice improvement
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Users have a polished voice experience with mute/deafen controls, speaking indicators, voice activity detection, and audio device selection
+**Requirements**: VOIC-MUTE, VOIC-DEAFEN, VOIC-SPEAKING, VOIC-VAD, VOIC-DEVICES, VOIC-SORT
 **Depends on:** Phase 5
-**Plans:** 0 plans
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 6 to break down)
+- [ ] 06-01-PLAN.md — Mute/deafen controls: VoiceChannel handler, channel_live events, VoiceBar buttons, JS setMute/setDeafen (VOIC-MUTE, VOIC-DEAFEN)
+- [ ] 06-02-PLAN.md — Speaking indicators: speaking_users assign, ptt_state handler, green ring in sidebar; members sidebar voice-first sort (VOIC-SPEAKING, VOIC-SORT)
+- [ ] 06-03-PLAN.md — DB migration + User schema voice prefs + Accounts context functions (VOIC-VAD, VOIC-DEVICES foundation)
+- [ ] 06-04-PLAN.md — VAD implementation in voice.js + VoiceSettings JS hook + settings page voice section (VOIC-VAD, VOIC-DEVICES)
+- [ ] 06-05-PLAN.md — Human verification checkpoint for all six VOIC requirements
