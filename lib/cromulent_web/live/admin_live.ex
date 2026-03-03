@@ -10,6 +10,8 @@ defmodule CromulentWeb.AdminLive do
 
   @impl true
   def mount(_params, _session, socket) do
+    flags = socket.assigns.feature_flags
+
     {:ok,
      socket
      |> assign(:tab, :users)
@@ -17,7 +19,10 @@ defmodule CromulentWeb.AdminLive do
      |> assign(:channels, Channels.list_channels())
      |> assign(:channel_form, to_form(%{"name" => "", "type" => "text"}))
      |> assign(:create_user_form, to_form(%{"email" => "", "username" => "", "password" => ""}))
-     |> assign(:turn_test_result, nil)}
+     |> assign(:turn_test_result, nil)
+     |> assign(:turn_draft_provider, flags.turn_provider || "disabled")
+     |> assign(:turn_draft_url, flags.turn_url || "")
+     |> assign(:turn_draft_secret, flags.turn_secret || "")}
   end
 
   @impl true
@@ -100,6 +105,18 @@ defmodule CromulentWeb.AdminLive do
          |> assign(:channels, Channels.list_channels())}
   end
 
+  def handle_event(
+        "turn_config_change",
+        %{"turn_provider" => provider, "turn_url" => url, "turn_secret" => secret},
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(:turn_draft_provider, provider)
+     |> assign(:turn_draft_url, url)
+     |> assign(:turn_draft_secret, secret)}
+  end
+
   def handle_event("toggle_flag", %{"flag" => flag}, socket) do
     flag_atom = String.to_existing_atom(flag)
     current = Map.get(socket.assigns.feature_flags, flag_atom)
@@ -132,6 +149,9 @@ defmodule CromulentWeb.AdminLive do
          socket
          |> put_flash(:info, "TURN config saved.")
          |> assign(:feature_flags, flags)
+         |> assign(:turn_draft_provider, flags.turn_provider || "disabled")
+         |> assign(:turn_draft_url, flags.turn_url || "")
+         |> assign(:turn_draft_secret, flags.turn_secret || "")
          |> assign(:turn_test_result, test_result)}
 
       {:error, _changeset} ->
@@ -571,7 +591,7 @@ defmodule CromulentWeb.AdminLive do
         <div class="p-4 bg-gray-800 rounded-lg border border-gray-700">
           <h2 class="text-sm font-semibold text-white mb-1">TURN Server Configuration</h2>
           <p class="text-xs text-gray-400 mb-4">Configure TURN relay for voice behind restrictive firewalls</p>
-          <form phx-submit="save_turn_config" class="space-y-3">
+          <form phx-submit="save_turn_config" phx-change="turn_config_change" class="space-y-3">
             <div>
               <label class="block mb-1 text-xs font-medium text-gray-400">Provider</label>
               <select name="turn_provider"
@@ -594,7 +614,8 @@ defmodule CromulentWeb.AdminLive do
                 class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" />
             </div>
             <button type="submit"
-              class="text-white bg-indigo-600 hover:bg-indigo-700 font-medium rounded-lg text-sm px-4 py-2.5">
+              disabled={@turn_draft_provider != "disabled" and (String.trim(@turn_draft_url) == "" or String.trim(@turn_draft_secret) == "")}
+              class="text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed font-medium rounded-lg text-sm px-4 py-2.5">
               Save & Test
             </button>
           </form>
