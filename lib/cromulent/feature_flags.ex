@@ -13,6 +13,8 @@ defmodule Cromulent.FeatureFlags do
 
   @doc "Upserts the feature flags row. Returns {:ok, flags} or {:error, changeset}."
   def upsert_flags(attrs) do
+    attrs = normalize_attrs(attrs)
+
     case get_flags() do
       %Flags{id: nil} = defaults ->
         defaults
@@ -24,5 +26,13 @@ defmodule Cromulent.FeatureFlags do
         |> Flags.changeset(attrs)
         |> Repo.update()
     end
+  end
+
+  # Convert empty string values to nil for optional string fields
+  defp normalize_attrs(attrs) do
+    Enum.into(attrs, %{}, fn
+      {k, ""} when k in [:turn_url, :turn_secret, "turn_url", "turn_secret"] -> {k, nil}
+      pair -> pair
+    end)
   end
 end

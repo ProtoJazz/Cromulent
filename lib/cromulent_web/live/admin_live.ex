@@ -100,8 +100,10 @@ defmodule CromulentWeb.AdminLive do
          |> assign(:channels, Channels.list_channels())}
   end
 
-  def handle_event("toggle_flag", %{"flag" => flag, "value" => value}, socket) do
-    attrs = %{String.to_existing_atom(flag) => value == "true"}
+  def handle_event("toggle_flag", %{"flag" => flag}, socket) do
+    flag_atom = String.to_existing_atom(flag)
+    current = Map.get(socket.assigns.feature_flags, flag_atom)
+    attrs = %{flag_atom => !current}
 
     case FeatureFlags.upsert_flags(attrs) do
       {:ok, flags} ->
