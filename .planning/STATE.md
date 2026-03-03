@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 
 ## Current Position
 
-Phase: 5 of 5 (Feature Toggles) — IN PROGRESS
-Plan: 1 of 3 in current phase — COMPLETE (2026-03-02)
-Status: Plan 05-01 complete — FeatureFlags DB foundation, schema, context, and LiveView assign injection complete
-Last activity: 2026-03-02 — Plan 05-01 executed and committed
+Phase: 6 of 6 (Voice Improvement) — IN PROGRESS
+Plan: 2 of 4 in current phase — COMPLETE (2026-03-03)
+Status: Plan 06-02 complete — Speaking indicators (green ring) and voice-first sort in members sidebar
+Last activity: 2026-03-03 — Plan 06-02 executed and committed
 
-Progress: [█████████░] 85%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Progress: [█████████░] 85%
 | 04 | 2 | 7 min | 3.5 min |
 | 05 | 1 | 3 min | 3 min |
 | Phase 06-voice-improvement P03 | 2 | 2 tasks | 3 files |
+| Phase 06-voice-improvement P02 | 2 | 2 min | 1 min |
 
 ## Accumulated Context
 
@@ -96,6 +97,9 @@ Recent decisions affecting current work:
 - [Phase 06-voice-improvement]: [06-03]: voice_mode stored as :string not Ecto.Enum — allows client extensibility without migration
 - [Phase 06-voice-improvement]: [06-03]: vad_threshold validated in range -60 to -20 dB to prevent nonsensical VAD sensitivity values
 - [Phase 06-voice-improvement]: [06-03]: get_voice_prefs/1 reads from loaded user struct — no extra DB query for settings page render
+- [06-02]: speaking_users stored as plain list of string IDs (not MapSet) for LiveView assign serialization compatibility
+- [06-02]: broadcast_from! in voice_channel.ex means sender does not see their own speaking ring — acceptable, self-state can be tracked client-side if needed
+- [06-02]: Departed voice users cleared from speaking_users in presence_diff handler to prevent stuck ring indicators
 
 ### Roadmap Evolution
 
@@ -111,6 +115,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-03T18:06:07.016Z
-Stopped at: Completed 06-03-PLAN.md — Voice DB foundation complete
-Resume file: None
+Last session: 2026-03-03T18:08:00Z
+Stopped at: Completed 06-02-PLAN.md — Speaking indicators and voice-first sort complete
+Resume file: .planning/phases/06-voice-improvement/06-01-PLAN.md
