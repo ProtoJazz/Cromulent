@@ -90,6 +90,8 @@ defmodule Cromulent.Chat.RoomServer do
         Task.start(fn ->
           case Cromulent.Messages.LinkPreview.fetch(url) do
             {:ok, preview} ->
+              Cromulent.Messages.update_link_preview(message.id, preview)
+
               PubSub.broadcast(
                 Cromulent.PubSub,
                 "text:#{channel_id}",

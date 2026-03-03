@@ -15,8 +15,8 @@ defmodule Cromulent.Messages do
     |> limit(@page_size)
     |> preload([:user, :mentions])
     |> Repo.all()
-    # back to chronological order
     |> Enum.reverse()
+    |> Enum.map(&atomize_link_preview/1)
   end
 
   def list_messages_before(channel_id, before_id) do
@@ -27,8 +27,24 @@ defmodule Cromulent.Messages do
     |> preload([:user, :mentions])
     |> Repo.all()
     |> Enum.reverse()
+    |> Enum.map(&atomize_link_preview/1)
   end
 
+  defp atomize_link_preview(%{link_preview: nil} = msg), do: msg
+
+  defp atomize_link_preview(%{link_preview: preview} = msg) when is_map(preview) do
+    %{msg | link_preview: Map.new(preview, fn {k, v} -> {String.to_atom(k), v} end)}
+  end
+
+  defp atomize_link_preview(msg), do: msg
+
+
+  def update_link_preview(message_id, preview) do
+    case Repo.get(Message, message_id) do
+      nil -> :ok
+      message -> message |> Ecto.Changeset.change(link_preview: preview) |> Repo.update()
+    end
+  end
 
   def delete_message(user, message_id) do
     case Repo.get(Message, message_id) do
