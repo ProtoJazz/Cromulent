@@ -127,7 +127,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 **Goal:** Users have a polished voice experience with mute/deafen controls, speaking indicators, voice activity detection, and audio device selection
 **Requirements**: VOIC-MUTE, VOIC-DEAFEN, VOIC-SPEAKING, VOIC-VAD, VOIC-DEVICES, VOIC-SORT
 **Depends on:** Phase 5
-**Plans:** 5 plans
+**Plans:** 2/5 plans executed
 
 Plans:
 - [ ] 06-01-PLAN.md — Mute/deafen controls: VoiceChannel handler, channel_live events, VoiceBar buttons, JS setMute/setDeafen (VOIC-MUTE, VOIC-DEAFEN)

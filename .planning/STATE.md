@@ -2,13 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-03-03T14:47:59.037Z"
+status: completed
+stopped_at: Completed 06-03-PLAN.md — Voice DB foundation complete
+last_updated: "2026-03-03T18:06:07.019Z"
+last_activity: 2026-03-02 — Plan 05-01 executed and committed
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 16
-  completed_plans: 16
+  total_plans: 21
+  completed_plans: 18
+  percent: 85
 ---
 
 # Project State
@@ -45,6 +48,7 @@ Progress: [█████████░] 85%
 | 03 | 4 | 4 min | 1 min |
 | 04 | 2 | 7 min | 3.5 min |
 | 05 | 1 | 3 min | 3 min |
+| Phase 06-voice-improvement P03 | 2 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -89,6 +93,9 @@ Recent decisions affecting current work:
 - [05-01]: get_flags/0 uses Repo.one(Flags) || %Flags{} — no crash on fresh install, returns safe defaults
 - [05-01]: upsert_flags/1 detects insert vs update by checking id == nil on returned struct from get_flags/0
 - [05-01]: feature_flags assign added in ensure_authenticated authenticated branch only (not unauthenticated path)
+- [Phase 06-voice-improvement]: [06-03]: voice_mode stored as :string not Ecto.Enum — allows client extensibility without migration
+- [Phase 06-voice-improvement]: [06-03]: vad_threshold validated in range -60 to -20 dB to prevent nonsensical VAD sensitivity values
+- [Phase 06-voice-improvement]: [06-03]: get_voice_prefs/1 reads from loaded user struct — no extra DB query for settings page render
 
 ### Roadmap Evolution
 
@@ -104,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-02
-Stopped at: Completed 05-01-PLAN.md — FeatureFlags DB foundation complete
-Resume file: .planning/phases/05-feature-toggles/05-02-PLAN.md
+Last session: 2026-03-03T18:06:07.016Z
+Stopped at: Completed 06-03-PLAN.md — Voice DB foundation complete
+Resume file: None
