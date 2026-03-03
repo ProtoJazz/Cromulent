@@ -75,12 +75,14 @@ defmodule CromulentWeb.UserLoginLive do
             >
               Sign in
             </button>
-             <p class="text-sm font-light text-gray-500 dark:text-gray-400">
-              Don't have an account?
-              <.link navigate={~p"/users/register"} class="font-medium text-blue-600 hover:underline dark:text-blue-500">
-                Register
-              </.link>
-            </p>
+            <%= if @feature_flags.registration_enabled do %>
+              <p class="text-sm font-light text-gray-500 dark:text-gray-400">
+                Don't have an account?
+                <.link navigate={~p"/users/register"} class="font-medium text-blue-600 hover:underline dark:text-blue-500">
+                  Register
+                </.link>
+              </p>
+            <% end %>
           </form>
         </div>
       </div>
@@ -89,8 +91,9 @@ defmodule CromulentWeb.UserLoginLive do
   end
 
   def mount(_params, _session, socket) do
+    flags = Cromulent.FeatureFlags.get_flags()
     email = Phoenix.Flash.get(socket.assigns.flash, :email)
     form = to_form(%{"email" => email}, as: "user")
-    {:ok, assign(socket, form: form), temporary_assigns: [form: form]}
+    {:ok, assign(socket, form: form, feature_flags: flags), temporary_assigns: [form: form]}
   end
 end

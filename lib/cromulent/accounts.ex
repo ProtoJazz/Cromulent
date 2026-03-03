@@ -41,7 +41,16 @@ defmodule Cromulent.Accounts do
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
     user = Repo.get_by(User, email: email)
-    if User.valid_password?(user, password), do: user
+
+    if User.valid_password?(user, password) do
+      flags = Cromulent.FeatureFlags.get_flags()
+
+      if flags.email_confirmation_required && is_nil(user.confirmed_at) do
+        nil
+      else
+        user
+      end
+    end
   end
 
   @doc """
