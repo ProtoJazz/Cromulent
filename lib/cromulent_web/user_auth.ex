@@ -248,6 +248,7 @@ defmodule CromulentWeb.UserAuth do
         end
 
       socket = Phoenix.Component.assign(socket, :feature_flags, flags)
+      socket = Phoenix.Component.assign(socket, :speaking_users, [])
 
       {:cont, socket}
     else
@@ -279,7 +280,21 @@ defmodule CromulentWeb.UserAuth do
       |> Enum.map(fn {_id, %{metas: [meta | _]}} -> meta end)
 
     voice_presences = Map.put(socket.assigns.voice_presences, channel_id, users)
-    {:cont, Phoenix.Component.assign(socket, :voice_presences, voice_presences)}
+
+    # Remove speaking_users who are no longer in any voice channel
+    all_voice_user_ids =
+      voice_presences
+      |> Enum.flat_map(fn {_ch_id, ch_users} -> Enum.map(ch_users, &to_string(&1.user_id)) end)
+      |> MapSet.new()
+
+    speaking_users =
+      socket.assigns.speaking_users
+      |> Enum.filter(&MapSet.member?(all_voice_user_ids, &1))
+
+    {:cont,
+     socket
+     |> Phoenix.Component.assign(:voice_presences, voice_presences)
+     |> Phoenix.Component.assign(:speaking_users, speaking_users)}
   end
 
   defp handle_presence_info(
@@ -291,6 +306,22 @@ defmodule CromulentWeb.UserAuth do
       |> Enum.map(fn {_id, %{metas: [meta | _]}} -> meta end)
 
     {:cont, Phoenix.Component.assign(socket, :server_presences, server_presences)}
+  end
+
+  defp handle_presence_info(
+         %Phoenix.Socket.Broadcast{event: "ptt_state", payload: %{user_id: user_id, active: active}},
+         socket
+       ) do
+    uid = to_string(user_id)
+
+    speaking_users =
+      if active do
+        if uid in socket.assigns.speaking_users, do: socket.assigns.speaking_users, else: [uid | socket.assigns.speaking_users]
+      else
+        Enum.reject(socket.assigns.speaking_users, &(&1 == uid))
+      end
+
+    {:cont, Phoenix.Component.assign(socket, :speaking_users, speaking_users)}
   end
 
   defp handle_presence_info(_msg, socket), do: {:cont, socket}
