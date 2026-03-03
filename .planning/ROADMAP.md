@@ -121,14 +121,14 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 3. Voice Reliability | 4/4 | Complete   | 2026-03-01 |
 | 4. Rich Text Rendering | 2/3 | In Progress | - |
 | 5. Feature Toggles | 1/4 | In Progress | - |
-| 6. Voice Improvement | 4/5 | In Progress | - |
+| 6. Voice Improvement | 5/5 | Complete   | 2026-03-03 |
 
 ### Phase 6: Voice improvement
 
 **Goal:** Users have a polished voice experience with mute/deafen controls, speaking indicators, voice activity detection, and audio device selection
 **Requirements**: VOIC-MUTE, VOIC-DEAFEN, VOIC-SPEAKING, VOIC-VAD, VOIC-DEVICES, VOIC-SORT
 **Depends on:** Phase 5
-**Plans:** 4/5 plans executed
+**Plans:** 5/5 plans complete
 
 Plans:
 - [x] 06-01-PLAN.md — Mute/deafen controls: VoiceChannel handler, channel_live events, VoiceBar buttons, JS setMute/setDeafen (VOIC-MUTE, VOIC-DEAFEN)
