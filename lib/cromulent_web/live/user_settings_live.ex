@@ -104,7 +104,7 @@ defmodule CromulentWeb.UserSettingsLive do
               <input type="range" name="vad_threshold"
                 min="-60" max="-20" step="1"
                 value={@voice_prefs.vad_threshold}
-                class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
+                class="flex-1 accent-indigo-600 cursor-pointer" />
               <span class="text-xs text-gray-500">Least sensitive</span>
             </div>
             <p class="text-xs text-gray-500 mt-1">Current: {@voice_prefs.vad_threshold} dBFS</p>

@@ -18,26 +18,10 @@ defmodule CromulentWeb.Components.MembersSidebar do
     offline_members =
       Enum.filter(assigns.all_members, &(not MapSet.member?(online_ids, &1.id)))
 
-    voice_channel_by_user =
-      assigns.voice_presences
-      |> Enum.flat_map(fn {channel_id, users} ->
-        Enum.map(users, fn u -> {u.user_id, channel_id} end)
-      end)
-      |> Map.new()
-
-    voice_user_ids = MapSet.new(Map.keys(voice_channel_by_user))
-
-    online_members_sorted =
-      online_members
-      |> Enum.sort_by(fn member ->
-        if MapSet.member?(voice_user_ids, member.id), do: 0, else: 1
-      end)
-
     assigns =
       assigns
-      |> assign(:online_members, online_members_sorted)
+      |> assign(:online_members, online_members)
       |> assign(:offline_members, offline_members)
-      |> assign(:voice_channel_by_user, voice_channel_by_user)
 
     ~H"""
     <aside
@@ -69,20 +53,11 @@ defmodule CromulentWeb.Components.MembersSidebar do
                     <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-gray-800 rounded-full">
                     </span>
                   </div>
-                  <%!-- Name + voice badge --%>
+                  <%!-- Name --%>
                   <div class="flex-1 min-w-0">
                     <.user_popover_wrapper user={member} online={true} context="sidebar-online" placement="left">
                       <p class="text-sm font-medium text-gray-200 truncate">{member.username}</p>
                     </.user_popover_wrapper>
-                    <%= if _channel_id = Map.get(@voice_channel_by_user, member.id) do %>
-                      <p class="text-xs text-green-400 truncate flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M7 4a3 3 0 016 0v6a3 3 0 11-6 0V4z" />
-                          <path d="M5.5 9.643a.75.75 0 00-1.5 0V10a6 6 0 0012 0v-.357a.75.75 0 00-1.5 0V10a4.5 4.5 0 01-9 0v-.357z" />
-                        </svg>
-                        In voice
-                      </p>
-                    <% end %>
                   </div>
                 </div>
               </li>

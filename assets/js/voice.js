@@ -137,7 +137,11 @@ enablePTT(key = ' ') {
       this.vadAnimFrame = requestAnimationFrame(tick)
     }
 
-    this.vadAnimFrame = requestAnimationFrame(tick)
+    // Ensure AudioContext is running — may be suspended due to autoplay policy
+    // (enableVAD is called from an async callback, not a direct user gesture)
+    this.vadAudioCtx.resume().then(() => {
+      this.vadAnimFrame = requestAnimationFrame(tick)
+    })
     console.log("VAD enabled, threshold:", threshold, "dBFS")
   }
 
