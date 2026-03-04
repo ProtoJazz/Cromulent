@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
-milestone_name: milestone
-status: completed
-stopped_at: "complete-milestone in progress — MILESTONES.md and REQUIREMENTS.md done. Remaining: PROJECT.md evolution, ROADMAP.md reorganize, RETROSPECTIVE.md, branch merge, git tag v1.0"
-last_updated: "2026-03-04T14:07:26.496Z"
-last_activity: 2026-03-03 — Plan 06-01 executed and committed
+milestone_name: MVP
+status: milestone_complete
+stopped_at: "v1.0 milestone complete — tagged, archived, retrospective written. Next: /gsd:new-milestone for v1.1"
+last_updated: "2026-03-04T00:00:00.000Z"
+last_activity: 2026-03-04 — v1.0 milestone archived and tagged
 progress:
   total_phases: 6
   completed_phases: 6
@@ -18,10 +18,10 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-26)
+See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Friends can reliably chat and voice call on a self-hosted server that just works
-**Current focus:** Phase 5 - Feature Toggles
+**Current focus:** v1.0 complete — planning next milestone
 
 ## Current Position
 
@@ -126,5 +126,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-04T00:00:00.000Z
-Stopped at: Phase 6 UAT accepted — v1.0 milestone complete. Next: /gsd:complete-milestone
+Stopped at: v1.0 milestone complete — PROJECT.md evolved, ROADMAP.md reorganized, RETROSPECTIVE.md written, tagged v1.0
 Resume file: None
