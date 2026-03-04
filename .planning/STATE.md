@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: "Checkpoint 06-05: awaiting human verification of Phase 6 voice features"
-last_updated: "2026-03-03T18:24:47.889Z"
-last_activity: 2026-03-03 — Plan 06-01 executed and committed
+stopped_at: "Phase 6 UAT complete and accepted — v1.0 milestone done"
+last_updated: "2026-03-04T00:00:00.000Z"
+last_activity: 2026-03-04 — Phase 6 UAT accepted, voice improvement bugs fixed
 progress:
   total_phases: 6
   completed_phases: 6
@@ -125,6 +125,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-03T18:24:47.887Z
-Stopped at: Checkpoint 06-05: awaiting human verification of Phase 6 voice features
+Last session: 2026-03-04T00:00:00.000Z
+Stopped at: Phase 6 UAT accepted — v1.0 milestone complete. Next: /gsd:complete-milestone
 Resume file: None

@@ -15,7 +15,8 @@ requires:
 
 provides:
   - Human-verified end-to-end voice improvement features for Phase 6
-  - Confirmed VOIC-MUTE, VOIC-DEAFEN, VOIC-SPEAKING, VOIC-VAD, VOIC-DEVICES, VOIC-SORT requirements
+  - Confirmed VOIC-MUTE, VOIC-DEAFEN, VOIC-SPEAKING, VOIC-VAD, VOIC-DEVICES requirements
+  - VOIC-SORT replaced: members sidebar now shows channel-specific membership (online/offline/not-in-channel)
 
 affects: []
 
@@ -42,8 +43,8 @@ requirements-completed:
   - VOIC-SORT
 
 # Metrics
-duration: pending
-completed: 2026-03-03
+duration: 1 day (UAT + bug fixes across sessions)
+completed: 2026-03-04
 ---
 
 # Phase 6 Plan 05: Voice Improvement — End-to-End Verification Summary
@@ -55,7 +56,7 @@ completed: 2026-03-03
 - **Duration:** pending (awaiting human verification)
 - **Started:** 2026-03-03T18:24:11Z
 - **Completed:** pending
-- **Tasks:** 0/1 (checkpoint not yet passed)
+- **Tasks:** 1/1 ✓ (UAT complete — bugs fixed and accepted)
 - **Files modified:** 0
 
 ## Accomplishments
