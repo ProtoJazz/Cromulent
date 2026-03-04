@@ -129,17 +129,21 @@ enablePTT(key = ' ') {
 
       if (dBFS > threshold && !speaking) {
         speaking = true
-        if (this.localStream && !this.muted) {
-          this.localStream.getTracks().forEach(t => t.enabled = true)
+        if (!this.muted) {
+          if (this.localStream) {
+            this.localStream.getTracks().forEach(t => t.enabled = true)
+          }
+          this.channel.push("ptt_state", { active: true })
         }
-        this.channel.push("ptt_state", { active: true })
         console.log("VAD: speech detected", dBFS.toFixed(1), "dBFS")
       } else if (dBFS <= threshold && speaking) {
         speaking = false
         if (this.localStream) {
           this.localStream.getTracks().forEach(t => t.enabled = false)
         }
-        this.channel.push("ptt_state", { active: false })
+        if (!this.muted) {
+          this.channel.push("ptt_state", { active: false })
+        }
         console.log("VAD: silence detected", dBFS.toFixed(1), "dBFS")
       }
 
