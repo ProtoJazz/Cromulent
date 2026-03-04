@@ -129,7 +129,7 @@ enablePTT(key = ' ') {
 
       if (dBFS > threshold && !speaking) {
         speaking = true
-        if (this.localStream) {
+        if (this.localStream && !this.muted) {
           this.localStream.getTracks().forEach(t => t.enabled = true)
         }
         this.channel.push("ptt_state", { active: true })
