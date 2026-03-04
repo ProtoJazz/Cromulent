@@ -115,6 +115,21 @@ None - no external service configuration required.
 - Voice settings persist to DB and are applied on next voice channel join
 - VAD sensitivity is configurable per-user; PTT mode remains default for new users
 
+## Self-Check: PASSED
+
+All created files verified on disk:
+- FOUND: lib/cromulent_web/live/user_settings_live.ex
+- FOUND: lib/cromulent_web/live/channel_live.ex
+- FOUND: assets/js/hooks/voice_settings.js
+- FOUND: assets/js/voice.js
+- FOUND: assets/js/app.js
+- FOUND: .planning/phases/06-voice-improvement/06-04-SUMMARY.md
+
+All commits verified in git log:
+- cff57af (Task 1 — Elixir settings section + channel_live voice prefs)
+- c316128 (Task 2 — JS hook + VAD in voice.js + app.js wiring)
+- f6b8b45 (Plan metadata — SUMMARY, STATE, ROADMAP)
+
 ---
 *Phase: 06-voice-improvement*
 *Completed: 2026-03-03*
