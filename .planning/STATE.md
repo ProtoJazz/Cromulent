@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: MVP
-status: milestone_complete
-stopped_at: "v1.0 milestone complete — tagged, archived, retrospective written. Next: /gsd:new-milestone for v1.1"
+milestone: v1.1
+milestone_name: Polish & Distribution
+status: defining_requirements
+stopped_at: ""
 last_updated: "2026-03-04T00:00:00.000Z"
-last_activity: 2026-03-04 — v1.0 milestone archived and tagged
+last_activity: 2026-03-04 — Milestone v1.1 started
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 21
-  completed_plans: 21
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Friends can reliably chat and voice call on a self-hosted server that just works
-**Current focus:** v1.0 complete — planning next milestone
+**Current focus:** v1.1 Polish & Distribution — defining requirements
 
 ## Current Position
 
-Phase: 6 of 6 (Voice Improvement) — COMPLETE
-Plan: 4 of 4 in current phase — COMPLETE (2026-03-03)
-Status: Plan 06-01 complete — Mute/deafen controls wired end-to-end; all Phase 6 plans complete
-Last activity: 2026-03-03 — Plan 06-01 executed and committed
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-04 — Milestone v1.1 started
 
 Progress: [██████████] 100%
 

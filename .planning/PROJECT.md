@@ -10,6 +10,18 @@ v1.0 shipped with a complete communication feature set: @mention autocomplete wi
 
 Friends can reliably chat and voice call on a self-hosted server that just works — deploy it, invite people, and use it daily.
 
+## Current Milestone: v1.1 Polish & Distribution
+
+**Goal:** Make Cromulent easier to use and easier to self-host — user customization, Windows client, automated builds, Unraid packaging, and a documentation skeleton.
+
+**Target features:**
+- User avatars (file upload, server-stored)
+- Display name changes
+- PTT key binding configuration (Electron + web)
+- Windows + Linux Electron builds via GitHub CI/CD
+- Unraid Community Applications Docker template
+- README structure skeleton
+
 ## Requirements
 
 ### Validated
@@ -41,11 +53,17 @@ Friends can reliably chat and voice call on a self-hosted server that just works
 - ✓ Speaking indicators — green ring on active speaker, voice-first member sort — v1.0
 - ✓ Voice activity detection (VAD) — opt-in per-user setting with configurable threshold — v1.0
 - ✓ Audio device selection — input/output device picker on voice settings page — v1.0
+- ✓ Code syntax highlighting — syntax-highlighted code blocks with language detection — v1.0
+- ✓ Unread message counts — per-channel unread badge for non-mention messages — v1.0
 
 ### Active
 
-- [ ] Code syntax highlighting — syntax-highlighted code blocks with language detection (deferred from v1.0)
-- [ ] Unread message counts — per-channel unread badge for non-mention messages
+- [ ] User avatars — file upload, server-stored, displayed in chat and profiles
+- [ ] Display name changes — users can update their shown name
+- [ ] PTT key binding configuration — customizable hotkey in Electron and web settings
+- [ ] Windows + Linux Electron builds via GitHub CI/CD
+- [ ] Unraid Community Applications Docker template
+- [ ] README structure skeleton (headings + placeholders, human-written content)
 
 ### Out of Scope
 
@@ -53,7 +71,7 @@ Friends can reliably chat and voice call on a self-hosted server that just works
 - Mobile app — web and Electron desktop cover the use cases for now
 - Direct messages — focus on channel-based communication first
 - Video chat — audio-only keeps complexity and bandwidth manageable
-- File uploads — no cloud storage integration; image embeds via URL for now
+- General file uploads in chat — no cloud storage; image embeds via URL (avatars are a separate scoped feature)
 - Multi-node clustering — single-server deployment is the target
 - Per-message read receipts — privacy concerns, users feel surveilled
 - Email notifications — adds Swoosh production config complexity, overkill for self-hosted
@@ -98,4 +116,4 @@ Cromulent v1.0 is a complete, self-hostable voice and chat platform. The Phoenix
 | voice_connection_state lifecycle (nil→:connecting→:connected/:disconnected) | Clear state machine, nil on leave prevents stale state | ✓ Good |
 
 ---
-*Last updated: 2026-03-04 after v1.0 milestone*
+*Last updated: 2026-03-04 after v1.1 milestone started*
