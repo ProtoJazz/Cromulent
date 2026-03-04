@@ -107,7 +107,7 @@ defmodule CromulentWeb.UserSettingsLive do
                 class="flex-1 accent-indigo-600 cursor-pointer" />
               <span class="text-xs text-gray-500">Least sensitive</span>
             </div>
-            <p class="text-xs text-gray-500 mt-1">Current: {@voice_prefs.vad_threshold} dBFS</p>
+            <p id="vad-threshold-label" class="text-xs text-gray-500 mt-1">Current: {@voice_prefs.vad_threshold} dBFS</p>
           </div>
 
           <%!-- Microphone device picker --%>

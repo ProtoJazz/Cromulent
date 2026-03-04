@@ -57,6 +57,9 @@ defmodule CromulentWeb.ChannelLive do
       )
     end
 
+    channel_member_ids =
+      Cromulent.Channels.list_channel_member_ids(channel.id) |> MapSet.new()
+
     {:noreply,
      socket
      |> assign(
@@ -64,7 +67,8 @@ defmodule CromulentWeb.ChannelLive do
        messages: messages,
        oldest_id: List.first(messages) && List.first(messages).id,
        all_loaded: length(messages) < 50,
-       can_write: can_write
+       can_write: can_write,
+       channel_member_ids: channel_member_ids
      )
      |> refresh_unread_counts()}
   end

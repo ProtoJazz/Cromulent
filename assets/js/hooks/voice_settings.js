@@ -5,6 +5,15 @@ const VoiceSettings = {
     this.micAnimFrame = null
     this.testActive = false
 
+    // Live label update as slider moves
+    const slider = this.el.querySelector('input[name="vad_threshold"]')
+    const label = this.el.querySelector('#vad-threshold-label')
+    if (slider && label) {
+      slider.addEventListener('input', () => {
+        label.textContent = `Current: ${slider.value} dBFS`
+      })
+    }
+
     const testBtn = document.getElementById("test-mic-btn")
     const levelBar = document.getElementById("mic-level-bar")
     const levelFill = document.getElementById("mic-level-fill")

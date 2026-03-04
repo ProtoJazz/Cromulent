@@ -97,15 +97,24 @@ enablePTT(key = ' ') {
   }
 }
   enableVAD(threshold = -40) {
-    // Start muted; VAD will enable tracks when speech detected
+    this.vadActive = true
+    this.vadAudioCtx = new AudioContext()
+
+    // Clone the audio track for the analyser. Per spec, a disabled MediaStreamTrack
+    // produces silence in Web Audio API too — so we need an always-enabled clone
+    // purely for level detection, while the original track controls transmission.
+    const audioTracks = this.localStream.getAudioTracks()
+    this.vadAnalyserStream = audioTracks.length > 0
+      ? new MediaStream([audioTracks[0].clone()])
+      : this.localStream
+
+    const source = this.vadAudioCtx.createMediaStreamSource(this.vadAnalyserStream)
+    const analyser = this.vadAudioCtx.createAnalyser()
+
+    // Now disable the original tracks — analyser clone is unaffected
     if (this.localStream) {
       this.localStream.getTracks().forEach(t => t.enabled = false)
     }
-
-    this.vadActive = true
-    this.vadAudioCtx = new AudioContext()
-    const source = this.vadAudioCtx.createMediaStreamSource(this.localStream)
-    const analyser = this.vadAudioCtx.createAnalyser()
     analyser.fftSize = 1024
     source.connect(analyser)
 
@@ -385,6 +394,10 @@ enablePTT(key = ' ') {
     if (this.vadAudioCtx) {
       this.vadAudioCtx.close()
       this.vadAudioCtx = null
+    }
+    if (this.vadAnalyserStream) {
+      this.vadAnalyserStream.getTracks().forEach(t => t.stop())
+      this.vadAnalyserStream = null
     }
 
     // Reset mute/deafen state on leave

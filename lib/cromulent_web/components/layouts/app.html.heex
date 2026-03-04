@@ -74,6 +74,7 @@
     server_presences={assigns[:server_presences] || []}
     all_members={assigns[:all_members] || []}
     voice_presences={assigns[:voice_presences] || %{}}
+    channel_member_ids={assigns[:channel_member_ids] || MapSet.new()}
   />
 
   <%!-- Main content --%>
