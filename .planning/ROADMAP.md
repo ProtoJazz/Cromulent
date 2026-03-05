@@ -39,7 +39,12 @@ See full details: `.planning/milestones/v1.0-ROADMAP.md`
   2. Built Electron artifacts are attached to a GitHub Release automatically and available for download from the repository's Releases page
   3. Pushing a release tag triggers a Docker image build that pushes to GitHub Container Registry (GHCR) without manual intervention
   4. A user on Windows can download the Electron installer from GitHub Releases and run it without needing to install Elixir, Node, or any dev tooling
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Migrate electron-client to electron-builder (package.json, main.js daemon path fix, icon assets)
+- [ ] 07-02-PLAN.md — Create GHCR Docker release workflow (.github/workflows/release-docker.yml)
+- [ ] 07-03-PLAN.md — Create Electron release workflow with Linux+Windows matrix (.github/workflows/release-electron.yml)
 
 ### Phase 8: PTT Key Binding
 **Goal**: Users can configure which key activates push-to-talk in the Electron client, and their preference persists across sessions
@@ -84,7 +89,7 @@ See full details: `.planning/milestones/v1.0-ROADMAP.md`
 | 4. Rich Text Rendering | v1.0 | 3/3 | Complete | 2026-03-02 |
 | 5. Feature Toggles | v1.0 | 4/4 | Complete | 2026-03-02 |
 | 6. Voice Improvement | v1.0 | 5/5 | Complete | 2026-03-03 |
-| 7. CI/CD & Electron Distribution | v1.1 | 0/? | Not started | - |
+| 7. CI/CD & Electron Distribution | v1.1 | 0/3 | Not started | - |
 | 8. PTT Key Binding | v1.1 | 0/? | Not started | - |
 | 9. User Profiles | v1.1 | 0/? | Not started | - |
 | 10. Unraid & Documentation | v1.1 | 0/? | Not started | - |
