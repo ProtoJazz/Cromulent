@@ -26,6 +26,7 @@ import VoiceRoom from "./voice"
 import "./electron-bridge.js"
 import MentionAutocomplete from "./hooks/mention_autocomplete"
 import NotificationHandler from "./hooks/notification_handler"
+import VoiceSettings from "./hooks/voice_settings"
 
 let voiceRoom = null
 let voiceSocket = null
@@ -33,11 +34,12 @@ let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("
 const Hooks = {
   MentionAutocomplete,
   NotificationHandler,
+  VoiceSettings,
   VoiceRoom: {
     mounted() {
       // This element is always in the DOM, so mounted() fires once on page load.
       // Voice join/leave is driven entirely by server-pushed events.
-      this.handleEvent("voice:join", ({ channel_id, user_token, user_id, ice_servers }) => {
+      this.handleEvent("voice:join", ({ channel_id, user_token, user_id, ice_servers, voice_mode, vad_threshold, mic_device_id, speaker_device_id }) => {
         // Leave existing voice session if switching channels
         if (voiceRoom) {
           voiceRoom.leave()
@@ -58,7 +60,7 @@ const Hooks = {
         voiceSocket.onClose(() => console.log("Voice socket closed"))
 
         voiceRoom = new VoiceRoom(channel_id, user_id, voiceSocket, ice_servers)
-        voiceRoom.join()
+        voiceRoom.join(voice_mode || "ptt", vad_threshold || -40, mic_device_id || null, speaker_device_id || null)
           .then(() => {
             // Phoenix Channel join succeeded = "connected" (peers connect independently)
             this.pushEvent("voice_state_changed", { state: "connected" })
@@ -79,6 +81,14 @@ const Hooks = {
           voiceSocket.disconnect()
           voiceSocket = null
         }
+      })
+
+      this.handleEvent("voice:set_mute", ({ muted }) => {
+        if (voiceRoom) voiceRoom.setMute(muted)
+      })
+
+      this.handleEvent("voice:set_deafen", ({ deafened, muted }) => {
+        if (voiceRoom) voiceRoom.setDeafen(deafened, muted)
       })
     },
     destroyed() {

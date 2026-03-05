@@ -1,0 +1,66 @@
+# .github/workflows/release-electron.yml
+# Builds Electron desktop client for Linux (.AppImage, .deb) and Windows (.exe NSIS).
+# Publishes artifacts to a GitHub Release automatically.
+# Triggered on semver release tags (e.g., v1.2.0).
+#
+# Prerequisites for runners:
+# - Linux: ubuntu-latest (Rust daemon compiled via cargo; uiohook-napi rebuilt by electron-builder)
+# - Windows: windows-latest (uiohook-napi rebuilt by electron-builder; VS Build Tools pre-installed)
+#
+# No code signing configured for v1.1. Windows users will see SmartScreen "Unknown Publisher"
+# warning on first run — this is expected for unsigned open-source builds.
+name: Release Electron
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: win
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: electron-client/package-lock.json
+
+      # Linux only: compile Rust PTT daemon (evdev is Linux-only; not needed on Windows)
+      - name: Install Rust toolchain
+        if: matrix.platform == 'linux'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build PTT daemon (Linux only)
+        if: matrix.platform == 'linux'
+        working-directory: electron-client/ptt-daemon
+        run: cargo build --release
+
+      # Install Node dependencies and build+publish Electron installers
+      # electron-builder auto-detects OS and builds appropriate targets:
+      #   Linux  → AppImage + deb (from package.json build.linux.target)
+      #   Windows → nsis (from package.json build.win.target)
+      # --publish always: create GitHub Release and upload artifacts immediately
+      # GH_TOKEN: GITHUB_TOKEN has contents:write permission (set above)
+      - name: Install dependencies and publish
+        working-directory: electron-client
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm ci
+          npx electron-builder --publish always

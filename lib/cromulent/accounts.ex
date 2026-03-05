@@ -455,6 +455,27 @@ defmodule Cromulent.Accounts do
     |> Repo.update()
   end
 
+  @doc """
+  Updates a user's voice preferences (voice_mode, vad_threshold, mic_device_id, speaker_device_id).
+  """
+  def update_user_voice_prefs(user, attrs) do
+    user
+    |> User.voice_preferences_changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Returns the current voice preferences for a user as a map.
+  """
+  def get_voice_prefs(user) do
+    %{
+      voice_mode: user.voice_mode || "ptt",
+      vad_threshold: user.vad_threshold || -40,
+      mic_device_id: user.mic_device_id,
+      speaker_device_id: user.speaker_device_id
+    }
+  end
+
   def list_users do
     Repo.all(User)
   end

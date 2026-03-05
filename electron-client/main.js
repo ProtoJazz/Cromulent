@@ -55,7 +55,9 @@ async tryRustDaemon() {
     return false;
   }
 
-  const daemonPath = path.join(__dirname, 'ptt-daemon', 'target', 'debug', 'ptt-daemon');
+  const daemonPath = app.isPackaged
+    ? path.join(process.resourcesPath, 'app.asar.unpacked', 'ptt-daemon', 'target', 'release', 'ptt-daemon')
+    : path.join(__dirname, 'ptt-daemon', 'target', 'debug', 'ptt-daemon');
   
   if (!fs.existsSync(daemonPath)) {
     console.log('[PTT] Rust daemon not found at:', daemonPath);

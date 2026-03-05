@@ -8,11 +8,14 @@ defmodule CromulentWeb.Components.Sidebar do
   attr :voice_presences, :map, default: %{}
   attr :voice_channel, :any, default: nil
   attr :voice_connection_state, :atom, default: nil
+  attr :voice_muted, :boolean, default: false
+  attr :voice_deafened, :boolean, default: false
   attr :current_channel, :any, default: nil
   attr :join_modal_type, :atom, default: nil
   attr :unread_counts, :map, default: %{}
   attr :mention_counts, :map, default: %{}
   attr :voice_enabled, :boolean, default: true
+  attr :speaking_users, :list, default: []
 
   def sidebar(assigns) do
     text_channels = Enum.filter(assigns.channels, &(&1.type == :text))
@@ -203,10 +206,24 @@ defmodule CromulentWeb.Components.Sidebar do
                 <%= if users = @voice_presences[ch.id] do %>
                   <ul class="ml-7 mt-0.5 space-y-0.5">
                     <li :for={user <- users} class="flex items-center px-2 py-1 text-xs text-gray-400">
-                      <div class="w-5 h-5 rounded-full bg-gray-600 flex items-center justify-center text-white text-[10px] font-medium mr-2 flex-shrink-0">
+                      <div class={[
+                        "w-5 h-5 rounded-full bg-gray-600 flex items-center justify-center text-white text-[10px] font-medium mr-2 flex-shrink-0",
+                        to_string(user.user_id) in @speaking_users && "ring-2 ring-green-400"
+                      ]}>
                         {user.email |> String.first() |> String.upcase()}
                       </div>
                       <span class="truncate">{user.email}</span>
+                      <%= if user.muted do %>
+                        <svg class="w-3 h-3 ml-1 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" title="Muted">
+                          <path d="M7 4a3 3 0 016 0v6a3 3 0 11-6 0V4z"/>
+                          <path d="M5.5 9.643a.75.75 0 00-1.5 0V10a6 6 0 0012 0v-.357a.75.75 0 00-1.5 0V10a4.5 4.5 0 01-9 0v-.357z"/>
+                        </svg>
+                      <% end %>
+                      <%= if user.deafened do %>
+                        <svg class="w-3 h-3 ml-1 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="Deafened">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                        </svg>
+                      <% end %>
                     </li>
                   </ul>
                 <% end %>
@@ -218,7 +235,13 @@ defmodule CromulentWeb.Components.Sidebar do
 
         <%!-- Voice connection bar --%>
         <%= if @voice_channel do %>
-          <.voice_bar voice_channel={@voice_channel} connection_state={@voice_connection_state || :connecting} />
+          <.voice_bar
+            voice_channel={@voice_channel}
+            connection_state={@voice_connection_state || :connecting}
+            muted={@voice_muted}
+            deafened={@voice_deafened}
+            voice_mode={if @current_user, do: @current_user.voice_mode || "ptt", else: "ptt"}
+          />
         <% end %>
 
         <%!-- User panel at bottom --%>

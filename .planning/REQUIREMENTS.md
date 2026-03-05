@@ -1,110 +1,89 @@
 # Requirements: Cromulent
 
-**Defined:** 2026-02-26
-**Core Value:** Friends can reliably chat and voice call on a self-hosted server that just works
+**Defined:** 2026-03-05
+**Core Value:** Friends can reliably chat and voice call on a self-hosted server that just works — deploy it, invite people, and use it daily.
 
-## v1 Requirements
+## v1.1 Requirements
 
-Requirements for this milestone. Each maps to roadmap phases.
+### Distribution
 
-### Mentions
+- [x] **DIST-01**: GitHub Actions builds Electron app for Linux (.AppImage, .deb) on release tag
+- [x] **DIST-02**: GitHub Actions builds Electron app for Windows (.exe or .msi) on release tag
+- [x] **DIST-03**: Built Electron artifacts are published to GitHub Releases automatically
+- [x] **DIST-04**: GitHub Actions builds and pushes Docker image to GHCR on release tag
 
-- [x] **MENT-01**: User can type @ in message input and see a filterable dropdown of channel members
-- [x] **MENT-02**: User can navigate autocomplete with keyboard (up/down/enter/escape)
-- [x] **MENT-03**: @everyone and @here mentions display correctly in autocomplete alongside users
-- [x] **MENT-04**: @group mentions display correctly in autocomplete alongside users
+### Push-to-Talk
 
-### Notifications
+- [ ] **PTT-01**: User can configure their PTT key in voice preferences settings
+- [ ] **PTT-02**: Electron client reads the user's configured PTT key from the server on connect
+- [ ] **PTT-03**: PTT key preference persists in the database across Electron client restarts
 
-- [x] **NOTF-01**: System detects whether user is on Electron or web browser client
-- [x] **NOTF-02**: Electron users receive native OS desktop notifications when mentioned
-- [x] **NOTF-03**: Web browser users receive Web Notifications API alerts when mentioned
-- [x] **NOTF-04**: Notifications only fire when user is online and not viewing the mentioned channel
-- [x] **NOTF-05**: User hears an audible sound when mentioned in a channel they're not viewing
-- [ ] **NOTF-06**: User can view a notification inbox tab showing missed mentions and alerts
-- [x] **NOTF-07**: User tooltip/popover shows display name, avatar, online status, and role on hover
+### Profiles
 
-### Rich Text
+- [ ] **PROF-01**: User can set a display name separate from their username
+- [ ] **PROF-02**: Display name is shown in chat messages, member list, and user popovers
+- [ ] **PROF-03**: Admin can configure avatar mode for the server (none, URL, or Libravatar)
+- [ ] **PROF-04**: When avatar mode is "URL", user can enter an avatar image URL in profile settings
+- [ ] **PROF-05**: When avatar mode is "Libravatar", avatar is automatically derived from user's email hash
+- [ ] **PROF-06**: Avatar is displayed in the message feed, member list, and user popovers when a mode is active
 
-- [x] **RTXT-01**: Messages render markdown formatting (bold, italic, code blocks, lists, blockquotes)
-- [x] **RTXT-02**: URLs in messages are automatically linked
-- [x] **RTXT-03**: URLs display a preview card with title, description, and thumbnail (Open Graph)
-- [x] **RTXT-04**: Image URLs display inline as embedded images
+### Unraid & Documentation
 
-### Voice
+- [ ] **DOCS-01**: Unraid Community Applications XML template created and referencing GHCR image
+- [ ] **DOCS-02**: README contains a self-hosting deployment guide (Docker setup, environment variables, first run)
+- [ ] **DOCS-03**: README contains a technical architecture reference (stack, components, how it fits together)
 
-- [x] **VOIC-01**: User cannot join the same voice channel multiple times
-- [x] **VOIC-02**: Server includes a bundled TURN server (coturn) for NAT traversal
+## Future Requirements
 
-### Admin/Config
+### Avatar Uploads
 
-- [ ] **ADMN-01**: Server operator can enable/disable features via environment variables (voice, TURN, link previews, registration)
+- **AVT-01**: Admin can enable local disk avatar uploads (server-stored)
+- **AVT-02**: Admin can enable S3-compatible avatar uploads (external storage)
+- **AVT-03**: User can upload an avatar image when upload mode is enabled
 
-## v2 Requirements
+### PTT
 
-Deferred to future release. Tracked but not in current roadmap.
-
-### Rich Text
-
-- **RTXT-05**: Code blocks display with syntax highlighting and language detection
-- **RTXT-06**: User sees live markdown preview while composing messages
-
-### Notifications
-
-- **NOTF-08**: User can configure notification preferences per channel (mute, custom sounds)
-- **NOTF-09**: User can set Do Not Disturb mode to suppress all notifications
-- **NOTF-10**: Offline users receive notifications when they next log in (push notifications for mobile)
-
-### Mentions
-
-- **MENT-05**: Mention chips render as rich tokens in the message input (Discord-style)
-- **MENT-06**: #channel-name auto-links to channels in messages
+- **PTT-04**: Web client respects configured PTT key when browser tab is focused
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Per-message read receipts | Privacy concerns — users feel surveilled |
-| Email notifications | Adds Swoosh production config complexity, overkill for self-hosted |
-| Mobile push notifications | No mobile app in scope for this milestone |
-| WYSIWYG editor | Massive complexity, breaks LiveView patterns, users expect markdown in chat |
-| Inline GIF search (Tenor/Giphy) | Third-party API dependency, violates self-hosting philosophy |
-| Voice activity detection (VAD) | Privacy concerns, false positives, CPU intensive |
-| End-to-end encryption | Breaks self-hosted trust model, adds significant complexity |
-| SFU/media server | Overkill for 5-50 users, P2P is sufficient |
-| Video chat | Bandwidth/complexity, audio-only keeps it manageable |
+| Avatar file uploads (local/S3) | Deferred to v1.2+; URL and Libravatar cover v1.1 use cases |
+| PTT key binding on web | Web tab focus limitation makes global PTT impractical; Electron covers primary use case |
 | OAuth/LDAP/SSO | Local accounts sufficient for small-scale self-hosting |
+| Mobile app | Web and Electron desktop cover use cases |
+| Direct messages | Channel-based communication is the focus |
+| Video chat | Audio-only keeps complexity manageable |
+| General file uploads in chat | No cloud storage; image embeds via URL |
+| Multi-node clustering | Single-server deployment is the target |
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MENT-01 | Phase 1 | Complete |
-| MENT-02 | Phase 1 | Complete |
-| MENT-03 | Phase 1 | Complete |
-| MENT-04 | Phase 1 | Complete |
-| NOTF-01 | Phase 2 | Complete |
-| NOTF-02 | Phase 2 | Complete |
-| NOTF-03 | Phase 2 | Complete |
-| NOTF-04 | Phase 2 | Complete |
-| NOTF-05 | Phase 2 | Complete |
-| NOTF-06 | Phase 2 | Pending |
-| NOTF-07 | Phase 2 | Complete |
-| RTXT-01 | Phase 4 | Complete |
-| RTXT-02 | Phase 4 | Complete |
-| RTXT-03 | Phase 4 | Complete |
-| RTXT-04 | Phase 4 | Complete |
-| VOIC-01 | Phase 3 | Complete |
-| VOIC-02 | Phase 3 | Complete |
-| ADMN-01 | Phase 5 | Pending |
+| DIST-01 | Phase 7 | Complete |
+| DIST-02 | Phase 7 | Complete |
+| DIST-03 | Phase 7 | Complete |
+| DIST-04 | Phase 7 | Complete |
+| PTT-01 | Phase 8 | Pending |
+| PTT-02 | Phase 8 | Pending |
+| PTT-03 | Phase 8 | Pending |
+| PROF-01 | Phase 9 | Pending |
+| PROF-02 | Phase 9 | Pending |
+| PROF-03 | Phase 9 | Pending |
+| PROF-04 | Phase 9 | Pending |
+| PROF-05 | Phase 9 | Pending |
+| PROF-06 | Phase 9 | Pending |
+| DOCS-01 | Phase 10 | Pending |
+| DOCS-02 | Phase 10 | Pending |
+| DOCS-03 | Phase 10 | Pending |
 
 **Coverage:**
-- v1 requirements: 18 total
-- Mapped to phases: 18
-- Unmapped: 0
+- v1.1 requirements: 16 total
+- Mapped to phases: 16
+- Unmapped: 0 ✓
 
 ---
-*Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after roadmap creation*
+*Requirements defined: 2026-03-05*
+*Last updated: 2026-03-05 after v1.1 milestone discussion*

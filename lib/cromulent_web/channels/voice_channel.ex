@@ -53,6 +53,13 @@ defmodule CromulentWeb.VoiceChannel do
     {:noreply, socket}
   end
 
+  def handle_in("toggle_deafen", %{"deafened" => deafened}, socket) do
+    Presence.update(socket, socket.assigns.current_user.id, fn meta ->
+      Map.put(meta, :deafened, deafened)
+    end)
+    {:noreply, socket}
+  end
+
   def handle_in("sdp_offer", %{"to" => to, "sdp" => sdp}, socket) do
     CromulentWeb.Endpoint.broadcast("voice:#{socket.assigns.channel_id}", "sdp_offer", %{
       from: socket.assigns.current_user.id,

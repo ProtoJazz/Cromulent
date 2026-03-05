@@ -8,6 +8,15 @@ class VoiceRoom {
     // Use dynamic ICE servers from server; fall back to STUN-only if not provided
     this.iceServers = iceServers || [{ urls: "stun:stun.l.google.com:19302" }]
 
+    // VAD state
+    this.vadActive = false
+    this.vadAudioCtx = null
+    this.vadAnimFrame = null
+
+    // Mute/deafen state
+    this.muted = false
+    this.deafened = false
+
     this.channel = socket.channel(`voice:${channelId}`)
     this.bindChannelEvents()
   }
@@ -25,6 +34,7 @@ enablePTT(key = ' ') {
 
   const activate = () => {
     if (this.pttActive) return
+    if (this.muted) return  // mute blocks PTT
     this.pttActive = true
     this.localStream.getTracks().forEach(t => t.enabled = true)
     this.channel.push("ptt_state", { active: true })
@@ -86,26 +96,139 @@ enablePTT(key = ' ') {
     window.addEventListener("keyup", this._onKeyUp)
   }
 }
-  async join() {
-    this.localStream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-        sampleRate: 48000
+  enableVAD(threshold = -40) {
+    this.vadActive = true
+    this.vadAudioCtx = new AudioContext()
+
+    // Clone the audio track for the analyser. Per spec, a disabled MediaStreamTrack
+    // produces silence in Web Audio API too — so we need an always-enabled clone
+    // purely for level detection, while the original track controls transmission.
+    const audioTracks = this.localStream.getAudioTracks()
+    this.vadAnalyserStream = audioTracks.length > 0
+      ? new MediaStream([audioTracks[0].clone()])
+      : this.localStream
+
+    const source = this.vadAudioCtx.createMediaStreamSource(this.vadAnalyserStream)
+    const analyser = this.vadAudioCtx.createAnalyser()
+
+    // Now disable the original tracks — analyser clone is unaffected
+    if (this.localStream) {
+      this.localStream.getTracks().forEach(t => t.enabled = false)
+    }
+    analyser.fftSize = 1024
+    source.connect(analyser)
+
+    const buffer = new Float32Array(analyser.fftSize)
+    let speaking = false
+
+    const tick = () => {
+      if (!this.vadActive) return
+      analyser.getFloatTimeDomainData(buffer)
+      const rms = Math.sqrt(buffer.reduce((s, v) => s + v * v, 0) / buffer.length)
+      const dBFS = 20 * Math.log10(rms || 0.000001)
+
+      if (dBFS > threshold && !speaking) {
+        speaking = true
+        if (!this.muted) {
+          if (this.localStream) {
+            this.localStream.getTracks().forEach(t => t.enabled = true)
+          }
+          this.channel.push("ptt_state", { active: true })
+        }
+        console.log("VAD: speech detected", dBFS.toFixed(1), "dBFS")
+      } else if (dBFS <= threshold && speaking) {
+        speaking = false
+        if (this.localStream) {
+          this.localStream.getTracks().forEach(t => t.enabled = false)
+        }
+        if (!this.muted) {
+          this.channel.push("ptt_state", { active: false })
+        }
+        console.log("VAD: silence detected", dBFS.toFixed(1), "dBFS")
       }
+
+      this.vadAnimFrame = requestAnimationFrame(tick)
+    }
+
+    // Ensure AudioContext is running — may be suspended due to autoplay policy
+    // (enableVAD is called from an async callback, not a direct user gesture)
+    this.vadAudioCtx.resume().then(() => {
+      this.vadAnimFrame = requestAnimationFrame(tick)
     })
-    console.log("🎤 Got local stream", this.localStream.getTracks())
+    console.log("VAD enabled, threshold:", threshold, "dBFS")
+  }
+
+  setMute(muted) {
+    this.muted = muted
+    if (this.localStream) {
+      this.localStream.getTracks().forEach(t => t.enabled = !muted)
+    }
+    // If currently PTT-active and now muting, deactivate PTT
+    if (muted && this.pttActive) {
+      this.pttActive = false
+      this.channel.push("ptt_state", { active: false })
+      const btn = document.getElementById("ptt-button")
+      btn?.setAttribute("data-active", "false")
+      btn?.classList.replace("bg-green-500", "bg-gray-600")
+      if (btn) btn.textContent = "Push to Talk"
+    }
+    // Push mute state to channel so Presence meta updates
+    this.channel.push("toggle_mute", { muted: muted })
+  }
+
+  setDeafen(deafened, muted) {
+    this.deafened = deafened
+    // Mute all remote audio elements
+    document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
+      a.muted = deafened
+    })
+    // Apply mic mute (deafen auto-mutes; undeafen does NOT auto-unmute)
+    this.setMute(muted)
+    // Push deafen state to channel so Presence meta updates
+    this.channel.push("toggle_deafen", { deafened: deafened })
+  }
+
+  async join(voiceMode = "ptt", vadThreshold = -40, micDeviceId = null, speakerDeviceId = null) {
+    this.speakerDeviceId = speakerDeviceId
+
+    // Use saved mic device if available, fall back gracefully on OverconstrainedError
+    let audioConstraints = {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+      sampleRate: 48000
+    }
+    if (micDeviceId) {
+      audioConstraints.deviceId = { exact: micDeviceId }
+    }
+
+    try {
+      this.localStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints })
+    } catch (err) {
+      if (err.name === "OverconstrainedError" || err.name === "NotFoundError") {
+        console.warn("Saved mic device not found, falling back to default mic")
+        delete audioConstraints.deviceId
+        this.localStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints })
+      } else {
+        throw err
+      }
+    }
+
+    console.log("Got local stream", this.localStream.getTracks())
 
     return new Promise((resolve, reject) => {
       this.channel.join()
         .receive("ok", () => {
-          console.log("✅ Joined voice channel")
-          this.enablePTT(' ')  // spacebar
+          console.log("Joined voice channel")
+          if (voiceMode === "vad") {
+            this.enableVAD(vadThreshold)
+          } else {
+            this.enablePTT(" ")
+          }
           resolve()
         })
         .receive("error", (err) => {
-          console.error("❌ Failed to join:", err)
+          console.error("Failed to join:", err)
           reject(err)
         })
     })
@@ -246,6 +369,14 @@ enablePTT(key = ' ') {
     audio.id = `audio-${id}`
     audio.srcObject = stream
     audio.autoplay = true
+
+    // Speaker device selection (Chromium/Electron only)
+    if (this.speakerDeviceId && typeof audio.setSinkId !== "undefined") {
+      audio.setSinkId(this.speakerDeviceId).catch(err => {
+        console.warn("setSinkId failed:", err)
+      })
+    }
+
     document.body.appendChild(audio)
   }
 
@@ -261,16 +392,35 @@ enablePTT(key = ' ') {
   }
 
   leave() {
-  // Only remove keyboard listeners if we added them (not using Electron)
-  if (this._onKeyDown && this._onKeyUp) {
-    window.removeEventListener("keydown", this._onKeyDown)
-    window.removeEventListener("keyup", this._onKeyUp)
+    // Stop VAD if active
+    this.vadActive = false
+    if (this.vadAnimFrame) cancelAnimationFrame(this.vadAnimFrame)
+    if (this.vadAudioCtx) {
+      this.vadAudioCtx.close()
+      this.vadAudioCtx = null
+    }
+    if (this.vadAnalyserStream) {
+      this.vadAnalyserStream.getTracks().forEach(t => t.stop())
+      this.vadAnalyserStream = null
+    }
+
+    // Reset mute/deafen state on leave
+    this.muted = false
+    this.deafened = false
+    document.querySelectorAll('audio[id^="audio-"]').forEach(a => {
+      a.muted = false
+    })
+
+    // Only remove keyboard listeners if we added them (not using Electron)
+    if (this._onKeyDown && this._onKeyUp) {
+      window.removeEventListener("keydown", this._onKeyDown)
+      window.removeEventListener("keyup", this._onKeyUp)
+    }
+
+    Object.keys(this.peers).forEach(id => this.removePeer(id))
+    this.localStream?.getTracks().forEach(t => t.stop())
+    this.channel.leave()
   }
-  
-  Object.keys(this.peers).forEach(id => this.removePeer(id))
-  this.localStream?.getTracks().forEach(t => t.stop())
-  this.channel.leave()
-}
 }
 
 export default VoiceRoom

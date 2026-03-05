@@ -1,42 +1,53 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: unknown
-last_updated: "2026-03-03T14:47:59.037Z"
+milestone: v1.1
+milestone_name: Polish & Distribution
+status: Roadmap ready
+stopped_at: Completed 07-03 Electron release workflow
+last_updated: "2026-03-05T14:29:00.625Z"
+last_activity: 2026-03-05 — v1.1 roadmap created (Phases 7-10)
 progress:
-  total_phases: 6
-  completed_phases: 5
-  total_plans: 16
-  completed_plans: 16
+  total_phases: 4
+  completed_phases: 1
+  total_plans: 3
+  completed_plans: 3
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-26)
+See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Friends can reliably chat and voice call on a self-hosted server that just works
-**Current focus:** Phase 5 - Feature Toggles
+**Current focus:** v1.1 Polish & Distribution — roadmap ready, beginning Phase 7
 
 ## Current Position
 
-Phase: 5 of 5 (Feature Toggles) — IN PROGRESS
-Plan: 1 of 3 in current phase — COMPLETE (2026-03-02)
-Status: Plan 05-01 complete — FeatureFlags DB foundation, schema, context, and LiveView assign injection complete
-Last activity: 2026-03-02 — Plan 05-01 executed and committed
+Phase: 7 — CI/CD & Electron Distribution (not started)
+Plan: —
+Status: Roadmap ready
+Last activity: 2026-03-05 — v1.1 roadmap created (Phases 7-10)
 
-Progress: [█████████░] 85%
+Progress: [░░░░░░░░░░] 0% (0/4 phases)
+
+## v1.1 Phase Map
+
+| Phase | Name | Requirements | Status |
+|-------|------|--------------|--------|
+| 7 | CI/CD & Electron Distribution | DIST-01, DIST-02, DIST-03, DIST-04 | Not started |
+| 8 | PTT Key Binding | PTT-01, PTT-02, PTT-03 | Not started |
+| 9 | User Profiles | PROF-01, PROF-02, PROF-03, PROF-04, PROF-05, PROF-06 | Not started |
+| 10 | Unraid & Documentation | DOCS-01, DOCS-02, DOCS-03 | Not started |
 
 ## Performance Metrics
 
-**Velocity:**
-- Total plans completed: 3
-- Average duration: 1.9 minutes
-- Total execution time: 0.13 hours
+**Velocity (v1.0 reference):**
+- Total plans completed: 21
+- v1.0 timeline: 22 days, 6 phases
 
-**By Phase:**
+**By Phase (v1.0):**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
@@ -45,6 +56,10 @@ Progress: [█████████░] 85%
 | 03 | 4 | 4 min | 1 min |
 | 04 | 2 | 7 min | 3.5 min |
 | 05 | 1 | 3 min | 3 min |
+| 06 | 5 | ~16 min | ~3.2 min |
+| Phase 07-cicd-electron-distribution P01 | 2 | 3 tasks | 4 files |
+| Phase 07-cicd-electron-distribution P02 | 1 | 1 tasks | 1 files |
+| Phase 07-cicd-electron-distribution P03 | 1 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -89,10 +104,33 @@ Recent decisions affecting current work:
 - [05-01]: get_flags/0 uses Repo.one(Flags) || %Flags{} — no crash on fresh install, returns safe defaults
 - [05-01]: upsert_flags/1 detects insert vs update by checking id == nil on returned struct from get_flags/0
 - [05-01]: feature_flags assign added in ensure_authenticated authenticated branch only (not unauthenticated path)
+- [Phase 06-voice-improvement]: [06-03]: voice_mode stored as :string not Ecto.Enum — allows client extensibility without migration
+- [Phase 06-voice-improvement]: [06-03]: vad_threshold validated in range -60 to -20 dB to prevent nonsensical VAD sensitivity values
+- [Phase 06-voice-improvement]: [06-03]: get_voice_prefs/1 reads from loaded user struct — no extra DB query for settings page render
+- [06-02]: speaking_users stored as plain list of string IDs (not MapSet) for LiveView assign serialization compatibility
+- [06-02]: broadcast_from! in voice_channel.ex means sender does not see their own speaking ring — acceptable, self-state can be tracked client-side if needed
+- [06-02]: Departed voice users cleared from speaking_users in presence_diff handler to prevent stuck ring indicators
+- [06-04]: getUserMedia called before enumerateDevices so browser populates device labels (known browser API requirement)
+- [06-04]: VAD uses track.enabled toggle (not mute) to suppress audio without destroying the WebRTC track/renegotiating
+- [06-04]: VAD loop cleanup: vadActive=false stops rAF loop; vadAudioCtx.close() releases Web Audio resources in leave()
+- [06-04]: setSinkId feature-detected at runtime (Chromium/Electron only; no-op on Firefox)
+- [06-01]: setDeafen calls setMute internally — Presence must show both muted and deafened accurately, so toggle_mute fires for every deafen toggle
+- [06-01]: Mute guard added in PTT activate() closure — muted state prevents any PTT transmission even if key/button held down
+- [06-01]: voice_muted/voice_deafened reset to false on leave_voice — prevents stale state if user rejoins without page reload
+- [06-01]: Deafen auto-mutes mic; undeafen does NOT auto-unmute — consistent with Discord/Slack behavior
+- [Phase 07-cicd-electron-distribution]: electron-builder chosen over @electron/packager — produces installable packages (AppImage, deb, NSIS) with built-in GitHub Releases publishing
+- [Phase 07-cicd-electron-distribution]: app.isPackaged + process.resourcesPath/app.asar.unpacked pattern for native binary path resolution in packaged Electron builds
+- [Phase 07-cicd-electron-distribution]: releaseType: release set explicitly to prevent electron-builder creating draft releases by default
+- [Phase 07-cicd-electron-distribution]: GITHUB_TOKEN with packages: write is sufficient for GHCR push — no external PAT secrets needed
+- [Phase 07-cicd-electron-distribution]: docker/metadata-action@v5 produces three image tags per release: exact semver, major.minor, and latest
+- [Phase 07-cicd-electron-distribution]: fail-fast: false on matrix strategy — Linux and Windows are independent deliverables
+- [Phase 07-cicd-electron-distribution]: dtolnay/rust-toolchain@stable used instead of archived actions-rs/toolchain
+- [Phase 07-cicd-electron-distribution]: Rust PTT daemon build steps gated on matrix.platform == linux — evdev crate does not build on Windows
 
 ### Roadmap Evolution
 
-- Phase 6 added: Voice improvement
+- Phase 6 added: Voice improvement (v1.0)
+- Phases 7-10 defined: v1.1 Polish & Distribution (2026-03-05)
 
 ### Pending Todos
 
@@ -104,6 +142,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-02
-Stopped at: Completed 05-01-PLAN.md — FeatureFlags DB foundation complete
-Resume file: .planning/phases/05-feature-toggles/05-02-PLAN.md
+Last session: 2026-03-05T14:24:43.128Z
+Stopped at: Completed 07-03 Electron release workflow
+Resume file: None
