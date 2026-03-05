@@ -23,7 +23,7 @@ See full details: `.planning/milestones/v1.0-ROADMAP.md`
 
 ### v1.1 Polish & Distribution (Phases 7-10)
 
-- [ ] **Phase 7: CI/CD & Electron Distribution** - Automated builds for Linux/Windows Electron and Docker image published via GitHub Actions
+- [x] **Phase 7: CI/CD & Electron Distribution** - Automated builds for Linux/Windows Electron and Docker image published via GitHub Actions (completed 2026-03-05)
 - [ ] **Phase 8: PTT Key Binding** - Users can configure their push-to-talk key in voice preferences; Electron reads it from the server
 - [ ] **Phase 9: User Profiles** - Display name changes and admin-configurable avatar modes (none, URL, Libravatar)
 - [ ] **Phase 10: Unraid & Documentation** - Unraid Community Applications template and comprehensive README for self-hosters
@@ -89,7 +89,7 @@ Plans:
 | 4. Rich Text Rendering | v1.0 | 3/3 | Complete | 2026-03-02 |
 | 5. Feature Toggles | v1.0 | 4/4 | Complete | 2026-03-02 |
 | 6. Voice Improvement | v1.0 | 5/5 | Complete | 2026-03-03 |
-| 7. CI/CD & Electron Distribution | 2/3 | In Progress|  | - |
+| 7. CI/CD & Electron Distribution | 3/3 | Complete   | 2026-03-05 | - |
 | 8. PTT Key Binding | v1.1 | 0/? | Not started | - |
 | 9. User Profiles | v1.1 | 0/? | Not started | - |
 | 10. Unraid & Documentation | v1.1 | 0/? | Not started | - |
