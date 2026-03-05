@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish & Distribution
-status: roadmap_ready
-stopped_at: ""
-last_updated: "2026-03-05T00:00:00.000Z"
+status: Roadmap ready
+stopped_at: Completed 07-01 electron-builder migration
+last_updated: "2026-03-05T14:18:56.028Z"
 last_activity: 2026-03-05 — v1.1 roadmap created (Phases 7-10)
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 3
+  completed_plans: 1
   percent: 0
 ---
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0% (0/4 phases)
 | 04 | 2 | 7 min | 3.5 min |
 | 05 | 1 | 3 min | 3 min |
 | 06 | 5 | ~16 min | ~3.2 min |
+| Phase 07-cicd-electron-distribution P01 | 2 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,9 @@ Recent decisions affecting current work:
 - [06-01]: Mute guard added in PTT activate() closure — muted state prevents any PTT transmission even if key/button held down
 - [06-01]: voice_muted/voice_deafened reset to false on leave_voice — prevents stale state if user rejoins without page reload
 - [06-01]: Deafen auto-mutes mic; undeafen does NOT auto-unmute — consistent with Discord/Slack behavior
+- [Phase 07-cicd-electron-distribution]: electron-builder chosen over @electron/packager — produces installable packages (AppImage, deb, NSIS) with built-in GitHub Releases publishing
+- [Phase 07-cicd-electron-distribution]: app.isPackaged + process.resourcesPath/app.asar.unpacked pattern for native binary path resolution in packaged Electron builds
+- [Phase 07-cicd-electron-distribution]: releaseType: release set explicitly to prevent electron-builder creating draft releases by default
 
 ### Roadmap Evolution
 
@@ -131,6 +135,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-05T00:00:00.000Z
-Stopped at: v1.1 roadmap defined — Phases 7-10 ready for planning
+Last session: 2026-03-05T14:18:56.026Z
+Stopped at: Completed 07-01 electron-builder migration
 Resume file: None
