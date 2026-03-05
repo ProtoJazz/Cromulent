@@ -15,12 +15,13 @@ Friends can reliably chat and voice call on a self-hosted server that just works
 **Goal:** Make Cromulent easier to use and easier to self-host — user customization, Windows client, automated builds, Unraid packaging, and a documentation skeleton.
 
 **Target features:**
-- User avatars (file upload, server-stored)
-- Display name changes
-- PTT key binding configuration (Electron + web)
-- Windows + Linux Electron builds via GitHub CI/CD
-- Unraid Community Applications Docker template
-- README structure skeleton
+- User avatars — admin picks mode: none, URL (user pastes), or Libravatar (auto from email); file uploads deferred
+- Display name changes — users can update their shown name
+- PTT key binding configuration — Electron client only; key stored in user voice preferences, read from server
+- Windows + Linux Electron builds via GitHub Actions → GitHub Releases
+- Docker image published to GHCR via GitHub Actions
+- Unraid Community Applications XML template pointing at GHCR image
+- README: self-hosting deployment guide + technical architecture deep-dive
 
 ## Requirements
 
@@ -58,12 +59,13 @@ Friends can reliably chat and voice call on a self-hosted server that just works
 
 ### Active
 
-- [ ] User avatars — file upload, server-stored, displayed in chat and profiles
+- [ ] User avatars — admin-configurable mode (none / URL / Libravatar); displayed in chat, member list, popovers
 - [ ] Display name changes — users can update their shown name
-- [ ] PTT key binding configuration — customizable hotkey in Electron and web settings
-- [ ] Windows + Linux Electron builds via GitHub CI/CD
-- [ ] Unraid Community Applications Docker template
-- [ ] README structure skeleton (headings + placeholders, human-written content)
+- [ ] PTT key binding — Electron client reads configured key from server; user sets in voice preferences
+- [ ] Windows + Linux Electron builds — GitHub Actions → GitHub Releases (.AppImage, .deb, .exe/.msi)
+- [ ] Docker image published to GHCR via GitHub Actions on tag
+- [ ] Unraid Community Applications XML template pointing at GHCR image
+- [ ] README — self-hosting deployment guide + technical architecture deep-dive
 
 ### Out of Scope
 
@@ -71,7 +73,9 @@ Friends can reliably chat and voice call on a self-hosted server that just works
 - Mobile app — web and Electron desktop cover the use cases for now
 - Direct messages — focus on channel-based communication first
 - Video chat — audio-only keeps complexity and bandwidth manageable
-- General file uploads in chat — no cloud storage; image embeds via URL (avatars are a separate scoped feature)
+- General file uploads in chat — no cloud storage; image embeds via URL
+- Avatar file uploads (local disk / S3) — deferred to v1.2+; URL and Libravatar cover v1.1
+- PTT key binding on web — web tab focus limitation makes this low-value; Electron-only for now
 - Multi-node clustering — single-server deployment is the target
 - Per-message read receipts — privacy concerns, users feel surveilled
 - Email notifications — adds Swoosh production config complexity, overkill for self-hosted

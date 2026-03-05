@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish & Distribution
-status: defining_requirements
+status: roadmap_ready
 stopped_at: ""
-last_updated: "2026-03-04T00:00:00.000Z"
-last_activity: 2026-03-04 — Milestone v1.1 started
+last_updated: "2026-03-05T00:00:00.000Z"
+last_activity: 2026-03-05 — v1.1 roadmap created (Phases 7-10)
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,25 +21,33 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Friends can reliably chat and voice call on a self-hosted server that just works
-**Current focus:** v1.1 Polish & Distribution — defining requirements
+**Current focus:** v1.1 Polish & Distribution — roadmap ready, beginning Phase 7
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 7 — CI/CD & Electron Distribution (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-03-04 — Milestone v1.1 started
+Status: Roadmap ready
+Last activity: 2026-03-05 — v1.1 roadmap created (Phases 7-10)
 
-Progress: [██████████] 100%
+Progress: [░░░░░░░░░░] 0% (0/4 phases)
+
+## v1.1 Phase Map
+
+| Phase | Name | Requirements | Status |
+|-------|------|--------------|--------|
+| 7 | CI/CD & Electron Distribution | DIST-01, DIST-02, DIST-03, DIST-04 | Not started |
+| 8 | PTT Key Binding | PTT-01, PTT-02, PTT-03 | Not started |
+| 9 | User Profiles | PROF-01, PROF-02, PROF-03, PROF-04, PROF-05, PROF-06 | Not started |
+| 10 | Unraid & Documentation | DOCS-01, DOCS-02, DOCS-03 | Not started |
 
 ## Performance Metrics
 
-**Velocity:**
-- Total plans completed: 3
-- Average duration: 1.9 minutes
-- Total execution time: 0.13 hours
+**Velocity (v1.0 reference):**
+- Total plans completed: 21
+- v1.0 timeline: 22 days, 6 phases
 
-**By Phase:**
+**By Phase (v1.0):**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
@@ -48,10 +56,7 @@ Progress: [██████████] 100%
 | 03 | 4 | 4 min | 1 min |
 | 04 | 2 | 7 min | 3.5 min |
 | 05 | 1 | 3 min | 3 min |
-| Phase 06-voice-improvement P03 | 2 | 2 tasks | 3 files |
-| Phase 06-voice-improvement P02 | 2 | 2 min | 1 min |
-| Phase 06-voice-improvement P04 | 2 | 8 min | 4 min |
-| Phase 06-voice-improvement P01 | 2 | 3 min | 1.5 min |
+| 06 | 5 | ~16 min | ~3.2 min |
 
 ## Accumulated Context
 
@@ -113,7 +118,8 @@ Recent decisions affecting current work:
 
 ### Roadmap Evolution
 
-- Phase 6 added: Voice improvement
+- Phase 6 added: Voice improvement (v1.0)
+- Phases 7-10 defined: v1.1 Polish & Distribution (2026-03-05)
 
 ### Pending Todos
 
@@ -125,6 +131,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-04T00:00:00.000Z
-Stopped at: v1.0 milestone complete — PROJECT.md evolved, ROADMAP.md reorganized, RETROSPECTIVE.md written, tagged v1.0
+Last session: 2026-03-05T00:00:00.000Z
+Stopped at: v1.1 roadmap defined — Phases 7-10 ready for planning
 Resume file: None
