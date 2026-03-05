@@ -89,7 +89,7 @@ Plans:
 | 4. Rich Text Rendering | v1.0 | 3/3 | Complete | 2026-03-02 |
 | 5. Feature Toggles | v1.0 | 4/4 | Complete | 2026-03-02 |
 | 6. Voice Improvement | v1.0 | 5/5 | Complete | 2026-03-03 |
-| 7. CI/CD & Electron Distribution | 1/3 | In Progress|  | - |
+| 7. CI/CD & Electron Distribution | 2/3 | In Progress|  | - |
 | 8. PTT Key Binding | v1.1 | 0/? | Not started | - |
 | 9. User Profiles | v1.1 | 0/? | Not started | - |
 | 10. Unraid & Documentation | v1.1 | 0/? | Not started | - |

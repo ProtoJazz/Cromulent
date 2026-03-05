@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish & Distribution
 status: Roadmap ready
-stopped_at: Completed 07-01 electron-builder migration
-last_updated: "2026-03-05T14:18:56.028Z"
+stopped_at: Completed 07-02 GHCR Docker release workflow
+last_updated: "2026-03-05T14:22:00.591Z"
 last_activity: 2026-03-05 — v1.1 roadmap created (Phases 7-10)
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -58,6 +58,7 @@ Progress: [░░░░░░░░░░] 0% (0/4 phases)
 | 05 | 1 | 3 min | 3 min |
 | 06 | 5 | ~16 min | ~3.2 min |
 | Phase 07-cicd-electron-distribution P01 | 2 | 3 tasks | 4 files |
+| Phase 07-cicd-electron-distribution P02 | 1 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,8 @@ Recent decisions affecting current work:
 - [Phase 07-cicd-electron-distribution]: electron-builder chosen over @electron/packager — produces installable packages (AppImage, deb, NSIS) with built-in GitHub Releases publishing
 - [Phase 07-cicd-electron-distribution]: app.isPackaged + process.resourcesPath/app.asar.unpacked pattern for native binary path resolution in packaged Electron builds
 - [Phase 07-cicd-electron-distribution]: releaseType: release set explicitly to prevent electron-builder creating draft releases by default
+- [Phase 07-cicd-electron-distribution]: GITHUB_TOKEN with packages: write is sufficient for GHCR push — no external PAT secrets needed
+- [Phase 07-cicd-electron-distribution]: docker/metadata-action@v5 produces three image tags per release: exact semver, major.minor, and latest
 
 ### Roadmap Evolution
 
@@ -135,6 +138,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-05T14:18:56.026Z
-Stopped at: Completed 07-01 electron-builder migration
+Last session: 2026-03-05T14:22:00.589Z
+Stopped at: Completed 07-02 GHCR Docker release workflow
 Resume file: None

@@ -10,7 +10,7 @@
 - [x] **DIST-01**: GitHub Actions builds Electron app for Linux (.AppImage, .deb) on release tag
 - [x] **DIST-02**: GitHub Actions builds Electron app for Windows (.exe or .msi) on release tag
 - [x] **DIST-03**: Built Electron artifacts are published to GitHub Releases automatically
-- [ ] **DIST-04**: GitHub Actions builds and pushes Docker image to GHCR on release tag
+- [x] **DIST-04**: GitHub Actions builds and pushes Docker image to GHCR on release tag
 
 ### Push-to-Talk
 
@@ -65,7 +65,7 @@
 | DIST-01 | Phase 7 | Complete |
 | DIST-02 | Phase 7 | Complete |
 | DIST-03 | Phase 7 | Complete |
-| DIST-04 | Phase 7 | Pending |
+| DIST-04 | Phase 7 | Complete |
 | PTT-01 | Phase 8 | Pending |
 | PTT-02 | Phase 8 | Pending |
 | PTT-03 | Phase 8 | Pending |
