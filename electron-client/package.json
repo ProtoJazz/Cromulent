@@ -9,7 +9,10 @@
     "pack": "electron-builder --dir"
   },
   "keywords": [],
-  "author": "",
+  "author": {
+    "name": "ProtoJazz",
+    "email": "noreply@cromulent.dev"
+  },
   "license": "ISC",
   "repository": {
     "type": "git",
