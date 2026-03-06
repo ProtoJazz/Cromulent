@@ -10,6 +10,9 @@ const api = {
   // PTT APIs
   getPTTKey: () => ipcRenderer.invoke('get-ptt-key'),
   setPTTKey: (keyCode) => ipcRenderer.invoke('set-ptt-key', keyCode),
+  getPTTDevice: () => ipcRenderer.invoke('get-ptt-device'),
+  setPTTDevice: (devicePath) => ipcRenderer.invoke('set-ptt-device', devicePath),
+  listPTTDevices: () => ipcRenderer.invoke('list-ptt-devices'),
   onPTTState: (callback) => ipcRenderer.on('ptt-state', (event, isPressed) => callback(isPressed)),
   onPTTError: (callback) => ipcRenderer.on('ptt-error', (event, message) => callback(message)),
 

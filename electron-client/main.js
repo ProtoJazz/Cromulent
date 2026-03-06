@@ -19,6 +19,7 @@ class PTTManager {
     this.backend = null;
     this.backendName = null;
     this.keyCode = store.get('ptt-key-code', 29); // Default: Left Ctrl (code 29)
+    this.devicePath = store.get('ptt-device-path', null); // null = auto-detect
     this.daemonProcess = null;
     this.daemonRespawnTimer = null;
     this.uiohook = null;
@@ -65,7 +66,7 @@ async tryRustDaemon() {
   }
 
   // Try without sudo - user should be in 'input' group
-  if (await this.spawnDaemon(daemonPath, false)) {
+  if (await this.spawnDaemon(daemonPath, false, this.devicePath)) {
     this.backendName = 'rust-daemon';
     return true;
   }
@@ -74,10 +75,11 @@ async tryRustDaemon() {
   return false;
 }
 
- async spawnDaemon(daemonPath, useSudo) {
+ async spawnDaemon(daemonPath, useSudo, devicePath = null) {
   return new Promise((resolve) => {
     const cmd = useSudo ? 'sudo' : daemonPath;
-    const spawnArgs = useSudo ? [daemonPath] : [];
+    const baseArgs = useSudo ? [daemonPath] : [];
+    const spawnArgs = devicePath ? [...baseArgs, devicePath] : baseArgs;
 
     console.log(`[PTT] Spawning: ${cmd} ${spawnArgs.join(' ')}`);
 
@@ -128,7 +130,7 @@ async tryRustDaemon() {
       if (this.backendName && this.backendName.startsWith('rust-daemon')) {
         console.log('[PTT] Scheduling daemon respawn...');
         this.daemonRespawnTimer = setTimeout(() => {
-          this.spawnDaemon(daemonPath, useSudo);
+          this.spawnDaemon(daemonPath, useSudo, devicePath);
         }, 2000);
       }
     });
@@ -259,9 +261,39 @@ async tryUIOHook() {
     this.keyCode = keyCode;
     store.set('ptt-key-code', keyCode);
     console.log(`[PTT] Key code changed to ${keyCode}, reinitializing...`);
-    
     this.cleanup();
     this.initialize();
+  }
+
+  setDevice(devicePath) {
+    // null means auto-detect
+    this.devicePath = devicePath || null;
+    if (devicePath) {
+      store.set('ptt-device-path', devicePath);
+    } else {
+      store.delete('ptt-device-path');
+    }
+    console.log(`[PTT] Device changed to ${devicePath || 'auto'}, reinitializing...`);
+    this.cleanup();
+    this.initialize();
+  }
+
+  listDevices(daemonPath) {
+    return new Promise((resolve) => {
+      const { spawnSync } = require('child_process');
+      const result = spawnSync(daemonPath, ['--list'], { encoding: 'utf8', timeout: 3000 });
+      if (result.error || result.status !== 0) {
+        console.log('[PTT] list-devices failed:', result.error || result.stderr);
+        resolve([]);
+        return;
+      }
+      try {
+        resolve(JSON.parse(result.stdout.trim()));
+      } catch (e) {
+        console.log('[PTT] list-devices parse error:', e.message);
+        resolve([]);
+      }
+    });
   }
 
   cleanup() {
@@ -386,6 +418,40 @@ ipcMain.handle('set-ptt-key', (event, keyCode) => {
     store.set('ptt-key-code', keyCode);
   }
   return true;
+});
+
+ipcMain.handle('get-ptt-device', () => {
+  return store.get('ptt-device-path', null);
+});
+
+ipcMain.handle('set-ptt-device', (event, devicePath) => {
+  if (pttManager) {
+    pttManager.setDevice(devicePath);
+  } else {
+    if (devicePath) {
+      store.set('ptt-device-path', devicePath);
+    } else {
+      store.delete('ptt-device-path');
+    }
+  }
+  return true;
+});
+
+ipcMain.handle('list-ptt-devices', async () => {
+  const daemonPath = app.isPackaged
+    ? path.join(process.resourcesPath, 'app.asar.unpacked', 'ptt-daemon', 'target', 'release', 'ptt-daemon')
+    : path.join(__dirname, 'ptt-daemon', 'target', 'debug', 'ptt-daemon');
+
+  if (!fs.existsSync(daemonPath)) {
+    return [];
+  }
+
+  if (pttManager) {
+    return pttManager.listDevices(daemonPath);
+  }
+  // Create a temporary PTTManager just for listing
+  const tmp = new PTTManager(null);
+  return tmp.listDevices(daemonPath);
 });
 
 

@@ -12,6 +12,7 @@ async function init() {
   initPTT();
   setupContextMenu();
   setupWebview();
+  bindSettingsEvents();
 }
 
 // ── Sidebar ───────────────────────────────────────────────────────────
@@ -422,6 +423,171 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+// ── Settings Modal ────────────────────────────────────────────────────
+
+// Map JS event.code → evdev/uiohook scancode
+const JS_CODE_TO_PTT = {
+  'ControlLeft': 29, 'ControlRight': 97,
+  'AltLeft': 56,     'AltRight': 100,
+  'ShiftLeft': 42,   'ShiftRight': 54,
+  'Space': 57,
+  'CapsLock': 58,
+  'Tab': 15,
+  'Backquote': 41,
+  'F13': 183, 'F14': 184, 'F15': 185, 'F16': 186,
+  'F17': 187, 'F18': 188, 'F19': 189, 'F20': 190,
+};
+
+const PTT_KEY_NAMES = {
+  29: 'Left Ctrl',  97: 'Right Ctrl',
+  56: 'Left Alt',  100: 'Right Alt',
+  42: 'Left Shift', 54: 'Right Shift',
+  57: 'Space',
+  58: 'Caps Lock',
+  15: 'Tab',
+  41: 'Backtick',
+  183: 'F13', 184: 'F14', 185: 'F15', 186: 'F16',
+  187: 'F17', 188: 'F18', 189: 'F19', 190: 'F20',
+};
+
+let settingsPendingKey = null;  // keycode staged for save
+let settingsPendingDevice = undefined; // device path staged for save (undefined = unchanged)
+let settingsListening = false;
+
+async function openSettings() {
+  settingsPendingKey = null;
+  settingsPendingDevice = undefined;
+  settingsListening = false;
+
+  const modal = document.getElementById('settings-modal');
+  modal.classList.remove('hidden');
+
+  // Show current PTT key
+  const currentKey = await window.electronAPI.getPTTKey().catch(() => 29);
+  document.getElementById('ptt-key-display').textContent = PTT_KEY_NAMES[currentKey] || `Key ${currentKey}`;
+  document.getElementById('ptt-key-btn').dataset.currentCode = currentKey;
+  setKeyBtnIdle();
+
+  // Device section — Linux only
+  const isLinux = navigator.userAgent.includes('Linux') || navigator.platform.includes('Linux');
+  const deviceSection = document.getElementById('ptt-device-section');
+  if (isLinux) {
+    deviceSection.classList.remove('hidden');
+    await loadDevices();
+  } else {
+    deviceSection.classList.add('hidden');
+  }
+}
+
+async function loadDevices() {
+  const select = document.getElementById('ptt-device-select');
+  const currentDevice = await window.electronAPI.getPTTDevice().catch(() => null);
+
+  select.innerHTML = '<option value="">Loading...</option>';
+  select.disabled = true;
+
+  const devices = await window.electronAPI.listPTTDevices().catch(() => []);
+
+  select.innerHTML = '<option value="">Auto-detect</option>' +
+    devices.map(d =>
+      `<option value="${escapeHtml(d.path)}">${escapeHtml(d.name)} — ${escapeHtml(d.path)}</option>`
+    ).join('');
+  select.disabled = false;
+
+  // Restore saved selection
+  if (currentDevice) {
+    select.value = currentDevice;
+    if (!select.value) {
+      // Device no longer present — add as disabled option so user sees it
+      const opt = document.createElement('option');
+      opt.value = currentDevice;
+      opt.textContent = `${currentDevice} (not found)`;
+      opt.disabled = true;
+      select.appendChild(opt);
+      select.value = currentDevice;
+    }
+  }
+}
+
+function setKeyBtnListening() {
+  settingsListening = true;
+  const btn = document.getElementById('ptt-key-btn');
+  const hint = document.getElementById('ptt-key-hint');
+  btn.classList.add('border-indigo-500', 'text-indigo-300');
+  document.getElementById('ptt-key-display').textContent = 'Press a key…';
+  hint.textContent = 'Press any supported key (Ctrl, Alt, Shift, Space, F13–F20…)';
+}
+
+function setKeyBtnIdle() {
+  settingsListening = false;
+  const btn = document.getElementById('ptt-key-btn');
+  const hint = document.getElementById('ptt-key-hint');
+  btn.classList.remove('border-indigo-500', 'text-indigo-300');
+  hint.textContent = 'Click to rebind — then press any key';
+}
+
+function bindSettingsEvents() {
+  document.getElementById('settings-btn').addEventListener('click', openSettings);
+  document.getElementById('settings-close').addEventListener('click', closeSettings);
+  document.getElementById('settings-cancel').addEventListener('click', closeSettings);
+  document.getElementById('settings-backdrop').addEventListener('click', closeSettings);
+
+  document.getElementById('ptt-key-btn').addEventListener('click', () => {
+    if (settingsListening) {
+      setKeyBtnIdle();
+    } else {
+      setKeyBtnListening();
+    }
+  });
+
+  document.getElementById('ptt-device-refresh').addEventListener('click', loadDevices);
+
+  document.addEventListener('keydown', (e) => {
+    if (!settingsListening) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const code = JS_CODE_TO_PTT[e.code];
+    if (!code) {
+      document.getElementById('ptt-key-hint').textContent = `"${e.code}" isn't supported as a PTT key — try Ctrl, Alt, Shift, Space, or F13–F20`;
+      return;
+    }
+
+    settingsPendingKey = code;
+    document.getElementById('ptt-key-display').textContent = PTT_KEY_NAMES[code] || `Key ${code}`;
+    setKeyBtnIdle();
+  }, true);
+
+  document.getElementById('settings-save').addEventListener('click', async () => {
+    const saveBtn = document.getElementById('settings-save');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+
+    try {
+      if (settingsPendingKey !== null) {
+        await window.electronAPI.setPTTKey(settingsPendingKey);
+        document.getElementById('ptt-key').textContent = PTT_KEY_NAMES[settingsPendingKey] || `Key ${settingsPendingKey}`;
+      }
+
+      const deviceSelect = document.getElementById('ptt-device-select');
+      if (deviceSelect && !deviceSelect.classList.contains('hidden')) {
+        const chosenDevice = deviceSelect.value || null;
+        await window.electronAPI.setPTTDevice(chosenDevice);
+      }
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save';
+    }
+
+    closeSettings();
+  });
+}
+
+function closeSettings() {
+  setKeyBtnIdle();
+  document.getElementById('settings-modal').classList.add('hidden');
 }
 
 // ── Top-level event listeners ─────────────────────────────────────────

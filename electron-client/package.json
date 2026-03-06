@@ -9,8 +9,15 @@
     "pack": "electron-builder --dir"
   },
   "keywords": [],
-  "author": "",
+  "author": {
+    "name": "ProtoJazz",
+    "email": "protojazz@gmail.com"
+  },
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ProtoJazz/Cromulent.git"
+  },
   "build": {
     "appId": "dev.cromulent.voice",
     "productName": "Cromulent",
